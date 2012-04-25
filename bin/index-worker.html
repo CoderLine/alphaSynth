@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>alphaSynth</title>
+	<script type="text/javascript" src="jquery.min.js"></script>
+	<script type="text/javascript" src="alphaSynth.js"></script>
+	<script type="text/javascript" src="audiolib.min.js"></script>
+	<script type="text/javascript" src="json.js"></script>
+	<script type="text/javascript">
+	
+	var progressCache = null;
+
+	var worker = new Worker("alphaSynth.worker-float.js");
+	$(document).ready(function() {
+
+		$('.alphaSynth').click(function() {
+			progressCache = [];
+			worker.onmessage = function(event) {
+				handleStatus(event.data);
+		    };
+		 
+		    worker.onerror = function(event) {
+		        alert(event.message + " (" + event.filename + ":" + event.lineno + ")");
+		    };
+		 
+		    worker.postMessage($(this).attr('rel'));
+		});
+	});
+	
+	function unpackStatus(data) 
+	{
+		var status = new alphaSynth.SynthesizerStatus();
+		for(var property in data)
+		{
+			status[property] = data[property];
+		}
+		return status;
+	}
+	
+	function handleStatus(data)
+	{
+		var status = unpackStatus(data);
+		
+		if(!progressCache[status.getStatusText()]) {
+			var li = $('<li></li>');
+			$('#progress').append(li);
+			progressCache[status.getStatusText()] = li;
+		}
+	
+		progressCache[status.getStatusText()].html(getStatusString(status));
+
+
+		if(status.getStatusText() == "finished")
+		{
+			var offset = 0;
+			var data = JSON.decodeFloat32Array(status.getData());
+			function fillBuffer(stereoBuffer)
+			{
+				var index = 0;
+				while(index < stereoBuffer.length)
+				{
+					stereoBuffer[index++] = data[offset++];
+                    if(offset > data.length) 
+                        return;
+				}
+			}
+			var preBufferSize = 65536 * 4096;
+			var dev = audioLib.AudioDevice(fillBuffer, 2, preBufferSize, 48000);
+		}
+	}
+	
+	function getStatusString(status)
+	{
+		var percentage = status.getProgress() * 100;
+		return "" + percentage + "% - " + status.getStatusText();
+	}
+
+	function log(s)
+	{
+		$("#log").append("<li>" + new Date().getTime() + " - " + s + "</li>");
+	}
+	</script>
+</head>
+<body>
+	<button class="alphaSynth" rel="sweet.mid">Play Sweet Home Alabama</button>
+	<button class="alphaSynth" rel="wonderwall.mid">Play Wonderwall</button>
+	<button class="alphaSynth" rel="fade.mid">Play Fade To Black</button>
+	<button class="alphaSynth" rel="canon.mid">Play Canon Rock</button>
+	<button class="alphaSynth" rel="starchild.mid">Play Wintersun</button>
+	<br />
+	<strong>Progress:</strong>
+	<ul id="progress"></ul>
+	<br />
+	<strong>Log:</strong>
+	<ul id="log"></ul>
+	<br />
+	<pre id="data" style="width:1000px; border:1px solid #000"></pre>
+</body>
+</html>

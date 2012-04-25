@@ -1,0 +1,1 @@
+alphaSynth.Main.main();

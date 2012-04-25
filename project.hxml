@@ -1,0 +1,12 @@
+-js bin/alphaSynth2
+-main alphaSynth.Main
+--macro alphaSynth.AlphaSynthJsGenerator.use()
+-cp src
+
+--next
+
+-swf9 bin/alphaSynth.swf
+-main alphaSynth.Main
+-swf-version 10
+-swf-header 200:200:30:FFFFFF
+-cp src

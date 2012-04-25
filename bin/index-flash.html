@@ -1,0 +1,35 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>alphaSynth</title>
+<script type="text/javascript" src="jquery.min.js"></script>
+<script type="text/javascript">
+	$(document).ready(function() {
+
+		$('.alphaSynth').click(function() {
+		  var swf = $('#synth')[0];
+		  swf.load($(this).attr('rel'));
+		});
+	});
+</script>
+</head>
+<body>
+<embed type="application/x-shockwave-flash" id="synth" src="alphaSynth.swf"
+	width="400" height="400" allowScriptAccess="always" />
+
+<button class="alphaSynth" rel="sweet.mid">Play Sweet Home
+Alabama</button>
+<button class="alphaSynth" rel="wonderwall.mid">Play Wonderwall</button>
+<button class="alphaSynth" rel="fade.mid">Play Fade To Black</button>
+<button class="alphaSynth" rel="canon.mid">Play Canon Rock</button>
+<button class="alphaSynth" rel="starchild.mid">Play Wintersun</button>
+<br />
+<strong>Progress:</strong>
+<ul id="progress"></ul>
+<br />
+<strong>Log:</strong>
+<ul id="log"></ul>
+<br />
+</body>
+</html>
