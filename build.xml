@@ -1,0 +1,83 @@
+<project name="alphaSynth" default="flash" basedir=".">
+    <description>
+        a buildfile compiling alphaSynth
+    </description>
+    
+    <!--*************************************************************************
+        General
+    **************************************************************************-->
+    
+    <!-- Main Properties -->
+	<property name="bin" location="bin"/>
+	<property name="src" location="src"/>
+
+    <!--*************************************************************************
+        Building Flash
+    **************************************************************************-->
+    
+    <property name="bin-flash" location="${bin}/flash"/>
+    <property name="lib-flash" location="${bin-flash}/lib/alphaSynth"/>
+	<property name="haxe-flash-swf" location="${lib-flash}/alphaSynth.swf"/>
+	<property name="haxe-flash-js" location="${lib-flash}/alphaSynth.js"/>
+    
+	<!-- Haxe Builds -->
+	<target name="flash">
+		<delete file="${haxe-flash-swf}" />
+		<delete file="${haxe-flash-js}" />
+        <exec executable="haxe" failonerror="true">
+            <arg value="-cp" />
+            <arg value="${src}"/>
+            
+            <arg value="-main" />
+            <arg value="as.Main" />
+            
+            <arg value="-swf" />
+            <arg value="${haxe-flash-swf}" />
+            
+            <arg value="-lib" />
+            <arg value="format" />
+            
+            <arg value="-swf-version" />
+            <arg value="11.4" />
+        </exec>
+        <exec executable="haxe" failonerror="true">
+            <arg value="-cp" />
+            <arg value="${src}"/>
+            
+            <arg value="-main" />
+            <arg value="as.Main" />
+            
+            <arg value="-js" />
+            <arg value="${haxe-flash-js}" />
+        </exec>
+	</target>	
+	
+    <property name="bin-cs" location="${bin}/cs"/>
+    <property name="haxe-cs" location="${bin-cs}/AlphaSynth.Core"/> 
+    
+	<!-- Haxe Builds -->
+	<target name="cs">
+		<mkdir dir="${bin-cs}" />
+		<delete dir="${haxe-cs}/src" />
+        <exec executable="haxe" failonerror="true">
+            <arg value="-cp" />
+            <arg value="${src}"/>
+            
+            <arg value="-D" />
+            <arg value="real-position" />
+            
+            <arg value="-D" />
+            <arg value="no-compilation" />
+            
+            <arg value="-D" />
+            <arg value="no-root" />
+            
+            <arg value="-main" />
+            <arg value="as.Main" />
+            
+            <arg value="-cs" />
+            <arg value="${haxe-cs}" />
+        </exec>
+	</target>	
+
+</project>

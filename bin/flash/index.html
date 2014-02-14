@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<title>alphaSynth</title>
+	<style type="text/css">
+		body { font-family: Arial, sans-serif; }
+	</style>    
+</head>
+<body>
+    <div id="controls">
+        <button disabled="disabled" id="play">Play</button>
+        <button disabled="disabled" id="pause">Pause</button>
+        <button disabled="disabled" id="stop">Stop</button>
+    </div>
+    <br />
+    <div id="alphaSynthContainer">
+		<p><a href="http://www.adobe.com/go/getflashplayer">Get Adobe Flash player</a></p>
+	</div>
+    
+    <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    
+    <!-- Initialize Flash Movie -->
+    <script src="lib/swfobject/swfobject.js"></script>
+	<script>
+    swfobject.embedSWF(
+        "lib/alphaSynth/alphaSynth.swf", 
+        "alphaSynthContainer", "1px", "1px", "11.4.0", 
+        "lib/swfobjectexpressInstall.swf", 
+        {}, {}, {id:"AlphaSynth"}
+    );
+	</script>
+
+    <!-- Initialize JavaScript -->    
+    <script src="lib/alphaSynth/alphaSynth.js"></script>
+    <script>
+    $(document).on('alphaSynthReady', function() {
+        var main = as.Main;
+        // load default data
+        main.loadSoundFont('../data/default.sf2');
+        main.loadMidiFromUrl('../data/Test.mid');
+        
+        // init ui
+        $('#play').click(function() {
+            main.play();
+        });
+        $('#pause').click(function() {
+            main.pause();
+        });
+        $('#stop').click(function() {
+            main.stop();
+        });
+        $('#controls button').removeAttr('disabled');
+    });
+    </script>
+</body>
+</html>
