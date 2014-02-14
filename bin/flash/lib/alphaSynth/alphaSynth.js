@@ -139,6 +139,11 @@ StringTools.urlEncode = function(s) {
 StringTools.urlDecode = function(s) {
 	return decodeURIComponent(s.split("+").join(" "));
 }
+StringTools.endsWith = function(s,end) {
+	var elen = end.length;
+	var slen = s.length;
+	return slen >= elen && HxOverrides.substr(s,slen - elen,elen) == end;
+}
 var ValueType = $hxClasses["ValueType"] = { __ename__ : ["ValueType"], __constructs__ : ["TNull","TInt","TFloat","TBool","TObject","TFunction","TClass","TEnum","TUnknown"] }
 ValueType.TNull = ["TNull",0];
 ValueType.TNull.toString = $estr;
@@ -229,40 +234,108 @@ Type["typeof"] = function(v) {
 	}
 }
 var as = {}
-as.Main = function() { }
-$hxClasses["as.Main"] = as.Main;
-$hxExpose(as.Main, "as.Main");
-as.Main.__name__ = ["as","Main"];
-as.Main.main = function() {
+as.AlphaSynth = function() { }
+$hxClasses["as.AlphaSynth"] = as.AlphaSynth;
+$hxExpose(as.AlphaSynth, "as.AlphaSynth");
+as.AlphaSynth.__name__ = ["as","AlphaSynth"];
+as.AlphaSynth.main = function() {
+	as.AlphaSynth._finishedListener = new Array();
+	as.AlphaSynth._positionChangedListener = new Array();
 	var ctx = new haxe.remoting.Context();
-	ctx.addObject("JsAlphaSynth",as.Main);
-	as.Main._flash = haxe.remoting.ExternalConnection.flashConnect("default",as.Main.AlphaSynthId,ctx);
+	ctx.addObject("JsAlphaSynth",as.AlphaSynth);
+	as.AlphaSynth._flash = haxe.remoting.ExternalConnection.flashConnect("default",as.AlphaSynth.AlphaSynthId,ctx);
 }
-as.Main.loadSoundFont = function(url) {
-	as.Main._flash.resolve("FlashAlphaSynth").resolve("loadSoundFont").call([url]);
+as.AlphaSynth.loadSoundFontFromUrl = function(url) {
+	as.AlphaSynth._flash.resolve("FlashAlphaSynth").resolve("loadSoundFont").call([url]);
 }
-as.Main.loadMidiFromUrl = function(url) {
-	as.Main._flash.resolve("FlashAlphaSynth").resolve("loadMidiFromUrl").call([url]);
+as.AlphaSynth.loadMidiFromUrl = function(url) {
+	as.AlphaSynth._flash.resolve("FlashAlphaSynth").resolve("loadMidiFromUrl").call([url]);
 }
-as.Main.play = function() {
-	as.Main._flash.resolve("FlashAlphaSynth").resolve("play").call([]);
+as.AlphaSynth.loadMidi = function(data) {
+	var data1 = haxe.Serializer.run(haxe.io.Bytes.ofData(data));
+	return as.AlphaSynth._flash.resolve("FlashAlphaSynth").resolve("loadMidi").call([data1]);
 }
-as.Main.pause = function() {
-	as.Main._flash.resolve("FlashAlphaSynth").resolve("pause").call([]);
+as.AlphaSynth.play = function() {
+	as.AlphaSynth._flash.resolve("FlashAlphaSynth").resolve("play").call([]);
 }
-as.Main.isPlaying = function() {
-	as.Main._flash.resolve("FlashAlphaSynth").resolve("isPlaying").call([]);
+as.AlphaSynth.pause = function() {
+	as.AlphaSynth._flash.resolve("FlashAlphaSynth").resolve("pause").call([]);
 }
-as.Main.stop = function() {
-	as.Main._flash.resolve("FlashAlphaSynth").resolve("stop").call([]);
+as.AlphaSynth.isPlaying = function() {
+	return as.AlphaSynth._flash.resolve("FlashAlphaSynth").resolve("isPlaying").call([]);
 }
-as.Main.log = function(v,i) {
+as.AlphaSynth.stop = function() {
+	as.AlphaSynth._flash.resolve("FlashAlphaSynth").resolve("stop").call([]);
+}
+as.AlphaSynth.positionChanged = function(pos) {
+}
+as.AlphaSynth.fireFinished = function() {
+	var _g = 0, _g1 = as.AlphaSynth._finishedListener;
+	while(_g < _g1.length) {
+		var l = _g1[_g];
+		++_g;
+		l();
+	}
+}
+as.AlphaSynth.addFinishedListener = function(listener) {
+	as.AlphaSynth._finishedListener.push(listener);
+}
+as.AlphaSynth.addPositionChangedListener = function(listener) {
+	as.AlphaSynth._positionChangedListener.push(listener);
+}
+as.AlphaSynth.firePositionChanged = function(position) {
+	var _g = 0, _g1 = as.AlphaSynth._positionChangedListener;
+	while(_g < _g1.length) {
+		var l = _g1[_g];
+		++_g;
+		l(position);
+	}
+}
+as.AlphaSynth.log = function(v,i) {
 	haxe.Log.trace(v,i);
 }
-as.Main.ready = function() {
+as.AlphaSynth.ready = function() {
+	as.AlphaSynth.isReady = true;
 	if(jQuery) {
 		jQuery(document).trigger('alphaSynthReady');
 	}
+}
+as.AlphaSynth.init = function(asRoot,swfObjectRoot) {
+	if(swfObjectRoot == null) swfObjectRoot = "";
+	var swf = swfobject;
+	if(asRoot != "" && !StringTools.endsWith(asRoot,"/")) asRoot += "/";
+	if(swfObjectRoot != "" && !StringTools.endsWith(swfObjectRoot,"/")) swfObjectRoot += "/";
+	if(swf) {
+		var alphaSynth = js.Browser.document.getElementById("alphaSynthContainer");
+		if(alphaSynth != null) {
+			haxe.Log.trace("Skipped initialization, existing alphaSynthContainer found",{ fileName : "AlphaSynth.hx", lineNumber : 266, className : "as.AlphaSynth", methodName : "init"});
+			return false;
+		}
+		alphaSynth = js.Browser.document.createElement("div");
+		alphaSynth.setAttribute("id","alphaSynthContainer");
+		js.Browser.document.body.appendChild(alphaSynth);
+		swf.embedSWF(asRoot + "alphaSynth.swf","alphaSynthContainer","1px","1px","11.4.0",swfObjectRoot + "expressInstall.swf",{ },{ },{ id : "AlphaSynth"});
+		return true;
+	} else {
+		haxe.Log.trace("Error initializing alphaSynth: swfobject not found",{ fileName : "AlphaSynth.hx", lineNumber : 287, className : "as.AlphaSynth", methodName : "init"});
+		return false;
+	}
+}
+as.synthesis = {}
+as.synthesis.SynthPosition = function(currentTime,currentTick,endTime,endTick) {
+	if(endTick == null) endTick = 0;
+	if(endTime == null) endTime = 0;
+	if(currentTick == null) currentTick = 0;
+	if(currentTime == null) currentTime = 0;
+	this.currentTime = currentTime;
+	this.currentTick = currentTick;
+	this.endTime = endTime;
+	this.endTick = endTick;
+};
+$hxClasses["as.synthesis.SynthPosition"] = as.synthesis.SynthPosition;
+as.synthesis.SynthPosition.__name__ = ["as","synthesis","SynthPosition"];
+as.synthesis.SynthPosition.prototype = {
+	__class__: as.synthesis.SynthPosition
 }
 var haxe = {}
 haxe.Log = function() { }
@@ -281,6 +354,11 @@ haxe.Serializer = function() {
 };
 $hxClasses["haxe.Serializer"] = haxe.Serializer;
 haxe.Serializer.__name__ = ["haxe","Serializer"];
+haxe.Serializer.run = function(v) {
+	var s = new haxe.Serializer();
+	s.serialize(v);
+	return s.toString();
+}
 haxe.Serializer.prototype = {
 	serializeException: function(e) {
 		this.buf.b += "x";
@@ -863,8 +941,20 @@ haxe.io.Bytes.alloc = function(length) {
 	}
 	return new haxe.io.Bytes(length,a);
 }
+haxe.io.Bytes.ofData = function(b) {
+	return new haxe.io.Bytes(b.length,b);
+}
 haxe.io.Bytes.prototype = {
 	__class__: haxe.io.Bytes
+}
+haxe.io.Eof = function() { }
+$hxClasses["haxe.io.Eof"] = haxe.io.Eof;
+haxe.io.Eof.__name__ = ["haxe","io","Eof"];
+haxe.io.Eof.prototype = {
+	toString: function() {
+		return "Eof";
+	}
+	,__class__: haxe.io.Eof
 }
 haxe.remoting = {}
 haxe.remoting.Connection = function() { }
@@ -1127,7 +1217,7 @@ var Class = $hxClasses.Class = { __name__ : ["Class"]};
 var Enum = { };
 var q = window.jQuery;
 js.JQuery = q;
-as.Main.AlphaSynthId = "AlphaSynth";
+as.AlphaSynth.AlphaSynthId = "AlphaSynth";
 haxe.Serializer.USE_CACHE = false;
 haxe.Serializer.USE_ENUM_INDEX = false;
 haxe.Serializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%:";
@@ -1136,7 +1226,8 @@ haxe.Unserializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
 haxe.ds.ObjectMap.count = 0;
 haxe.remoting.ExternalConnection.connections = new haxe.ds.StringMap();
 js.Browser.window = typeof window != "undefined" ? window : null;
-as.Main.main();
+js.Browser.document = typeof window != "undefined" ? window.document : null;
+as.AlphaSynth.main();
 function $hxExpose(src, path) {
 	var o = typeof window != "undefined" ? window : exports;
 	var parts = path.split(".");

@@ -21,6 +21,7 @@ import as.bank.PatchBank;
 import as.midi.MidiFile;
 import as.sequencer.MidiFileSequencer;
 import as.synthesis.Synthesizer;
+import as.synthesis.SynthPosition;
 import haxe.Http;
 import haxe.io.Bytes;
 import haxe.io.BytesInput;
@@ -34,15 +35,19 @@ class SynthPlayer
     
     private var _synth:Synthesizer;
     private var _sequencer:MidiFileSequencer;
+    private var _finishedListener:Array < Void->Void > ;
+    private var _positionChangedListener:Array < SynthPosition->Void > ;
     
     public function new() 
     {
+        _finishedListener = new Array < Void->Void >();
+        _positionChangedListener = new Array < SynthPosition->Void >();
+
         #if flash
         _output = new FlashOutput();
         #end
         _output.addFinishedListener(function() {
             // stop everything
-            trace('Output Finished');
             stop(); 
         });
         _output.addSampleRequestListener(function() {
@@ -54,17 +59,35 @@ class SynthPlayer
         });
         _output.addPositionChangedListener(function(pos:Int) {
             // log position
-            if (isPlaying()) 
-            {
-                var endTime = Std.int((_sequencer.endTime / _synth.sampleRate) * 1000);
-                trace('position: ' + pos + "/" + endTime);
-            }
+            var positions = new SynthPosition();
+            positions.endTime = Std.int((_sequencer.endTime / _synth.sampleRate) * 1000);
+            positions.currentTime = pos;
+            positions.endTick = _sequencer.millisToTicks(positions.endTime);
+            positions.currentTick = _sequencer.millisToTicks(positions.currentTime);
+            firePositionChanged(positions);
         });
         
-        trace('initializing synth');
         _synth = new Synthesizer(44100, 2, 441, 3, 100);
         _sequencer = new MidiFileSequencer(_synth);
         _sequencer.addFinishedListener(_output.sequencerFinished);
+    }
+    
+    public inline function addFinishedListener(listener:Void->Void)
+    {
+        _output.addFinishedListener(listener);
+    }
+    
+    public inline function addPositionChangedListener(listener:SynthPosition->Void)
+    {
+        _positionChangedListener.push(listener);
+    }
+    
+    private function firePositionChanged(position:SynthPosition)
+    {
+        for (l in _positionChangedListener)
+        {
+            l(position);
+        }
     }
     
     public function loadBank(bank:PatchBank)
