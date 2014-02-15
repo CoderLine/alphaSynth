@@ -162,7 +162,7 @@ class FlashOutputWorker extends Sprite
         if (_soundChannel.position != 0)
         {
             _fromOutput.send("position");
-            _fromOutput.send(Std.int(_soundChannel.position));
+            _fromOutput.send(Std.int(_soundChannel.position - SynthPlayer.Latency));
         }
         
         if (!_finished)

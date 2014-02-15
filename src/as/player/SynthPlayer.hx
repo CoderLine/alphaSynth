@@ -28,7 +28,9 @@ import haxe.io.BytesInput;
 
 class SynthPlayer
 {
+    private static inline var SampleRate = 44100;
     private static inline var BufferSize = 8192;
+    public static inline var Latency = (BufferSize * 1000) / SampleRate;
     private static inline var BufferCount = 5;
     
     private var _output:ISynthOutput;
@@ -67,7 +69,7 @@ class SynthPlayer
             firePositionChanged(positions);
         });
         
-        _synth = new Synthesizer(44100, 2, 441, 3, 100);
+        _synth = new Synthesizer(SampleRate, 2, 441, 3, 100);
         _sequencer = new MidiFileSequencer(_synth);
         _sequencer.addFinishedListener(_output.sequencerFinished);
     }
