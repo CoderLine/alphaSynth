@@ -51,8 +51,9 @@ class MidiFile
     public function combineTracks() : Void
     {
         var finalTrack:MidiTrack = mergeTracks();
+                
         var absEvents:FixedArray<FixedArray<MidiEvent>> = new FixedArray<FixedArray<MidiEvent>>(tracks.length);
-        for (i in 0 ... absEvents.length) 
+        for (i in 0 ... tracks.length) 
         {
             absEvents[i] = new FixedArray<MidiEvent>(tracks[i].midiEvents.length);
             var totalDeltaTime = 0;
@@ -92,6 +93,7 @@ class MidiFile
             finalTrack.midiEvents[x].deltaTime -= deltaDiff;
             deltaDiff = oldTime;
         }
+        
         tracks = new FixedArray<MidiTrack>(1);
         tracks[0] = finalTrack;
         trackFormat = MidiTrackFormat.SingleTrack;        

@@ -225,7 +225,7 @@ class MidiFileSequencer
             var mEvent:MidiEvent = midiFile.tracks[0].midiEvents[x];
             _synthData[x] = new SynthEvent(mEvent);
             absTick += mEvent.deltaTime;
-            absTime += mEvent.deltaTime * (60.0 / (bpm * midiFile.division)); 
+            absTime += mEvent.deltaTime * (60000.0 / (bpm * midiFile.division)); 
             absDelta += synth.sampleRate * mEvent.deltaTime * (60.0 / (bpm * midiFile.division));
             _synthData[x].delta = Std.int(absDelta);
             if (isTempoMessage(mEvent.getCommand(), mEvent.getData1()))
@@ -234,11 +234,6 @@ class MidiFileSequencer
                 bpm = MidiHelper.MicroSecondsPerMinute / meta.value;
                 _tempoChanges.push(new MidiFileSequencerTempoChange(bpm, absTick, Std.int(absTime)));
             }
-        }
-        
-        for (c in _tempoChanges)
-        {
-            trace(c.time + "/" + c.ticks + "/" + c.bpm);
         }
         
         endTime = _synthData[_synthData.length - 1].delta;
@@ -267,7 +262,10 @@ class MidiFileSequencer
         // find start and bpm of last tempo change before time
         for (c in _tempoChanges)
         {
-            if (c.time > time) break;
+            if (time < c.time)
+            {
+                break;
+            }
             ticks = c.ticks;
             bpm = c.bpm;
             lastChange = c.time;
