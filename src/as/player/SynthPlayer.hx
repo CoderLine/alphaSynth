@@ -125,7 +125,7 @@ class SynthPlayer
     public function loadSoundFontUrl(url:String) : Void
     {
         if (state != Stopped) return;
-        Console.debug('Start loading soundfont from url ${url}');
+        Console.info('Start loading soundfont from url ${url}');
         var loader = new UrlLoader();
         loader.url = url;
         loader.method = "GET";
@@ -144,7 +144,7 @@ class SynthPlayer
     public function loadSoundFontData(data:String) : Void
     {
         if (state != Stopped) return;
-        Console.debug('Start loading soundfont from serialized bytes');
+        Console.info('Start loading soundfont from serialized bytes');
         var bytes:Bytes = null;
         try
         {
@@ -163,13 +163,13 @@ class SynthPlayer
         var input:BytesInput = new BytesInput(data);
         try 
         {
-            Console.debug('Loading soundfont from bytes');
+            Console.info('Loading soundfont from bytes');
             var bank = new PatchBank();
             bank.loadSf2(input);
             _synth.loadBank(bank);
             isSoundFontLoaded = true;
             _events.onSoundFontLoaded();
-            Console.debug('soundFont successfully loaded');
+            Console.info('soundFont successfully loaded');
             if (isReady) _events.onReadyForPlay();
         }
         catch (e:Dynamic)
@@ -184,7 +184,7 @@ class SynthPlayer
     public function loadMidiUrl(url:String) : Void
     {
         if (state != Stopped) return;
-        Console.debug('Start loading midi from url ${url}');
+        Console.info('Start loading midi from url ${url}');
         var loader = new UrlLoader();
         loader.url = url;
         loader.method = "GET";
@@ -203,7 +203,7 @@ class SynthPlayer
     public function loadMidiData(data:String) : Void
     {
         if (state != Stopped) return;
-        Console.debug('Start loading midi from serialized bytes');
+        Console.info('Start loading midi from serialized bytes');
         var bytes:Bytes = null;
         try
         {
@@ -222,13 +222,13 @@ class SynthPlayer
         var input:BytesInput = new BytesInput(data);
         try 
         {
-            Console.debug('Loading midi from bytes');
+            Console.info('Loading midi from bytes');
             var midi = new MidiFile();
             midi.load(input);
             _sequencer.loadMidi(midi);
             isMidiLoaded = true;
             _events.onMidiLoaded();
-            Console.debug('Midi successfully loaded');
+            Console.info('Midi successfully loaded');
             if (isReady) _events.onReadyForPlay();
         }
         catch (e:Dynamic)
