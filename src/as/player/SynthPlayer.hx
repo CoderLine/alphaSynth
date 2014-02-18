@@ -208,7 +208,7 @@ class SynthPlayer
         try
         {
             bytes = Unserializer.run(data);
-            loadSoundFontBytes(bytes);
+            loadMidiBytes(bytes);
         }
         catch (e:Dynamic)
         {
