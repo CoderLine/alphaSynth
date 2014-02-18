@@ -37,6 +37,9 @@
             <arg value="-lib" />
             <arg value="format" />
             
+            <arg value="-lib" />
+            <arg value="mconsole" />
+            
             <arg value="-swf-version" />
             <arg value="11.4" />
         </exec>

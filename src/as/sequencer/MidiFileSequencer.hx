@@ -155,9 +155,9 @@ class MidiFileSequencer
         _blockList[channel] = muteValue;
     }
     
-    public function seek(seconds:Int) : Void
+    public function seek(milliseconds:Int) : Void
     {
-        var targetSampleTime = Std.int(synth.sampleRate * seconds);
+        var targetSampleTime = Std.int(synth.sampleRate * (milliseconds / 1000.0));
         if (targetSampleTime > currentTime)
         {
             silentProcess(targetSampleTime - currentTime);
@@ -206,7 +206,7 @@ class MidiFileSequencer
         }
     }
     
-    public function loadMidiFile(midiFile:MidiFile)
+    private function loadMidiFile(midiFile:MidiFile)
     {
         _tempoChanges = new Array<MidiFileSequencerTempoChange>();
         var bpm = 120.0;
@@ -278,8 +278,34 @@ class MidiFileSequencer
         return ticks;
     }
     
+    public function ticksToMillis(ticks:Int)
+    {
+        var time = 0;
+        var bpm = 120.0;
+        var lastChange = 0;
+        
+        // find start and bpm of last tempo change before time
+        for (c in _tempoChanges)
+        {
+            if (ticks < c.ticks)
+            {
+                break;
+            }
+            time = c.time;
+            bpm = c.bpm;
+            lastChange = c.ticks;
+        }
+        
+        // add the missing millis
+        ticks -= lastChange; 
+        time += Std.int(ticks * (60000.0 / (bpm * _division))); 
+        
+        return time;
+    }
+    
     private function silentProcess(amount:Int) : Void
     {
+        if (amount <= 0) return;
         while (_eventIndex < _synthData.length && _synthData[_eventIndex].delta < (currentTime + amount))
         {
             if (_synthData[_eventIndex].event.getCommand() != MidiEventTypeEnum.NoteOn)

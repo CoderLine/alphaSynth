@@ -17,232 +17,333 @@
  */
 package as;
 
-// platform specific includes
-
 #if flash
-import as.midi.MidiFile;
+import as.log.LevelPrinter;
+import as.player.ISynthPlayerListener;
 import as.player.SynthPlayer;
-import as.util.HxWorker;
-import flash.display.JointStyle;
-import flash.display.Sprite;
-import flash.Lib;
-import flash.system.Worker;
-import flash.events.Event;
-import flash.events.ProgressEvent;
-import flash.net.URLLoaderDataFormat;
-import flash.utils.ByteArray;
-import flash.utils.JSON;
-#end
+import as.player.SynthPlayerState;
+import haxe.io.Bytes;
+import haxe.remoting.Context;
+import haxe.remoting.ExternalConnection;
 
-#if js
+#elseif js
+import as.player.SynthPlayerState;
+import haxe.Serializer;
+import haxe.io.Bytes;
+import haxe.remoting.Context;
+import haxe.remoting.ExternalConnection;
 import js.Browser;
 import js.JQuery;
 import js.html.Element;
-#end
 
-#if cs
+#elseif cs
 import as.player.SynthPlayer;
 #end
 
-import haxe.Log;
-import haxe.PosInfos;
-import haxe.Serializer;
-import haxe.Unserializer;
-import haxe.io.Bytes;
-import haxe.io.BytesInput;
-
-import haxe.remoting.Context;
-import haxe.remoting.ExternalConnection;
-import as.synthesis.SynthPosition;
-
-#if js
-
-extern class Uint8Array implements ArrayAccess<Int>
-{
-  public var length:Int;
-}
-  
-#end
-
 @:expose
-class AlphaSynth 
+class AlphaSynth implements IAlphaSynth 
+#if flash
+implements ISynthPlayerListener
+#end
 {
-    #if flash
-    
-    private static var _player:SynthPlayer;
-    private static var _js;
-    
+    public var AlphaSynthId = "AlphaSynth";
+    public static var instance:AlphaSynth;
     public static function main()
     {
-        var ctx = new Context();
-        ctx.addObject("FlashAlphaSynth", AlphaSynth);
-        _js = ExternalConnection.jsConnect("default", ctx);
-        Log.trace = function(v:Dynamic, ?info:PosInfos)
-        {
-            _js.JsAlphaSynth.log.call([v, info]);
-        };
-
-         
-        trace('Initializing synthsizer');
-        _player = new SynthPlayer();
-        _player.addPositionChangedListener(function(p) {
-            _js.JsAlphaSynth.firePositionChanged.call([p]);
-        });
-        _player.addFinishedListener(function() {
-            _js.JsAlphaSynth.fireFinished.call([]);
-        });
-        trace('Done');
+        instance = new AlphaSynth();
+    }
+    
+    #if flash
+    
+    private var _player:SynthPlayer;
+    private var _js:ExternalConnection;
+    private var _printer:LevelPrinter;
+    
+    public function new()
+    {
+        untyped Console.hasConsole = false;
+        Console.start();
+        Console.removePrinter(Console.defaultPrinter);
+        Console.addPrinter((_printer = new LevelPrinter(sendLog)));
         
-        _js.JsAlphaSynth.ready.call([]);
+        var ctx = new Context();
+        ctx.addObject("FlashAlphaSynth", this);
+        _js = ExternalConnection.jsConnect("default", ctx);
+        
+        _player = new SynthPlayer();
+        _player.addEventListener(this);
+        onReady();
     }
     
-    public static function loadSoundFont(url:String)
+    public function isReadyForPlay() : Bool
     {
-        _player.loadBankUrl(url);
+        return _player.isReady;
     }
     
-    public static function loadMidiFromUrl(url:String)
-    {
-        _player.loadMidiUrl(url);
-    }
-    
-    public static function loadMidi(data:String)
-    {
-        try 
-        {
-            var bytes:Bytes = Unserializer.run(data);
-            var midi = new MidiFile();
-            midi.load(new BytesInput(bytes));
-            _player.loadMidi(midi);
-            return true;
-        }
-        catch (e:Dynamic)
-        {
-            trace('error loading midi from binary: ' + e);
-            return false;
-        }
-    }
-    
-    public static function play()
+    public function play() : Void
     {
         _player.play();
     }
     
-    public static function isPlaying()
-    {
-        _player.isPlaying();
-    }
-    
-    public static function pause()
+    public function pause() : Void
     {
         _player.pause();
     }
     
-    public static function stop()
+    public function playPause() : Void
+    {
+        _player.playPause();
+    }
+    
+    public function stop() : Void
     {
         _player.stop();
     }
     
+    public function setPositionTick(tick:Int) : Void
+    {
+        _player.tickPosition = tick;
+    }
+    
+    public function setPositionTime(millis:Int) : Void
+    {
+        _player.timePosition = millis;
+    }
+
+    public function loadSoundFontUrl(url:String) : Void
+    {
+        _player.loadSoundFontUrl(url);
+    }
+    
+    public function loadSoundFontData(data:String) : Void
+    {
+        _player.loadSoundFontData(data);
+    }
+    
+    public function loadMidiUrl(url:String) : Void
+    {
+        _player.loadMidiUrl(url);
+    }
+    
+    public function loadMidiData(data:String) : Void
+    {
+        _player.loadMidiData(data);
+    }
+    
+    public function getState() : SynthPlayerState
+    {
+        return _player.state;
+    }
+    
+    public function isSoundFontLoaded() : Bool
+    {
+        return _player.isSoundFontLoaded;
+    }
+    
+    public function isMidiLoaded() : Bool
+    {
+        return _player.isMidiLoaded;
+    }
+    
+    public function setLogLevel(level:Int) : Void
+    {
+        if (level < LevelPrinter.MinLogLevel || level > LevelPrinter.MaxLogLevel)
+        {
+            Console.error("invalid log level");
+            return;
+        }
+        _printer.level = level;
+    }
+    
+    //
+    // Events
+    
+    public function onReady() : Void
+    {
+        _js.JsAlphaSynth.trigger.call(['ready']);
+    }
+    
+    public function onPositionChanged(currentTime:Int, endTime:Int, currentTick:Int, endTick:Int) : Void
+    {
+        _js.JsAlphaSynth.trigger.call(['positionChanged', currentTime, endTime, currentTick, endTick]);
+    }
+    
+    public function onFinished() : Void
+    {
+        _js.JsAlphaSynth.trigger.call(['finished']);
+    }
+    
+    public function onSoundFontLoad(loaded:Int, full:Int) : Void
+    {
+        _js.JsAlphaSynth.trigger.call(['soundFontLoad', loaded, full]);
+    }
+    
+    public function onSoundFontLoaded() : Void
+    {
+        _js.JsAlphaSynth.trigger.call(['soundFontLoaded']);
+    }
+    
+    public function onSoundFontLoadFailed() : Void
+    {
+        _js.JsAlphaSynth.trigger.call(['soundFontLoadFailed']);
+    }
+    
+    public function onMidiLoad(loaded:Int, full:Int) : Void
+    {
+        _js.JsAlphaSynth.trigger.call(['midiLoad', loaded, full]);
+    }
+    
+    public function onMidiLoaded() : Void
+    {
+        _js.JsAlphaSynth.trigger.call(['midiFileLoaded']);
+    }
+    
+    public function onMidiLoadFailed() : Void
+    {
+        _js.JsAlphaSynth.trigger.call(['midiFileLoadFailed']);
+    }
+    
+    public function onReadyForPlay() : Void
+    {
+        _js.JsAlphaSynth.trigger.call(['readyForPlay', isReadyForPlay()]);
+    }
+    
+    public function sendLog(level:Int, s:String) : Void
+    {
+        _js.JsAlphaSynth.trigger.call(['log', level, s]);
+    }
+    
     #elseif js
     
-    private static var _flash;
+    private var _flash:ExternalConnection;
+    private var _events:JQuery;
     
-    public static var AlphaSynthId = "AlphaSynth";
-    public static var isReady:Bool;
+    public var ready:Bool;
     
-    private static var _finishedListener:Array < Void->Void > ;
-    private static var _positionChangedListener:Array < SynthPosition->Void > ;
-
-    
-    public static function main()
+    public function new()
     {
-        _finishedListener = new Array < Void->Void >();
-        _positionChangedListener = new Array < SynthPosition->Void >();
-
+        ready = false;
+        
         var ctx = new Context();
-        ctx.addObject("JsAlphaSynth", AlphaSynth);
+        ctx.addObject("JsAlphaSynth", this);
         _flash = ExternalConnection.flashConnect("default", AlphaSynthId, ctx);
+        
+        // todo: get rid of jQuery dependency
+        _events = new JQuery('<span></span>');
     }
     
-    public static function loadSoundFontFromUrl(url:String)
+    public function isReadyForPlay() : Bool
     {
-        _flash.FlashAlphaSynth.loadSoundFont.call([url]);
+        return _flash.FlashAlphaSynth.isReadyForPlay.call([]);
     }
     
-    public static function loadMidiFromUrl(url:String)
-    {
-        _flash.FlashAlphaSynth.loadMidiFromUrl.call([url]);
-    }    
-    
-    public static function loadMidi(data:Uint8Array)
-    {
-        var data = Serializer.run(Bytes.ofData(untyped data));
-        return _flash.FlashAlphaSynth.loadMidi.call([data]);
-    }    
-
-    public static function play()
+    public function play() : Void
     {
         _flash.FlashAlphaSynth.play.call([]);
     }
-
-    public static function pause()
+    
+    public function pause() : Void
     {
         _flash.FlashAlphaSynth.pause.call([]);
     }
-
-    public static function isPlaying()
+    
+    public function playPause() : Void
     {
-        return _flash.FlashAlphaSynth.isPlaying.call([]);
+        _flash.FlashAlphaSynth.playPause.call([]);
     }
     
-    public static function stop()
+    public function stop() : Void
     {
         _flash.FlashAlphaSynth.stop.call([]);
     }
     
-    public static function positionChanged(pos:SynthPosition)
+    public function setPositionTick(tick:Int) : Void
     {
+        _flash.FlashAlphaSynth.setPositionTick.call([tick]);
+    }
+    
+    public function setPositionTime(millis:Int) : Void
+    {
+        _flash.FlashAlphaSynth.setPositionTime.call([millis]);
+    }
+
+    public function loadSoundFontUrl(url:String) : Void
+    {
+        _flash.FlashAlphaSynth.loadSoundFontUrl.call([url]);
+    }
+    
+    public function loadSoundFontData(data:String) : Void
+    {
+        _flash.FlashAlphaSynth.loadSoundFontData.call([data]);
+    }
+    
+    public function loadMidiBytes(data:Dynamic /*Uint8Array */)
+    {
+        var data = Serializer.run(Bytes.ofData(data));
+        loadMidiData(data);
+    }    
+    
+    public function loadMidiUrl(url:String) : Void
+    {
+        _flash.FlashAlphaSynth.loadMidiUrl.call([url]);
+    }
+    
+    public function loadMidiData(data:String) : Void
+    {
+        _flash.FlashAlphaSynth.loadMidiData.call([data]);
+    }
+    
+    public function getState() : SynthPlayerState
+    {
+        return _flash.FlashAlphaSynth.getState.call([]);
+    }
+    
+    public function isSoundFontLoaded() : Bool
+    {
+        return _flash.FlashAlphaSynth.isSoundFontLoaded.call([]);
+    }
+    
+    public function isMidiLoaded() : Bool
+    {
+        return _flash.FlashAlphaSynth.isMidiLoaded.call([]);
+    }
+    
+    public function setLogLevel(level:Int) : Void
+    {
+        _flash.FlashAlphaSynth.setLogLevel.call([level]);
+    }
+    
+    public function on(events:String, fn:Dynamic)
+    {
+        _events.on(events, fn);
+    }
+    
+    public function log(level:Int, message:String)
+    {
+        var console = untyped __js__("window.console");
+        switch(level)
+        {
+            case 0: console.log(message);
+            case 1: console.debug(message);
+            case 2: console.info(message);
+            case 3: console.warn(message);
+            case 4: console.error(message);
+        }
+    }
         
-    }
-    
-    public static function fireFinished()
+    public function trigger(event:String)
     {
-        for (l in _finishedListener)
+        switch(event)
         {
-            l();
+            case "ready":
+                ready = true;
+            case "log":
+                var args = untyped __js__("arguments");
+                log(untyped args[1], untyped args[2]);
         }
-    }
-    
-    public static inline function addFinishedListener(listener:Void->Void)
-    {
-        _finishedListener.push(listener);
-    }
-    
-    public static inline function addPositionChangedListener(listener:SynthPosition->Void)
-    {
-        _positionChangedListener.push(listener);
-    }
-    
-    public static function firePositionChanged(position:SynthPosition)
-    {
-        for (l in _positionChangedListener)
-        {
-            l(position);
-        }
-    }
         
-    public static function log(v:Dynamic, i:PosInfos)
-    {
-        Log.trace(v, i);
-    }
-    
-    public static function ready()
-    {
-        isReady = true;
-        if (untyped __js__("jQuery"))
-        {
-            untyped __js__("jQuery(document).trigger('alphaSynthReady')");
-        }
+        var events = _events;
+        untyped __js__("events.trigger.apply(events, arguments)");
     }
     
     public static function init(asRoot:String, swfObjectRoot:String = '')
@@ -288,12 +389,10 @@ class AlphaSynth
             return false;
         }
     }
-    
-    #elseif cs
-    
-    public static function main()
-    {        
-    }    
-    
+    #else
+    public function new()
+    {
+        
+    }
     #end
 }

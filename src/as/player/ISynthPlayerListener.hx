@@ -15,21 +15,17 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-package as.synthesis;
+package as.player;
 
-class SynthPosition
+interface ISynthPlayerListener
 {
-    public var currentTime:Int;
-    public var currentTick:Int;
-    public var endTime:Int;
-    public var endTick:Int;
-
-    public function new(currentTime:Int=0, currentTick:Int=0, 
-                        endTime:Int=0, endTick:Int=0) 
-    {
-        this.currentTime = currentTime;
-        this.currentTick = currentTick;
-        this.endTime = endTime;
-        this.endTick = endTick;
-    }    
+    public function onPositionChanged(currentTime:Int, endTime:Int, currentTick:Int, endTick:Int) : Void;
+    public function onFinished() : Void;
+    public function onSoundFontLoad(loaded:Int, full:Int) : Void;
+    public function onSoundFontLoaded() : Void;
+    public function onSoundFontLoadFailed() : Void;
+    public function onMidiLoad(loaded:Int, full:Int) : Void;
+    public function onMidiLoaded() : Void;
+    public function onMidiLoadFailed() : Void;
+    public function onReadyForPlay() : Void;
 }

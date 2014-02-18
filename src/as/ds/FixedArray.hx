@@ -37,6 +37,17 @@ abstract FixedArray<T>(FixedArrayData<T>)
     {
 		return this[index] = val;
 	}
+    
+    public inline function clone() : FixedArray<T>
+    {
+        #if (flash||js)
+        return cast this.toData().slice();
+        #elseif cs
+        var c = new new haxe.ds.Vector<T>(length);
+        this.toData().CopyTo(c, 0);
+        return c;
+        #end
+    }
 
 	public var length(get, never):Int;
 	inline function get_length():Int 

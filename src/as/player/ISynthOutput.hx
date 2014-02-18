@@ -73,5 +73,11 @@ interface ISynthOutput
      * @param listener
      */
     function addSampleRequestListener(listener:Void->Void):Void;
+    
+    /**
+     * Seeks to the specified millisecond position
+     * @param position the millisecond position to seek at
+     */
+    function seek(position:Int):Void;
 
 }

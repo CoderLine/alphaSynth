@@ -23,7 +23,41 @@
     <script>
     $(document).ready(function() {
         as.AlphaSynth.init('lib/alphaSynth');
+        var main = as.AlphaSynth.instance;
+        
+        // load data
+        main.on('ready', function() {
+            main.setLogLevel(0);
+            // load default data
+            main.loadSoundFontUrl('../data/default.sf2');
+            main.loadMidiUrl('../data/Test.mid');
+        });
+        
+        // init ui
+        $('#play').click(function() {
+            main.play();
+        });
+        $('#pause').click(function() {
+            main.pause();
+        });
+        $('#stop').click(function() {
+            main.stop();
+        });
+        
+        // enable/disable ui
+        main.on('readyForPlay', function(e, ready) {
+            if(ready) 
+            {
+                $('#controls button').removeAttr('disabled');
+            }
+            else
+            {
+                $('#controls button').attr('disabled', 'disabled');
+            }
+        });      
+
     });
+    
     $(document).on('alphaSynthReady', function() {
         var main = as.AlphaSynth;
         // load default data

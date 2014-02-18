@@ -19,6 +19,8 @@ package as.player;
 
 import as.ds.CircularSampleBuffer;
 import as.ds.FixedArray.FixedArray;
+import as.log.LevelPrinter;
+import as.log.MethodPrinter;
 import as.platform.Types.Float32;
 import as.util.HxWorker;
 import flash.display.Sprite;
@@ -30,6 +32,7 @@ import flash.system.MessageChannel;
 import flash.system.Worker;
 import haxe.Log;
 import haxe.PosInfos;
+import mconsole.LogLevel;
 
 class FlashOutputWorker extends Sprite
 {
@@ -54,22 +57,11 @@ class FlashOutputWorker extends Sprite
         
         _fromOutput = Worker.current.getSharedProperty("fromOutput");
 		_toOutput = Worker.current.getSharedProperty("toOutput");
-		
 		_toOutput.addEventListener(Event.CHANNEL_MESSAGE, handleMessage);
-       
+        
         _circularBuffer = new CircularSampleBuffer(BufferSize*BufferCount);
         _sound = new Sound();
         _sound.addEventListener(SampleDataEvent.SAMPLE_DATA, generateSound);
-
-        
-        var oldTrace = Log.trace;
-        Log.trace = function(v:Dynamic, ?i:PosInfos)
-        {
-            oldTrace(v, i);
-            _fromOutput.send('log');
-            _fromOutput.send(Std.string(v));
-            _fromOutput.send(i);
-        };
     }
     
     private function handleMessage(_)
@@ -83,6 +75,9 @@ class FlashOutputWorker extends Sprite
                 pause();
             case 'stop':
                 stop();
+            case 'seek':
+                var position = _toOutput.receive(true);
+                seek(position);
             case 'finished':
                 _finished = true;
             case 'synthesized':
@@ -129,6 +124,12 @@ class FlashOutputWorker extends Sprite
             _soundChannel.stop();
             _soundChannel = null;
         }
+    }
+    private function seek(position:Int)
+    {
+        //stop();
+        _position = position;
+        //play();
     }
     
     private function generateSound(e:SampleDataEvent)
@@ -188,7 +189,7 @@ class FlashOutput implements ISynthOutput
         _finishedListeners = new Array();
         _sampleRequestListeners = new Array();
         
-        trace('initializing output worker');
+        Console.debug('Initializing flash output worker');
         _output = HxWorker.workerFromClass(FlashOutputWorker);
         
         _fromOutput = _output.createMessageChannel(Worker.current);
@@ -199,7 +200,7 @@ class FlashOutput implements ISynthOutput
 
         _fromOutput.addEventListener(Event.CHANNEL_MESSAGE, handleMessage);
         
-        trace('starting output worker');
+        Console.debug('Starting output worker');
         _output.start();
     }
     
@@ -209,9 +210,11 @@ class FlashOutput implements ISynthOutput
         switch(cmd)
         {
             case "log":
-                var v:String = _fromOutput.receive(true);
-                var i:PosInfos = _fromOutput.receive(true);
-                Log.trace(v, i);
+                var level:LogLevel = _fromOutput.receive(true);
+                var params:Array<Dynamic> = _fromOutput.receive(true);
+                var indent:Array<Dynamic> = _fromOutput.receive(true);
+                var pos:PosInfos = _fromOutput.receive(true);
+                untyped Console.print(level, params, pos);
             case "synthesize":
                 fireSampleRequest();
             case "position":
@@ -273,16 +276,26 @@ class FlashOutput implements ISynthOutput
     
     public function play() 
     {
+        Console.debug("Sending play to worker");
         _toOutput.send("play");
     }   
     
     public function pause() 
     {
+        Console.debug("Sending pause to worker");
         _toOutput.send("pause");
     }
     
     public function stop() 
     {
+        Console.debug("Sending stop to worker");
         _toOutput.send("stop");
+    }
+    
+    public function seek(position:Int) 
+    {
+        Console.debug('Seeking to position ${position}');
+        _toOutput.send("seek");
+        _toOutput.send(position);
     }
 }
