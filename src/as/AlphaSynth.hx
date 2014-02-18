@@ -333,17 +333,17 @@ implements ISynthPlayerListener
         
     public function trigger(event:String)
     {
+        var args = untyped __js__("Array.prototype.slice.call(arguments)");
         switch(event)
         {
             case "ready":
                 ready = true;
             case "log":
-                var args = untyped __js__("arguments");
                 log(untyped args[1], untyped args[2]);
         }
         
         var events = _events;
-        untyped __js__("events.trigger.apply(events, arguments)");
+        untyped __js__("events.trigger(event, args.splice(1))");
     }
     
     public static function init(asRoot:String, swfObjectRoot:String = '')
