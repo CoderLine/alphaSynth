@@ -29,10 +29,7 @@ import haxe.Unserializer;
 
 class SynthPlayer 
 {
-    private static inline var SampleRate = 44100;
-    private static inline var BufferSize = 8192;
-    public static inline var Latency = 0;
-    private static inline var BufferCount = 5;
+    public static inline var SampleRate = 44100;
     
     private var _output:ISynthOutput;
     private var _synth:Synthesizer;

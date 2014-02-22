@@ -37,6 +37,7 @@ import mconsole.LogLevel;
 class FlashOutputWorker extends Sprite
 {
     private static inline var BufferSize = 8192;
+    private static inline var Latency = (BufferSize * 1000) / (2*SynthPlayer.SampleRate);
     private static inline var BufferCount = 10;
     
     private var _fromOutput:MessageChannel;
@@ -163,7 +164,7 @@ class FlashOutputWorker extends Sprite
         if (_soundChannel.position != 0)
         {
             _fromOutput.send("position");
-            _fromOutput.send(Std.int(_soundChannel.position - SynthPlayer.Latency));
+            _fromOutput.send(Std.int(_soundChannel.position - Latency));
         }
         
         if (!_finished)
