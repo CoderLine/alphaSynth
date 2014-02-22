@@ -168,6 +168,11 @@ implements ISynthPlayerListener
         _js.JsAlphaSynth.trigger.call(['positionChanged', currentTime, endTime, currentTick, endTick]);
     }
     
+    public function onPlayerStateChanged(state:SynthPlayerState) : Void
+    {
+        _js.JsAlphaSynth.trigger.call(['playerStateChanged', Type.enumIndex(state)]);
+    }
+    
     public function onFinished() : Void
     {
         _js.JsAlphaSynth.trigger.call(['finished']);

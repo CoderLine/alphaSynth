@@ -45,6 +45,7 @@ class SynthPlayer
         _events = new SynthPlayerEventDispatcher();
 
         state = Stopped;
+        firePlayerStateChanged();
         
         Console.debug("Opening output");
         #if flash
@@ -92,18 +93,20 @@ class SynthPlayer
     {
         if (state == Playing || !isReady) return;
         Console.debug("Starting playback");
-        state = Playing;
         _sequencer.play();
         _output.play();
+        state = Playing;
+        firePlayerStateChanged();
     }
     
     public function pause()
     {
         if (state != Playing || !isReady) return;
         Console.debug("Pausing playback");
-        state = Paused;
         _sequencer.pause();
         _output.pause();
+        state = Paused;
+        firePlayerStateChanged();
     }
     
     public function playPause()
@@ -116,10 +119,12 @@ class SynthPlayer
     {
         if (state == Stopped || !isReady) return;
         Console.debug("Stopping playback");
-        state = Stopped;
         _sequencer.stop();
         _synth.stop();
         _output.stop();
+        state = Stopped;
+        firePlayerStateChanged();
+        firePositionChanged(0);
     }
     
     public function loadSoundFontUrl(url:String) : Void
@@ -265,11 +270,18 @@ class SynthPlayer
     private function set_timePosition(position:Int) : Int
     {
         Console.debug('Seeking to position ${position}ms');
-        var oldState = state;
-        pause();
+        if (state == Playing)
+        {
+            _sequencer.pause();
+            _output.pause();
+        }
         _sequencer.seek(position);
         _output.seek(position);
-        if (oldState == Playing) play();
+        if (state == Playing) 
+        {
+            _sequencer.play();
+            _output.play();
+        }
         
         return position;
     }
@@ -297,6 +309,11 @@ class SynthPlayer
         _timePosition = currentTime;
         Console.debug('Position changed: (time: ${currentTime}/${endTime}, tick: ${currentTick}/${endTick})');
         _events.onPositionChanged(currentTime, endTime, currentTick, endTick);
+    }
+    
+    private inline function firePlayerStateChanged()
+    {
+        _events.onPlayerStateChanged(state);
     }
     
     public inline function addEventListener(listener:ISynthPlayerListener)

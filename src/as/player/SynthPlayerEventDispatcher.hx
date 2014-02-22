@@ -13,6 +13,11 @@ class SynthPlayerEventDispatcher implements ISynthPlayerListener
         for (l in _listeners) l.onPositionChanged(currentTime, endTime, currentTick, endTick);
     }
     
+    public function onPlayerStateChanged(state:SynthPlayerState) : Void
+    {
+        for (l in _listeners) l.onPlayerStateChanged(state);
+    }
+    
     public function onFinished() : Void
     {
         for (l in _listeners) l.onFinished();

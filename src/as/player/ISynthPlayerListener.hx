@@ -20,6 +20,7 @@ package as.player;
 interface ISynthPlayerListener
 {
     public function onPositionChanged(currentTime:Int, endTime:Int, currentTick:Int, endTick:Int) : Void;
+    public function onPlayerStateChanged(state:SynthPlayerState) : Void;
     public function onFinished() : Void;
     public function onSoundFontLoad(loaded:Int, full:Int) : Void;
     public function onSoundFontLoaded() : Void;
