@@ -104,10 +104,12 @@ class PatchBank
     public function loadSf2(input:BytesInput)
     {
         reset();
-               
+       
+        Console.debug("Reading SF2");
         var sf = new SoundFont();
         sf.load(input);
         
+        Console.debug("Building patchbank");
         name = sf.info.bankName;
         comments = sf.info.comments;
 

@@ -39,8 +39,11 @@ class SoundFont
         if (id.toLowerCase() != "sfbk")
             throw ("Invalid soundfont. Riff type is invalid.");
          
+        Console.debug('Reading info chunk');
         info = new SoundFontInfo(input);
+        Console.debug('Reading sampledata chunk');
         sampleData = new SoundFontSampleData(input);
+        Console.debug('Reading preset chunk');
         presets = new SoundFontPresets(input);
     }
     

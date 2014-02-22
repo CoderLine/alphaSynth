@@ -44,9 +44,9 @@ class PresetHeaderChunk extends Chunk
             p.patchNumber = input.readUInt16();
             p.bankNumber = input.readUInt16();
             p.startPresetZoneIndex = input.readUInt16();
-            p.library = Int64.toInt(IOHelper.readUInt32(input));
-            p.genre = Int64.toInt(IOHelper.readUInt32(input));
-            p.morphology = Int64.toInt(IOHelper.readUInt32(input));
+            p.library = Int64.getLow(IOHelper.readUInt32(input));
+            p.genre = Int64.getLow(IOHelper.readUInt32(input));
+            p.morphology = Int64.getLow(IOHelper.readUInt32(input));
             if (lastPreset != null)
                 lastPreset.endPresetZoneIndex = TypeUtils.ToUInt16((p.startPresetZoneIndex - 1));
             _rawPresets[x] = p;

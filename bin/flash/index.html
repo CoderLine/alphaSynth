@@ -30,7 +30,7 @@
             main.setLogLevel(0);
             // load default data
             main.loadSoundFontUrl('../data/default.sf2');
-            main.loadMidiUrl('../data/Test.mid');
+            main.loadMidiUrl('../data/Test2.mid');
         });
         
         // init ui
@@ -56,25 +56,6 @@
             }
         });      
 
-    });
-    
-    $(document).on('alphaSynthReady', function() {
-        var main = as.AlphaSynth;
-        // load default data
-        main.loadSoundFontFromUrl('../data/default.sf2');
-        main.loadMidiFromUrl('../data/Test.mid');
-        
-        // init ui
-        $('#play').click(function() {
-            main.play();
-        });
-        $('#pause').click(function() {
-            main.pause();
-        });
-        $('#stop').click(function() {
-            main.stop();
-        });
-        $('#controls button').removeAttr('disabled');
     });
     </script>
 </body>
