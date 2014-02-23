@@ -123,7 +123,7 @@ class Tables
         var table = new FixedArray<Float32>(size);
         for(x in 0 ... size)
         {
-            table[1];
+            table[x] = 1;
         }
         return table;
     }

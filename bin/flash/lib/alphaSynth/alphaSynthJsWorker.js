@@ -4644,7 +4644,7 @@ as.util.Tables.createSustainTable = function(size) {
 	var _g = 0;
 	while(_g < size) {
 		var x = _g++;
-		table[1];
+		table[x] = 1;
 	}
 	return table;
 }
