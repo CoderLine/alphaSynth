@@ -29,7 +29,7 @@
             <arg value="${src}"/>
             
             <arg value="-main" />
-            <arg value="as.AlphaSynth" />
+            <arg value="as.AlphaSynthFlash" />
             
             <arg value="-swf" />
             <arg value="${haxe-flash-swf}" />
@@ -48,7 +48,7 @@
             <arg value="${src}"/>
             
             <arg value="-main" />
-            <arg value="as.AlphaSynth" />
+            <arg value="as.AlphaSynthJs" />
             
             <arg value="-js" />
             <arg value="${haxe-flash-js}" />
@@ -76,7 +76,7 @@
             <arg value="no-root" />
             
             <arg value="-main" />
-            <arg value="as.AlphaSynth" />
+            <arg value="as.AlphaSynthCs" />
             
             <arg value="-cs" />
             <arg value="${haxe-cs}" />

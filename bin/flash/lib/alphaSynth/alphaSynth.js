@@ -240,7 +240,7 @@ as.IAlphaSynth.__name__ = ["as","IAlphaSynth"];
 as.IAlphaSynth.prototype = {
 	__class__: as.IAlphaSynth
 }
-as.AlphaSynth = function() {
+as.AlphaSynthJs = function() {
 	this.AlphaSynthId = "AlphaSynth";
 	this.ready = false;
 	var ctx = new haxe.remoting.Context();
@@ -248,14 +248,14 @@ as.AlphaSynth = function() {
 	this._flash = haxe.remoting.ExternalConnection.flashConnect("default",this.AlphaSynthId,ctx);
 	this._events = new js.JQuery("<span></span>");
 };
-$hxClasses["as.AlphaSynth"] = as.AlphaSynth;
-$hxExpose(as.AlphaSynth, "as.AlphaSynth");
-as.AlphaSynth.__name__ = ["as","AlphaSynth"];
-as.AlphaSynth.__interfaces__ = [as.IAlphaSynth];
-as.AlphaSynth.main = function() {
-	as.AlphaSynth.instance = new as.AlphaSynth();
+$hxClasses["as.AlphaSynthJs"] = as.AlphaSynthJs;
+$hxExpose(as.AlphaSynthJs, "as.AlphaSynth");
+as.AlphaSynthJs.__name__ = ["as","AlphaSynthJs"];
+as.AlphaSynthJs.__interfaces__ = [as.IAlphaSynth];
+as.AlphaSynthJs.main = function() {
+	as.AlphaSynthJs.instance = new as.AlphaSynthJs();
 }
-as.AlphaSynth.init = function(asRoot,swfObjectRoot) {
+as.AlphaSynthJs.init = function(asRoot,swfObjectRoot) {
 	if(swfObjectRoot == null) swfObjectRoot = "";
 	var swf = swfobject;
 	if(asRoot != "" && !StringTools.endsWith(asRoot,"/")) asRoot += "/";
@@ -276,7 +276,7 @@ as.AlphaSynth.init = function(asRoot,swfObjectRoot) {
 		return false;
 	}
 }
-as.AlphaSynth.prototype = {
+as.AlphaSynthJs.prototype = {
 	trigger: function(event) {
 		var args = Array.prototype.slice.call(arguments);
 		switch(event) {
@@ -362,7 +362,7 @@ as.AlphaSynth.prototype = {
 	,isReadyForPlay: function() {
 		return this._flash.resolve("FlashAlphaSynth").resolve("isReadyForPlay").call([]);
 	}
-	,__class__: as.AlphaSynth
+	,__class__: as.AlphaSynthJs
 }
 as.player = {}
 as.player.SynthPlayerState = $hxClasses["as.player.SynthPlayerState"] = { __ename__ : ["as","player","SynthPlayerState"], __constructs__ : ["Stopped","Playing","Paused"] }
@@ -1232,7 +1232,7 @@ haxe.ds.ObjectMap.count = 0;
 haxe.remoting.ExternalConnection.connections = new haxe.ds.StringMap();
 js.Browser.window = typeof window != "undefined" ? window : null;
 js.Browser.document = typeof window != "undefined" ? window.document : null;
-as.AlphaSynth.main();
+as.AlphaSynthJs.main();
 function $hxExpose(src, path) {
 	var o = typeof window != "undefined" ? window : exports;
 	var parts = path.split(".");
