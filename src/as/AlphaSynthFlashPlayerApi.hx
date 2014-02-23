@@ -16,28 +16,19 @@
  * License along with this library.
  */
 package as;
+
 import as.ds.FixedArray.FixedArray;
 import as.platform.Types.Float32;
-import as.player.SynthPlayerState;
-import haxe.io.Bytes;
 import haxe.remoting.Context;
 import haxe.remoting.ExternalConnection;
-import haxe.Serializer;
-import haxe.Unserializer;
 import js.Browser;
 import js.html.Element;
 import js.JQuery;
 
-@:expose("as.AlphaSynth")
-class AlphaSynthFlashPlayerApi 
+class AlphaSynthFlashPlayerApi implements IAlphaSynthAsync
 {
     public static inline var AlphaSynthId = "AlphaSynth";
     public static inline var AlphaSynthWorkerId = "AlphaSynthWorker";
-    public static var instance:AlphaSynthFlashPlayerApi;
-    public static function main()
-    {
-        instance = new AlphaSynthFlashPlayerApi();
-    }
     
     private var _flash:ExternalConnection;
     private var _synth:Dynamic;
@@ -156,10 +147,10 @@ class AlphaSynthFlashPlayerApi
         switch(data.cmd)
         {
             // responses
-            case 'isReadyForPlay':
-            case 'getState':
-            case 'isSoundFontLoaded':
-            case 'isMidiLoaded':
+            case 'isReadyForPlay': untyped __js__("this._events.trigger(data.cmd, [data.value])");
+            case 'getState': untyped __js__("this._events.trigger(data.cmd, [data.value])");
+            case 'isSoundFontLoaded': untyped __js__("this._events.trigger(data.cmd, [data.value])");
+            case 'isMidiLoaded': untyped __js__("this._events.trigger(data.cmd, [data.value])");
             // events
             case 'positionChanged': untyped __js__("this._events.trigger(data.cmd, [data.currentTime, data.endTime, data.currentTick, data.endTick])");
             case 'playerStateChanged': untyped __js__("this._events.trigger(data.cmd, [data.state])");
@@ -259,13 +250,13 @@ class AlphaSynthFlashPlayerApi
             
             untyped {
                 // create web worker
-                Browser.window[AlphaSynthWorkerId] = __js__('new Worker(asRoot + "alphaSynthJsWorker.js")');
+                Browser.window[AlphaSynthWorkerId] = __js__('new Worker(asRoot + "alphaSynthWorker.js")');
                 // initialize swf
                 swf.embedSWF(
-                    asRoot + "alphaSynthJsWorker.swf", 
-                    "alphaSynthContainer", "1px", "1px", "11.4.0", 
+                    asRoot + "alphaSynthPlayer.swf", 
+                    "alphaSynthContainer", "1px", "1px", "11.0.0", 
                     swfObjectRoot + "expressInstall.swf", 
-                    {}, {}, {id:"AlphaSynth"}
+                    {}, {allowScriptAccess : "always"}, {id:"AlphaSynth"}
                 );
             }
             

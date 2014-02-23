@@ -1,4 +1,4 @@
-<project name="alphaSynth" default="flashOnly" basedir=".">
+<project name="alphaSynth" default="all" basedir=".">
     <description>
         a buildfile compiling alphaSynth
     </description>
@@ -17,20 +17,14 @@
     
     <property name="bin-flash" location="${bin}/flash"/>
     <property name="lib-flash" location="${bin-flash}/lib/alphaSynth"/>
-	<property name="haxe-flash-swf" location="${lib-flash}/alphaSynthFlashOnly.swf"/>
-	<property name="haxe-flash-api" location="${lib-flash}/alphaSynthFlashOnly.js"/>
-	<property name="haxe-flashjsworker-swf" location="${lib-flash}/alphaSynthJsWorker.swf"/>
-	<property name="haxe-flashjsworker-js" location="${lib-flash}/alphaSynthJsWorker.js"/>
-	<property name="haxe-flashjsworker-api" location="${lib-flash}/alphaSynthJsWorkerApi.js"/>
+	<property name="haxe-flash-full" location="${lib-flash}/alphaSynthFull.swf"/>
+	<property name="haxe-flash-player" location="${lib-flash}/alphaSynthPlayer.swf"/>
+	<property name="haxe-js-worker" location="${lib-flash}/alphaSynthWorker.js"/>
+	<property name="haxe-js-api" location="${lib-flash}/alphaSynth.js"/>
     
 	<!-- Haxe Builds -->
-    <target name="all" depends="flashOnly,flashJsWorker">
-        
-    </target>
-    
-	<target name="flashOnly">
-		<delete file="${haxe-flash-swf}" />
-		<delete file="${haxe-flash-js}" />
+    <target name="all">
+        <echo message="Building alphaSynth Flash (full)" />
         <exec executable="haxe" failonerror="true">
             <arg value="-cp" />
             <arg value="${src}"/>
@@ -39,7 +33,7 @@
             <arg value="as.AlphaSynthFlash" />
             
             <arg value="-swf" />
-            <arg value="${haxe-flash-swf}" />
+            <arg value="${haxe-flash-full}" />
             
             <arg value="-lib" />
             <arg value="format" />
@@ -50,21 +44,8 @@
             <arg value="-swf-version" />
             <arg value="11.4" />
         </exec>
-        <exec executable="haxe" failonerror="true">
-            <arg value="-cp" />
-            <arg value="${src}"/>
-            
-            <arg value="-main" />
-            <arg value="as.AlphaSynthFlashApi" />
-            
-            <arg value="-js" />
-            <arg value="${haxe-flash-api}" />
-        </exec>
-	</target>	
-	<target name="flashJsWorker">
-		<delete file="${haxe-flashjsworker-swf}" />
-		<delete file="${haxe-flashjsworker-js}" />
-		<delete file="${haxe-flashjsworker-api}" />
+        
+        <echo message="Building alphaSynth Flash (player)" />
         <exec executable="haxe" failonerror="true">
             <arg value="-cp" />
             <arg value="${src}"/>
@@ -73,17 +54,10 @@
             <arg value="as.AlphaSynthFlashPlayer" />
             
             <arg value="-swf" />
-            <arg value="${haxe-flashjsworker-swf}" />
-            
-            <arg value="-lib" />
-            <arg value="format" />
-            
-            <arg value="-lib" />
-            <arg value="mconsole" />
-            
-            <arg value="-swf-version" />
-            <arg value="11.4" />
+            <arg value="${haxe-flash-player}" />
         </exec>
+        
+        <echo message="Building alphaSynth Js (WebWorker)" />
         <exec executable="haxe" failonerror="true">
             <arg value="-cp" />
             <arg value="${src}"/>
@@ -98,20 +72,26 @@
             <arg value="samsung" />
 
             <arg value="-js" />
-            <arg value="${haxe-flashjsworker-js}" />
+            <arg value="${haxe-js-worker}" />
         </exec>
+        
+        <echo message="Building alphaSynth Js (API)" />
         <exec executable="haxe" failonerror="true">
             <arg value="-cp" />
             <arg value="${src}"/>
             
             <arg value="-main" />
-            <arg value="as.AlphaSynthFlashPlayerApi" />
+            <arg value="as.AlphaSynthJs" />
             
+            <arg value="-lib" />
+            <arg value="mconsole" />
+
             <arg value="-js" />
-            <arg value="${haxe-flashjsworker-api}" />
-        </exec>
-	</target>	
-	
+            <arg value="${haxe-js-api}" />
+        </exec>        
+        
+    </target>
+    
     <property name="bin-cs" location="${bin}/cs"/>
     <property name="haxe-cs" location="${bin-cs}/AlphaSynth.Core"/> 
     

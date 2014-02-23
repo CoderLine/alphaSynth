@@ -287,6 +287,19 @@ as.player.ISynthPlayerListener.__name__ = ["as","player","ISynthPlayerListener"]
 as.player.ISynthPlayerListener.prototype = {
 	__class__: as.player.ISynthPlayerListener
 }
+as.IAlphaSynth = function() { }
+$hxClasses["as.IAlphaSynth"] = as.IAlphaSynth;
+as.IAlphaSynth.__name__ = ["as","IAlphaSynth"];
+as.IAlphaSynth.prototype = {
+	__class__: as.IAlphaSynth
+}
+as.IAlphaSynthSync = function() { }
+$hxClasses["as.IAlphaSynthSync"] = as.IAlphaSynthSync;
+as.IAlphaSynthSync.__name__ = ["as","IAlphaSynthSync"];
+as.IAlphaSynthSync.__interfaces__ = [as.IAlphaSynth];
+as.IAlphaSynthSync.prototype = {
+	__class__: as.IAlphaSynthSync
+}
 as.AlphaSynthJsWorker = function() {
 	mconsole.Console.hasConsole = false;
 	mconsole.Console.start();
@@ -300,7 +313,7 @@ as.AlphaSynthJsWorker = function() {
 };
 $hxClasses["as.AlphaSynthJsWorker"] = as.AlphaSynthJsWorker;
 as.AlphaSynthJsWorker.__name__ = ["as","AlphaSynthJsWorker"];
-as.AlphaSynthJsWorker.__interfaces__ = [as.player.ISynthPlayerListener];
+as.AlphaSynthJsWorker.__interfaces__ = [as.player.ISynthPlayerListener,as.IAlphaSynthSync];
 as.AlphaSynthJsWorker.main = function() {
 	as.AlphaSynthJsWorker.instance = new as.AlphaSynthJsWorker();
 }
@@ -333,7 +346,7 @@ as.AlphaSynthJsWorker.prototype = {
 		this._main.postMessage({ cmd : "finished"});
 	}
 	,onPlayerStateChanged: function(state) {
-		this._main.postMessage({ cmd : "playerStateChanged", state : state});
+		this._main.postMessage({ cmd : "playerStateChanged", state : state[1]});
 	}
 	,onPositionChanged: function(currentTime,endTime,currentTick,endTick) {
 		this._main.postMessage({ cmd : "positionChanged", currentTime : currentTime, endTime : endTime, currentTick : currentTick, endTick : endTick});
@@ -2592,17 +2605,17 @@ as.player.JsWorkerOutput.prototype = {
 as.player.SynthPlayer = function() {
 	var _g = this;
 	if(mconsole.Console.hasConsole) mconsole.Console.callConsole("debug",["Initializing player"]);
-	mconsole.Console.print(mconsole.LogLevel.debug,["Initializing player"],{ fileName : "SynthPlayer.hx", lineNumber : 41, className : "as.player.SynthPlayer", methodName : "new"});
+	mconsole.Console.print(mconsole.LogLevel.debug,["Initializing player"],{ fileName : "SynthPlayer.hx", lineNumber : 40, className : "as.player.SynthPlayer", methodName : "new"});
 	this._events = new as.player.SynthPlayerEventDispatcher();
 	this.state = as.player.SynthPlayerState.Stopped;
 	this._events.onPlayerStateChanged(this.state);
 	if(mconsole.Console.hasConsole) mconsole.Console.callConsole("debug",["Opening output"]);
-	mconsole.Console.print(mconsole.LogLevel.debug,["Opening output"],{ fileName : "SynthPlayer.hx", lineNumber : 47, className : "as.player.SynthPlayer", methodName : "new"});
+	mconsole.Console.print(mconsole.LogLevel.debug,["Opening output"],{ fileName : "SynthPlayer.hx", lineNumber : 46, className : "as.player.SynthPlayer", methodName : "new"});
 	this._output = new as.player.JsWorkerOutput();
 	this._output.addFinishedListener(function() {
 		_g.stop();
 		if(mconsole.Console.hasConsole) mconsole.Console.callConsole("debug",["Finished playback"]);
-		mconsole.Console.print(mconsole.LogLevel.debug,["Finished playback"],{ fileName : "SynthPlayer.hx", lineNumber : 57, className : "as.player.SynthPlayer", methodName : "new"});
+		mconsole.Console.print(mconsole.LogLevel.debug,["Finished playback"],{ fileName : "SynthPlayer.hx", lineNumber : 56, className : "as.player.SynthPlayer", methodName : "new"});
 		_g._events.onFinished();
 	});
 	this._output.addSampleRequestListener(function() {
@@ -2614,7 +2627,7 @@ as.player.SynthPlayer = function() {
 		_g.firePositionChanged(pos);
 	});
 	if(mconsole.Console.hasConsole) mconsole.Console.callConsole("debug",["Creating synthesizer"]);
-	mconsole.Console.print(mconsole.LogLevel.debug,["Creating synthesizer"],{ fileName : "SynthPlayer.hx", lineNumber : 72, className : "as.player.SynthPlayer", methodName : "new"});
+	mconsole.Console.print(mconsole.LogLevel.debug,["Creating synthesizer"],{ fileName : "SynthPlayer.hx", lineNumber : 71, className : "as.player.SynthPlayer", methodName : "new"});
 	this._synth = new as.synthesis.Synthesizer(44100,2,441,3,100);
 	this._sequencer = new as.sequencer.MidiFileSequencer(this._synth);
 	this._sequencer.addFinishedListener(($_=this._output,$bind($_,$_.sequencerFinished)));
@@ -2635,19 +2648,19 @@ as.player.SynthPlayer.prototype = {
 		var currentTick = this._sequencer.millisToTicks(currentTime);
 		this._tickPosition = currentTick;
 		this._timePosition = currentTime;
-		mconsole.Console.debug("Position changed: (time: " + currentTime + "/" + endTime + ", tick: " + currentTick + "/" + endTick + ")",{ fileName : "SynthPlayer.hx", lineNumber : 309, className : "as.player.SynthPlayer", methodName : "firePositionChanged"});
+		mconsole.Console.debug("Position changed: (time: " + currentTime + "/" + endTime + ", tick: " + currentTick + "/" + endTick + ")",{ fileName : "SynthPlayer.hx", lineNumber : 308, className : "as.player.SynthPlayer", methodName : "firePositionChanged"});
 		this._events.onPositionChanged(currentTime,endTime,currentTick,endTick);
 	}
 	,onMidiLoad: function(loaded,total) {
-		mconsole.Console.debug("Midi downloading: " + loaded + "/" + total + " bytes",{ fileName : "SynthPlayer.hx", lineNumber : 296, className : "as.player.SynthPlayer", methodName : "onMidiLoad"});
+		mconsole.Console.debug("Midi downloading: " + loaded + "/" + total + " bytes",{ fileName : "SynthPlayer.hx", lineNumber : 295, className : "as.player.SynthPlayer", methodName : "onMidiLoad"});
 		this._events.onMidiLoad(loaded,total);
 	}
 	,onSoundFontLoad: function(loaded,total) {
-		mconsole.Console.debug("Soundfont downloading: " + loaded + "/" + total + " bytes",{ fileName : "SynthPlayer.hx", lineNumber : 290, className : "as.player.SynthPlayer", methodName : "onSoundFontLoad"});
+		mconsole.Console.debug("Soundfont downloading: " + loaded + "/" + total + " bytes",{ fileName : "SynthPlayer.hx", lineNumber : 289, className : "as.player.SynthPlayer", methodName : "onSoundFontLoad"});
 		this._events.onSoundFontLoad(loaded,total);
 	}
 	,set_timePosition: function(position) {
-		mconsole.Console.debug("Seeking to position " + position + "ms",{ fileName : "SynthPlayer.hx", lineNumber : 271, className : "as.player.SynthPlayer", methodName : "set_timePosition"});
+		mconsole.Console.debug("Seeking to position " + position + "ms",{ fileName : "SynthPlayer.hx", lineNumber : 270, className : "as.player.SynthPlayer", methodName : "set_timePosition"});
 		if(this.state == as.player.SynthPlayerState.Playing) {
 			this._sequencer.pause();
 			this._output.pause();
@@ -2678,17 +2691,17 @@ as.player.SynthPlayer.prototype = {
 		var input = new haxe.io.BytesInput(data);
 		try {
 			if(mconsole.Console.hasConsole) mconsole.Console.callConsole("info",["Loading midi from bytes"]);
-			mconsole.Console.print(mconsole.LogLevel.info,["Loading midi from bytes"],{ fileName : "SynthPlayer.hx", lineNumber : 229, className : "as.player.SynthPlayer", methodName : "loadMidiBytes"});
+			mconsole.Console.print(mconsole.LogLevel.info,["Loading midi from bytes"],{ fileName : "SynthPlayer.hx", lineNumber : 228, className : "as.player.SynthPlayer", methodName : "loadMidiBytes"});
 			var midi = new as.midi.MidiFile();
 			midi.load(input);
 			this._sequencer.loadMidi(midi);
 			this.isMidiLoaded = true;
 			this._events.onMidiLoaded();
 			if(mconsole.Console.hasConsole) mconsole.Console.callConsole("info",["Midi successfully loaded"]);
-			mconsole.Console.print(mconsole.LogLevel.info,["Midi successfully loaded"],{ fileName : "SynthPlayer.hx", lineNumber : 235, className : "as.player.SynthPlayer", methodName : "loadMidiBytes"});
+			mconsole.Console.print(mconsole.LogLevel.info,["Midi successfully loaded"],{ fileName : "SynthPlayer.hx", lineNumber : 234, className : "as.player.SynthPlayer", methodName : "loadMidiBytes"});
 			if(this.isSoundFontLoaded && this.isMidiLoaded) this._events.onReadyForPlay();
 		} catch( e ) {
-			mconsole.Console.error("Could not load soundfont from bytes " + Std.string(e),null,{ fileName : "SynthPlayer.hx", lineNumber : 240, className : "as.player.SynthPlayer", methodName : "loadMidiBytes"});
+			mconsole.Console.error("Could not load soundfont from bytes " + Std.string(e),null,{ fileName : "SynthPlayer.hx", lineNumber : 239, className : "as.player.SynthPlayer", methodName : "loadMidiBytes"});
 			this.isMidiLoaded = false;
 			this._sequencer.unloadMidi();
 			this._events.onMidiLoadFailed();
@@ -2697,18 +2710,18 @@ as.player.SynthPlayer.prototype = {
 	,loadMidiData: function(data) {
 		if(this.state != as.player.SynthPlayerState.Stopped) return;
 		if(mconsole.Console.hasConsole) mconsole.Console.callConsole("info",["Start loading midi from serialized bytes"]);
-		mconsole.Console.print(mconsole.LogLevel.info,["Start loading midi from serialized bytes"],{ fileName : "SynthPlayer.hx", lineNumber : 210, className : "as.player.SynthPlayer", methodName : "loadMidiData"});
+		mconsole.Console.print(mconsole.LogLevel.info,["Start loading midi from serialized bytes"],{ fileName : "SynthPlayer.hx", lineNumber : 209, className : "as.player.SynthPlayer", methodName : "loadMidiData"});
 		var bytes = null;
 		try {
 			bytes = haxe.Unserializer.run(data);
 			this.loadMidiBytes(bytes);
 		} catch( e ) {
-			mconsole.Console.error("Could not load midi from serialized bytes: " + Std.string(e),null,{ fileName : "SynthPlayer.hx", lineNumber : 219, className : "as.player.SynthPlayer", methodName : "loadMidiData"});
+			mconsole.Console.error("Could not load midi from serialized bytes: " + Std.string(e),null,{ fileName : "SynthPlayer.hx", lineNumber : 218, className : "as.player.SynthPlayer", methodName : "loadMidiData"});
 		}
 	}
 	,loadMidiUrl: function(url) {
 		if(this.state != as.player.SynthPlayerState.Stopped) return;
-		mconsole.Console.info("Start loading midi from url " + url,{ fileName : "SynthPlayer.hx", lineNumber : 191, className : "as.player.SynthPlayer", methodName : "loadMidiUrl"});
+		mconsole.Console.info("Start loading midi from url " + url,{ fileName : "SynthPlayer.hx", lineNumber : 190, className : "as.player.SynthPlayer", methodName : "loadMidiUrl"});
 		var loader = new as.util.UrlLoader();
 		loader.url = url;
 		loader.method = "GET";
@@ -2717,7 +2730,7 @@ as.player.SynthPlayer.prototype = {
 		try {
 			loader.load();
 		} catch( e ) {
-			mconsole.Console.error("Could not load midi from url: " + Std.string(e),null,{ fileName : "SynthPlayer.hx", lineNumber : 203, className : "as.player.SynthPlayer", methodName : "loadMidiUrl"});
+			mconsole.Console.error("Could not load midi from url: " + Std.string(e),null,{ fileName : "SynthPlayer.hx", lineNumber : 202, className : "as.player.SynthPlayer", methodName : "loadMidiUrl"});
 		}
 	}
 	,loadSoundFontBytes: function(data) {
@@ -2725,17 +2738,17 @@ as.player.SynthPlayer.prototype = {
 		var input = new haxe.io.BytesInput(data);
 		try {
 			if(mconsole.Console.hasConsole) mconsole.Console.callConsole("info",["Loading soundfont from bytes"]);
-			mconsole.Console.print(mconsole.LogLevel.info,["Loading soundfont from bytes"],{ fileName : "SynthPlayer.hx", lineNumber : 170, className : "as.player.SynthPlayer", methodName : "loadSoundFontBytes"});
+			mconsole.Console.print(mconsole.LogLevel.info,["Loading soundfont from bytes"],{ fileName : "SynthPlayer.hx", lineNumber : 169, className : "as.player.SynthPlayer", methodName : "loadSoundFontBytes"});
 			var bank = new as.bank.PatchBank();
 			bank.loadSf2(input);
 			this._synth.loadBank(bank);
 			this.isSoundFontLoaded = true;
 			this._events.onSoundFontLoaded();
 			if(mconsole.Console.hasConsole) mconsole.Console.callConsole("info",["soundFont successfully loaded"]);
-			mconsole.Console.print(mconsole.LogLevel.info,["soundFont successfully loaded"],{ fileName : "SynthPlayer.hx", lineNumber : 176, className : "as.player.SynthPlayer", methodName : "loadSoundFontBytes"});
+			mconsole.Console.print(mconsole.LogLevel.info,["soundFont successfully loaded"],{ fileName : "SynthPlayer.hx", lineNumber : 175, className : "as.player.SynthPlayer", methodName : "loadSoundFontBytes"});
 			if(this.isSoundFontLoaded && this.isMidiLoaded) this._events.onReadyForPlay();
 		} catch( e ) {
-			mconsole.Console.error("Could not load soundfont from bytes " + Std.string(e),null,{ fileName : "SynthPlayer.hx", lineNumber : 181, className : "as.player.SynthPlayer", methodName : "loadSoundFontBytes"});
+			mconsole.Console.error("Could not load soundfont from bytes " + Std.string(e),null,{ fileName : "SynthPlayer.hx", lineNumber : 180, className : "as.player.SynthPlayer", methodName : "loadSoundFontBytes"});
 			this.isSoundFontLoaded = false;
 			this._synth.unloadBank();
 			this._events.onSoundFontLoadFailed();
@@ -2744,18 +2757,18 @@ as.player.SynthPlayer.prototype = {
 	,loadSoundFontData: function(data) {
 		if(this.state != as.player.SynthPlayerState.Stopped) return;
 		if(mconsole.Console.hasConsole) mconsole.Console.callConsole("info",["Start loading soundfont from serialized bytes"]);
-		mconsole.Console.print(mconsole.LogLevel.info,["Start loading soundfont from serialized bytes"],{ fileName : "SynthPlayer.hx", lineNumber : 151, className : "as.player.SynthPlayer", methodName : "loadSoundFontData"});
+		mconsole.Console.print(mconsole.LogLevel.info,["Start loading soundfont from serialized bytes"],{ fileName : "SynthPlayer.hx", lineNumber : 150, className : "as.player.SynthPlayer", methodName : "loadSoundFontData"});
 		var bytes = null;
 		try {
 			bytes = haxe.Unserializer.run(data);
 			this.loadSoundFontBytes(bytes);
 		} catch( e ) {
-			mconsole.Console.error("Could not load soundfont from serialized bytes: " + Std.string(e),null,{ fileName : "SynthPlayer.hx", lineNumber : 160, className : "as.player.SynthPlayer", methodName : "loadSoundFontData"});
+			mconsole.Console.error("Could not load soundfont from serialized bytes: " + Std.string(e),null,{ fileName : "SynthPlayer.hx", lineNumber : 159, className : "as.player.SynthPlayer", methodName : "loadSoundFontData"});
 		}
 	}
 	,loadSoundFontUrl: function(url) {
 		if(this.state != as.player.SynthPlayerState.Stopped) return;
-		mconsole.Console.info("Start loading soundfont from url " + url,{ fileName : "SynthPlayer.hx", lineNumber : 132, className : "as.player.SynthPlayer", methodName : "loadSoundFontUrl"});
+		mconsole.Console.info("Start loading soundfont from url " + url,{ fileName : "SynthPlayer.hx", lineNumber : 131, className : "as.player.SynthPlayer", methodName : "loadSoundFontUrl"});
 		var loader = new as.util.UrlLoader();
 		loader.url = url;
 		loader.method = "GET";
@@ -2764,13 +2777,13 @@ as.player.SynthPlayer.prototype = {
 		try {
 			loader.load();
 		} catch( e ) {
-			mconsole.Console.error("Could not load soundfont from url: " + Std.string(e),null,{ fileName : "SynthPlayer.hx", lineNumber : 144, className : "as.player.SynthPlayer", methodName : "loadSoundFontUrl"});
+			mconsole.Console.error("Could not load soundfont from url: " + Std.string(e),null,{ fileName : "SynthPlayer.hx", lineNumber : 143, className : "as.player.SynthPlayer", methodName : "loadSoundFontUrl"});
 		}
 	}
 	,stop: function() {
 		if(this.state == as.player.SynthPlayerState.Stopped || !(this.isSoundFontLoaded && this.isMidiLoaded)) return;
 		if(mconsole.Console.hasConsole) mconsole.Console.callConsole("debug",["Stopping playback"]);
-		mconsole.Console.print(mconsole.LogLevel.debug,["Stopping playback"],{ fileName : "SynthPlayer.hx", lineNumber : 120, className : "as.player.SynthPlayer", methodName : "stop"});
+		mconsole.Console.print(mconsole.LogLevel.debug,["Stopping playback"],{ fileName : "SynthPlayer.hx", lineNumber : 119, className : "as.player.SynthPlayer", methodName : "stop"});
 		this._sequencer.stop();
 		this._synth.stop();
 		this._output.stop();
@@ -2784,7 +2797,7 @@ as.player.SynthPlayer.prototype = {
 	,pause: function() {
 		if(this.state != as.player.SynthPlayerState.Playing || !(this.isSoundFontLoaded && this.isMidiLoaded)) return;
 		if(mconsole.Console.hasConsole) mconsole.Console.callConsole("debug",["Pausing playback"]);
-		mconsole.Console.print(mconsole.LogLevel.debug,["Pausing playback"],{ fileName : "SynthPlayer.hx", lineNumber : 104, className : "as.player.SynthPlayer", methodName : "pause"});
+		mconsole.Console.print(mconsole.LogLevel.debug,["Pausing playback"],{ fileName : "SynthPlayer.hx", lineNumber : 103, className : "as.player.SynthPlayer", methodName : "pause"});
 		this._sequencer.pause();
 		this._output.pause();
 		this.state = as.player.SynthPlayerState.Paused;
@@ -2793,7 +2806,7 @@ as.player.SynthPlayer.prototype = {
 	,play: function() {
 		if(this.state == as.player.SynthPlayerState.Playing || !(this.isSoundFontLoaded && this.isMidiLoaded)) return;
 		if(mconsole.Console.hasConsole) mconsole.Console.callConsole("debug",["Starting playback"]);
-		mconsole.Console.print(mconsole.LogLevel.debug,["Starting playback"],{ fileName : "SynthPlayer.hx", lineNumber : 94, className : "as.player.SynthPlayer", methodName : "play"});
+		mconsole.Console.print(mconsole.LogLevel.debug,["Starting playback"],{ fileName : "SynthPlayer.hx", lineNumber : 93, className : "as.player.SynthPlayer", methodName : "play"});
 		this._sequencer.play();
 		this._output.play();
 		this.state = as.player.SynthPlayerState.Playing;
@@ -6335,7 +6348,6 @@ as.midi.MidiHelper.MinChannel = 0;
 as.midi.MidiHelper.MaxChannel = 15;
 as.midi.MidiHelper.DrumChannel = 9;
 as.platform.TypeUtils.IntMax = 2147483647;
-as.player.SynthPlayer.SampleRate = 44100;
 as.sf2.SFSampleLink.MonoSample = 1;
 as.sf2.SFSampleLink.RightSample = 2;
 as.sf2.SFSampleLink.LeftSample = 4;
@@ -6432,6 +6444,7 @@ as.synthesis.PanFormulaEnum.ZeroCenter = 2;
 as.synthesis.VoiceStealingMethod.Oldest = 0;
 as.synthesis.VoiceStealingMethod.Quietest = 1;
 as.util.SynthConstants.InterpolationMode = 1;
+as.util.SynthConstants.SampleRate = 44100;
 as.util.SynthConstants.TwoPi = 2.0 * Math.PI;
 as.util.SynthConstants.HalfPi = Math.PI / 2.0;
 as.util.SynthConstants.InverseSqrtOfTwo = 0.707106781186;

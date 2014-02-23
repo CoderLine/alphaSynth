@@ -21,11 +21,6 @@ import as.player.SynthPlayerState;
 interface IAlphaSynth
 {
     /**
-     * Is ready for play
-     */    
-    public function isReadyForPlay() : Bool;
-    
-    /**
      * Starts the playback if possible
      */    
     public function play() : Void;
@@ -80,24 +75,6 @@ interface IAlphaSynth
      * @param data a serialized haxe.io.Bytes 
      */
     public function loadMidiData(data:String) : Void;
-    
-    /**
-     * Returns the current player state
-     * @return the current player state
-     */
-    public function getState() : SynthPlayerState;
-    
-    /**
-     * Returns whether the soundfont was loaded and parsed
-     * @return true if the soundfont was loaded and parsed
-     */    
-    public function isSoundFontLoaded() : Bool;
-    
-    /**
-     * Returns whether the midi data was loaded and parsed
-     * @return true if the midi data was loaded and parsed
-     */    
-    public function isMidiLoaded() : Bool;
     
     /**
      * Sets the logging level which alphaTab should use.

@@ -29,7 +29,7 @@ import haxe.remoting.ExternalConnection;
  * This main class for the flash target provives
  * a full AlphaSynth synthesizer.
  */
-class AlphaSynthFlash implements IAlphaSynth implements ISynthPlayerListener
+class AlphaSynthFlash implements IAlphaSynthSync implements ISynthPlayerListener
 {
     public var AlphaSynthId = "AlphaSynth";
     public static var instance:AlphaSynthFlash;

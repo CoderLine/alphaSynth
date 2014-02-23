@@ -30,15 +30,9 @@ import js.html.Element;
  * This main class for the JavaScript target acts as 
  * API to control the AlphaSynthFlash Synthesizer.
  */
-@:expose("as.AlphaSynth")
-class AlphaSynthFlashApi implements IAlphaSynth 
+class AlphaSynthFlashApi implements IAlphaSynthAsync 
 {
     public var AlphaSynthId = "AlphaSynth";
-    public static var instance:AlphaSynthFlashApi;
-    public static function main()
-    {
-        instance = new AlphaSynthFlashApi();
-    }
     
     private var _flash:ExternalConnection;
     private var _events:JQuery;
@@ -57,9 +51,10 @@ class AlphaSynthFlashApi implements IAlphaSynth
         _events = new JQuery('<span></span>');
     }
     
-    public function isReadyForPlay() : Bool
+    public function isReadyForPlay() : Void
     {
-        return _flash.FlashAlphaSynth.isReadyForPlay.call([]);
+        var v = _flash.FlashAlphaSynth.isReadyForPlay.call([]);
+        untyped __js__("this._events.trigger('isReadyForPlay', [v])");
     }
     
     public function play() : Void
@@ -118,19 +113,22 @@ class AlphaSynthFlashApi implements IAlphaSynth
         _flash.FlashAlphaSynth.loadMidiData.call([data]);
     }
     
-    public function getState() : SynthPlayerState
+    public function getState() : Void
     {
-        return _flash.FlashAlphaSynth.getState.call([]);
+        var v = _flash.FlashAlphaSynth.getState.call([]);
+        untyped __js__("this._events.trigger('getState', [v])");
     }
     
-    public function isSoundFontLoaded() : Bool
+    public function isSoundFontLoaded() : Void
     {
-        return _flash.FlashAlphaSynth.isSoundFontLoaded.call([]);
+        var v = _flash.FlashAlphaSynth.isSoundFontLoaded.call([]);
+        untyped __js__("this._events.trigger('isSoundFontLoaded', [v])");
     }
     
-    public function isMidiLoaded() : Bool
+    public function isMidiLoaded() : Void
     {
-        return _flash.FlashAlphaSynth.isMidiLoaded.call([]);
+        var v = _flash.FlashAlphaSynth.isMidiLoaded.call([]);
+        untyped __js__("this._events.trigger('isMidiLoaded', [v])");
     }
     
     public function setLogLevel(level:Int) : Void
@@ -200,10 +198,10 @@ class AlphaSynthFlashApi implements IAlphaSynth
             
             // initialize swf
             untyped swf.embedSWF(
-                asRoot + "alphaSynthFlashOnly.swf", 
+                asRoot + "alphaSynthFull.swf", 
                 "alphaSynthContainer", "1px", "1px", "11.4.0", 
                 swfObjectRoot + "expressInstall.swf", 
-                {}, {}, {id:"AlphaSynth"}
+                {}, {allowScriptAccess : "always"}, {id:"AlphaSynth"}
             );
             return true;
         }    

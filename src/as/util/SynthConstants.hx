@@ -22,6 +22,8 @@ class SynthConstants
 {
     public static var InterpolationMode = InterpolationEnum.Linear;
 
+    public static inline var SampleRate = 44100;
+
     public static var TwoPi = 2.0 * Math.PI;      
     public static var HalfPi = Math.PI / 2.0;     
     public static inline var InverseSqrtOfTwo = 0.707106781186;

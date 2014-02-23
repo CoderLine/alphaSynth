@@ -16,23 +16,18 @@
  * License along with this library.
  */
 package as;
+
 import as.ds.FixedArray.FixedArray;
 import as.platform.Types.Float32;
-import as.player.FlashOutput;
-import as.player.ISynthOutput;
-import as.player.SynthPlayerState;
-import haxe.remoting.ExternalConnection;
-import haxe.io.Bytes;
+import as.player.FlashOutputDevice;
 import haxe.remoting.Context;
 import haxe.remoting.ExternalConnection;
-import haxe.Serializer;
-import haxe.Unserializer;
 
 /**
  * This main class for the flash target implements a 
  * flash sample player.
  */
-class AlphaSynthFlashPlayer
+class AlphaSynthFlashPlayer 
 {
     public var AlphaSynthId = "AlphaSynth";
     public static var instance:AlphaSynthFlashPlayer;

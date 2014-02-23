@@ -1,5 +1,11 @@
 (function () { "use strict";
 var $hxClasses = {},$estr = function() { return js.Boot.__string_rec(this,''); };
+function $extend(from, fields) {
+	function inherit() {}; inherit.prototype = from; var proto = new inherit();
+	for (var name in fields) proto[name] = fields[name];
+	if( fields.toString !== Object.prototype.toString ) proto.toString = fields.toString;
+	return proto;
+}
 var HxOverrides = function() { }
 $hxClasses["HxOverrides"] = HxOverrides;
 HxOverrides.__name__ = ["HxOverrides"];
@@ -47,6 +53,18 @@ HxOverrides.substr = function(s,pos,len) {
 	} else if(len < 0) len = s.length + len - pos;
 	return s.substr(pos,len);
 }
+HxOverrides.remove = function(a,obj) {
+	var i = 0;
+	var l = a.length;
+	while(i < l) {
+		if(a[i] == obj) {
+			a.splice(i,1);
+			return true;
+		}
+		i++;
+	}
+	return false;
+}
 HxOverrides.iter = function(a) {
 	return { cur : 0, arr : a, hasNext : function() {
 		return this.cur < this.arr.length;
@@ -81,6 +99,9 @@ List.prototype = {
 var IMap = function() { }
 $hxClasses["IMap"] = IMap;
 IMap.__name__ = ["IMap"];
+IMap.prototype = {
+	__class__: IMap
+}
 var Reflect = function() { }
 $hxClasses["Reflect"] = Reflect;
 Reflect.__name__ = ["Reflect"];
@@ -144,6 +165,11 @@ StringTools.endsWith = function(s,end) {
 	var slen = s.length;
 	return slen >= elen && HxOverrides.substr(s,slen - elen,elen) == end;
 }
+StringTools.lpad = function(s,c,l) {
+	if(c.length <= 0) return s;
+	while(s.length < l) s = c + s;
+	return s;
+}
 var ValueType = $hxClasses["ValueType"] = { __ename__ : ["ValueType"], __constructs__ : ["TNull","TInt","TFloat","TBool","TObject","TFunction","TClass","TEnum","TUnknown"] }
 ValueType.TNull = ["TNull",0];
 ValueType.TNull.toString = $estr;
@@ -171,6 +197,10 @@ ValueType.TUnknown.__enum__ = ValueType;
 var Type = function() { }
 $hxClasses["Type"] = Type;
 Type.__name__ = ["Type"];
+Type.getClass = function(o) {
+	if(o == null) return null;
+	return o.__class__;
+}
 Type.getClassName = function(c) {
 	var a = c.__name__;
 	return a.join(".");
@@ -233,7 +263,154 @@ Type["typeof"] = function(v) {
 		return ValueType.TUnknown;
 	}
 }
+Type.enumConstructor = function(e) {
+	return e[0];
+}
+Type.enumParameters = function(e) {
+	return e.slice(2);
+}
+var XmlType = $hxClasses["XmlType"] = { __ename__ : ["XmlType"], __constructs__ : [] }
+var Xml = function() { }
+$hxClasses["Xml"] = Xml;
+Xml.__name__ = ["Xml"];
 var as = {}
+as.IAlphaSynth = function() { }
+$hxClasses["as.IAlphaSynth"] = as.IAlphaSynth;
+as.IAlphaSynth.__name__ = ["as","IAlphaSynth"];
+as.IAlphaSynth.prototype = {
+	__class__: as.IAlphaSynth
+}
+as.IAlphaSynthAsync = function() { }
+$hxClasses["as.IAlphaSynthAsync"] = as.IAlphaSynthAsync;
+as.IAlphaSynthAsync.__name__ = ["as","IAlphaSynthAsync"];
+as.IAlphaSynthAsync.__interfaces__ = [as.IAlphaSynth];
+as.IAlphaSynthAsync.prototype = {
+	__class__: as.IAlphaSynthAsync
+}
+as.AlphaSynthFlashApi = function() {
+	this.AlphaSynthId = "AlphaSynth";
+	this.ready = false;
+	var ctx = new haxe.remoting.Context();
+	ctx.addObject("JsAlphaSynth",this);
+	this._flash = haxe.remoting.ExternalConnection.flashConnect("default",this.AlphaSynthId,ctx);
+	this._events = new js.JQuery("<span></span>");
+};
+$hxClasses["as.AlphaSynthFlashApi"] = as.AlphaSynthFlashApi;
+as.AlphaSynthFlashApi.__name__ = ["as","AlphaSynthFlashApi"];
+as.AlphaSynthFlashApi.__interfaces__ = [as.IAlphaSynthAsync];
+as.AlphaSynthFlashApi.init = function(asRoot,swfObjectRoot) {
+	if(swfObjectRoot == null) swfObjectRoot = "";
+	var swf = swfobject;
+	if(asRoot != "" && !StringTools.endsWith(asRoot,"/")) asRoot += "/";
+	if(swfObjectRoot != "" && !StringTools.endsWith(swfObjectRoot,"/")) swfObjectRoot += "/";
+	if(swf) {
+		var alphaSynth = js.Browser.document.getElementById("alphaSynthContainer");
+		if(alphaSynth != null) {
+			haxe.Log.trace("Skipped initialization, existing alphaSynthContainer found",{ fileName : "AlphaSynthFlashApi.hx", lineNumber : 190, className : "as.AlphaSynthFlashApi", methodName : "init"});
+			return false;
+		}
+		alphaSynth = js.Browser.document.createElement("div");
+		alphaSynth.setAttribute("id","alphaSynthContainer");
+		js.Browser.document.body.appendChild(alphaSynth);
+		swf.embedSWF(asRoot + "alphaSynthFull.swf","alphaSynthContainer","1px","1px","11.4.0",swfObjectRoot + "expressInstall.swf",{ },{ allowScriptAccess : "always"},{ id : "AlphaSynth"});
+		return true;
+	} else {
+		haxe.Log.trace("Error initializing alphaSynth: swfobject not found",{ fileName : "AlphaSynthFlashApi.hx", lineNumber : 211, className : "as.AlphaSynthFlashApi", methodName : "init"});
+		return false;
+	}
+}
+as.AlphaSynthFlashApi.prototype = {
+	trigger: function(event) {
+		var args = Array.prototype.slice.call(arguments);
+		switch(event) {
+		case "ready":
+			this.ready = true;
+			break;
+		case "log":
+			this.log(args[1],args[2]);
+			break;
+		}
+		var events = this._events;
+		events.trigger(event, args.splice(1));
+	}
+	,log: function(level,message) {
+		var console = window.console;
+		switch(level) {
+		case 0:
+			console.log(message);
+			break;
+		case 1:
+			console.debug(message);
+			break;
+		case 2:
+			console.info(message);
+			break;
+		case 3:
+			console.warn(message);
+			break;
+		case 4:
+			console.error(message);
+			break;
+		}
+	}
+	,on: function(events,fn) {
+		this._events.on(events,fn);
+	}
+	,setLogLevel: function(level) {
+		this._flash.resolve("FlashAlphaSynth").resolve("setLogLevel").call([level]);
+	}
+	,isMidiLoaded: function() {
+		var v = this._flash.resolve("FlashAlphaSynth").resolve("isMidiLoaded").call([]);
+		this._events.trigger('isMidiLoaded', [v]);
+	}
+	,isSoundFontLoaded: function() {
+		var v = this._flash.resolve("FlashAlphaSynth").resolve("isSoundFontLoaded").call([]);
+		this._events.trigger('isSoundFontLoaded', [v]);
+	}
+	,getState: function() {
+		var v = this._flash.resolve("FlashAlphaSynth").resolve("getState").call([]);
+		this._events.trigger('getState', [v]);
+	}
+	,loadMidiData: function(data) {
+		this._flash.resolve("FlashAlphaSynth").resolve("loadMidiData").call([data]);
+	}
+	,loadMidiUrl: function(url) {
+		this._flash.resolve("FlashAlphaSynth").resolve("loadMidiUrl").call([url]);
+	}
+	,loadMidiBytes: function(data) {
+		var data1 = haxe.Serializer.run(haxe.io.Bytes.ofData(data));
+		this.loadMidiData(data1);
+	}
+	,loadSoundFontData: function(data) {
+		this._flash.resolve("FlashAlphaSynth").resolve("loadSoundFontData").call([data]);
+	}
+	,loadSoundFontUrl: function(url) {
+		this._flash.resolve("FlashAlphaSynth").resolve("loadSoundFontUrl").call([url]);
+	}
+	,setPositionTime: function(millis) {
+		this._flash.resolve("FlashAlphaSynth").resolve("setPositionTime").call([millis]);
+	}
+	,setPositionTick: function(tick) {
+		this._flash.resolve("FlashAlphaSynth").resolve("setPositionTick").call([tick]);
+	}
+	,stop: function() {
+		this._flash.resolve("FlashAlphaSynth").resolve("stop").call([]);
+	}
+	,playPause: function() {
+		this._flash.resolve("FlashAlphaSynth").resolve("playPause").call([]);
+	}
+	,pause: function() {
+		this._flash.resolve("FlashAlphaSynth").resolve("pause").call([]);
+	}
+	,play: function() {
+		this._flash.resolve("FlashAlphaSynth").resolve("play").call([]);
+	}
+	,isReadyForPlay: function() {
+		var v = this._flash.resolve("FlashAlphaSynth").resolve("isReadyForPlay").call([]);
+		this._events.trigger('isReadyForPlay', [v]);
+	}
+	,__class__: as.AlphaSynthFlashApi
+}
 as.AlphaSynthFlashPlayerApi = function() {
 	this.ready = false;
 	var ctx = new haxe.remoting.Context();
@@ -242,11 +419,8 @@ as.AlphaSynthFlashPlayerApi = function() {
 	this._events = new js.JQuery("<span></span>");
 };
 $hxClasses["as.AlphaSynthFlashPlayerApi"] = as.AlphaSynthFlashPlayerApi;
-$hxExpose(as.AlphaSynthFlashPlayerApi, "as.AlphaSynth");
 as.AlphaSynthFlashPlayerApi.__name__ = ["as","AlphaSynthFlashPlayerApi"];
-as.AlphaSynthFlashPlayerApi.main = function() {
-	as.AlphaSynthFlashPlayerApi.instance = new as.AlphaSynthFlashPlayerApi();
-}
+as.AlphaSynthFlashPlayerApi.__interfaces__ = [as.IAlphaSynthAsync];
 as.AlphaSynthFlashPlayerApi.init = function(asRoot,swfObjectRoot) {
 	if(swfObjectRoot == null) swfObjectRoot = "";
 	var swf = swfobject;
@@ -255,17 +429,17 @@ as.AlphaSynthFlashPlayerApi.init = function(asRoot,swfObjectRoot) {
 	if(swf) {
 		var alphaSynth = js.Browser.document.getElementById("alphaSynthContainer");
 		if(alphaSynth != null) {
-			console.log("Skipped initialization, existing alphaSynthContainer found");
+			haxe.Log.trace("Skipped initialization, existing alphaSynthContainer found",{ fileName : "AlphaSynthFlashPlayerApi.hx", lineNumber : 242, className : "as.AlphaSynthFlashPlayerApi", methodName : "init"});
 			return false;
 		}
 		alphaSynth = js.Browser.document.createElement("div");
 		alphaSynth.setAttribute("id","alphaSynthContainer");
 		js.Browser.document.body.appendChild(alphaSynth);
-		js.Browser.window.AlphaSynthWorker = new Worker(asRoot + "alphaSynthJsWorker.js");
-		swf.embedSWF(asRoot + "alphaSynthJsWorker.swf","alphaSynthContainer","1px","1px","11.4.0",swfObjectRoot + "expressInstall.swf",{ },{ },{ id : "AlphaSynth"});
+		js.Browser.window.AlphaSynthWorker = new Worker(asRoot + "alphaSynthWorker.js");
+		swf.embedSWF(asRoot + "alphaSynthPlayer.swf","alphaSynthContainer","1px","1px","11.0.0",swfObjectRoot + "expressInstall.swf",{ },{ allowScriptAccess : "always"},{ id : "AlphaSynth"});
 		return true;
 	} else {
-		console.log("Error initializing alphaSynth: swfobject not found");
+		haxe.Log.trace("Error initializing alphaSynth: swfobject not found",{ fileName : "AlphaSynthFlashPlayerApi.hx", lineNumber : 268, className : "as.AlphaSynthFlashPlayerApi", methodName : "init"});
 		return false;
 	}
 }
@@ -312,12 +486,16 @@ as.AlphaSynthFlashPlayerApi.prototype = {
 		var data = e.data;
 		switch(data.cmd) {
 		case "isReadyForPlay":
+			this._events.trigger(data.cmd, [data.value]);
 			break;
 		case "getState":
+			this._events.trigger(data.cmd, [data.value]);
 			break;
 		case "isSoundFontLoaded":
+			this._events.trigger(data.cmd, [data.value]);
 			break;
 		case "isMidiLoaded":
+			this._events.trigger(data.cmd, [data.value]);
 			break;
 		case "positionChanged":
 			this._events.trigger(data.cmd, [data.currentTime, data.endTime, data.currentTick, data.endTick]);
@@ -445,6 +623,130 @@ as.AlphaSynthFlashPlayerApi.prototype = {
 	}
 	,__class__: as.AlphaSynthFlashPlayerApi
 }
+as.AlphaSynthJs = function() {
+	this.AlphaSynthId = "AlphaSynth";
+};
+$hxClasses["as.AlphaSynthJs"] = as.AlphaSynthJs;
+$hxExpose(as.AlphaSynthJs, "as.AlphaSynth");
+as.AlphaSynthJs.__name__ = ["as","AlphaSynthJs"];
+as.AlphaSynthJs.__interfaces__ = [as.IAlphaSynthAsync];
+as.AlphaSynthJs.main = function() {
+	mconsole.Console.hasConsole = false;
+	mconsole.Console.start();
+	mconsole.Console.removePrinter(mconsole.Console.defaultPrinter);
+	mconsole.Console.addPrinter(as.AlphaSynthJs._printer = new as.log.LevelPrinter(as.AlphaSynthJs.log));
+	as.AlphaSynthJs.instance = new as.AlphaSynthJs();
+}
+as.AlphaSynthJs.log = function(level,message) {
+	var console = window.console;
+	switch(level) {
+	case 0:
+		console.log(message);
+		break;
+	case 1:
+		console.debug(message);
+		break;
+	case 2:
+		console.info(message);
+		break;
+	case 3:
+		console.warn(message);
+		break;
+	case 4:
+		console.error(message);
+		break;
+	}
+}
+as.AlphaSynthJs.init = function(asRoot,swfObjectRoot) {
+	if(swfObjectRoot == null) swfObjectRoot = "";
+	var swf = swfobject;
+	var supportsWebWorkers = !!window.Worker;
+	var supportsFlashWorkers = swf.hasFlashPlayerVersion("11.4");
+	if(supportsWebWorkers) {
+		if(mconsole.Console.hasConsole) mconsole.Console.callConsole("debug",["Will use webworkers for synthesizing"]);
+		mconsole.Console.print(mconsole.LogLevel.debug,["Will use webworkers for synthesizing"],{ fileName : "AlphaSynthJs.hx", lineNumber : 170, className : "as.AlphaSynthJs", methodName : "init"});
+		var result = as.AlphaSynthFlashPlayerApi.init(asRoot,swfObjectRoot);
+		if(result) as.AlphaSynthJs.instance.realInstance = new as.AlphaSynthFlashPlayerApi();
+		return result;
+	} else if(supportsFlashWorkers) {
+		if(mconsole.Console.hasConsole) mconsole.Console.callConsole("debug",["Will use flash for synthesizing"]);
+		mconsole.Console.print(mconsole.LogLevel.debug,["Will use flash for synthesizing"],{ fileName : "AlphaSynthJs.hx", lineNumber : 180, className : "as.AlphaSynthJs", methodName : "init"});
+		var result = as.AlphaSynthFlashApi.init(asRoot,swfObjectRoot);
+		if(result) as.AlphaSynthJs.instance.realInstance = new as.AlphaSynthFlashApi();
+		return result;
+	} else {
+		mconsole.Console.error("Incompatible browser",null,{ fileName : "AlphaSynthJs.hx", lineNumber : 190, className : "as.AlphaSynthJs", methodName : "init"});
+		return false;
+	}
+}
+as.AlphaSynthJs.prototype = {
+	on: function(events,fn) {
+		if(this.realInstance == null) return;
+		this.realInstance.on(events,fn);
+	}
+	,setLogLevel: function(level) {
+		as.AlphaSynthJs._printer.level = level;
+		if(this.realInstance == null) return;
+		this.realInstance.setLogLevel(level);
+	}
+	,loadMidiData: function(data) {
+		if(this.realInstance == null) return;
+		this.realInstance.loadMidiData(data);
+	}
+	,loadMidiUrl: function(url) {
+		if(this.realInstance == null) return;
+		this.realInstance.loadMidiUrl(url);
+	}
+	,loadSoundFontData: function(data) {
+		if(this.realInstance == null) return;
+		this.realInstance.loadSoundFontData(data);
+	}
+	,loadSoundFontUrl: function(url) {
+		if(this.realInstance == null) return;
+		this.realInstance.loadSoundFontUrl(url);
+	}
+	,setPositionTime: function(millis) {
+		if(this.realInstance == null) return;
+		this.realInstance.setPositionTime(millis);
+	}
+	,setPositionTick: function(tick) {
+		if(this.realInstance == null) return;
+		this.realInstance.setPositionTick(tick);
+	}
+	,stop: function() {
+		if(this.realInstance == null) return;
+		this.realInstance.stop();
+	}
+	,playPause: function() {
+		if(this.realInstance == null) return;
+		this.realInstance.playPause();
+	}
+	,pause: function() {
+		if(this.realInstance == null) return;
+		this.realInstance.pause();
+	}
+	,play: function() {
+		if(this.realInstance == null) return;
+		this.realInstance.play();
+	}
+	,isMidiLoaded: function() {
+		if(this.realInstance == null) return;
+		this.realInstance.isMidiLoaded();
+	}
+	,isSoundFontLoaded: function() {
+		if(this.realInstance == null) return;
+		this.realInstance.isSoundFontLoaded();
+	}
+	,getState: function() {
+		if(this.realInstance == null) return;
+		this.realInstance.getState();
+	}
+	,isReadyForPlay: function() {
+		if(this.realInstance == null) return;
+		this.realInstance.isReadyForPlay();
+	}
+	,__class__: as.AlphaSynthJs
+}
 as.ds = {}
 as.ds._FixedArray = {}
 as.ds._FixedArray.FixedArray_Impl_ = function() { }
@@ -504,6 +806,65 @@ as.ds._FixedArray.FixedArray_Impl_.unserialize = function(data) {
 		v[i] = val;
 	}
 	return v;
+}
+var mconsole = {}
+mconsole.Printer = function() { }
+$hxClasses["mconsole.Printer"] = mconsole.Printer;
+mconsole.Printer.__name__ = ["mconsole","Printer"];
+mconsole.Printer.prototype = {
+	__class__: mconsole.Printer
+}
+as.log = {}
+as.log.LevelPrinter = function(target) {
+	this._target = target;
+	this.level = as.log.LevelPrinter.logLevelToInt(mconsole.LogLevel.log);
+};
+$hxClasses["as.log.LevelPrinter"] = as.log.LevelPrinter;
+as.log.LevelPrinter.__name__ = ["as","log","LevelPrinter"];
+as.log.LevelPrinter.__interfaces__ = [mconsole.Printer];
+as.log.LevelPrinter.logLevelToInt = function(level) {
+	switch( (level)[1] ) {
+	case 4:
+		return 4;
+	case 3:
+		return 3;
+	case 1:
+		return 2;
+	case 2:
+		return 1;
+	case 0:
+		return 0;
+	}
+}
+as.log.LevelPrinter.prototype = {
+	printLine: function(level,message) {
+		this._target(level,message);
+	}
+	,print: function(level,params,indent,pos) {
+		var intLevel = as.log.LevelPrinter.logLevelToInt(level);
+		if(intLevel < this.level) return;
+		params = params.slice();
+		var _g1 = 0, _g = params.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			params[i] = Std.string(params[i]);
+		}
+		var message = params.join(", ");
+		var nextPosition = "@ " + pos.className + "." + pos.methodName;
+		var nextLineNumber = Std.string(pos.lineNumber);
+		var lineColumn = "";
+		var emptyLineColumn = "";
+		if(nextPosition != this._position) this._target(intLevel,nextPosition);
+		emptyLineColumn = StringTools.lpad(""," ",5);
+		if(nextPosition != this._position || nextLineNumber != this._lineNumber) lineColumn = StringTools.lpad("L" + nextLineNumber," ",6) + ": "; else lineColumn = emptyLineColumn;
+		this._position = nextPosition;
+		this._lineNumber = nextLineNumber;
+		var indent1 = StringTools.lpad(""," ",indent * 2);
+		message = lineColumn + indent1 + message;
+		message = message.split("\n").join("\n" + emptyLineColumn + indent1);
+		this._target(intLevel,message);
+	}
+	,__class__: as.log.LevelPrinter
 }
 as.platform = {}
 as.platform.TypeUtils = function() { }
@@ -570,6 +931,63 @@ as.player.SynthPlayerState.Paused = ["Paused",2];
 as.player.SynthPlayerState.Paused.toString = $estr;
 as.player.SynthPlayerState.Paused.__enum__ = as.player.SynthPlayerState;
 var haxe = {}
+haxe.StackItem = $hxClasses["haxe.StackItem"] = { __ename__ : ["haxe","StackItem"], __constructs__ : ["CFunction","Module","FilePos","Method","Lambda"] }
+haxe.StackItem.CFunction = ["CFunction",0];
+haxe.StackItem.CFunction.toString = $estr;
+haxe.StackItem.CFunction.__enum__ = haxe.StackItem;
+haxe.StackItem.Module = function(m) { var $x = ["Module",1,m]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; }
+haxe.StackItem.FilePos = function(s,file,line) { var $x = ["FilePos",2,s,file,line]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; }
+haxe.StackItem.Method = function(classname,method) { var $x = ["Method",3,classname,method]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; }
+haxe.StackItem.Lambda = function(v) { var $x = ["Lambda",4,v]; $x.__enum__ = haxe.StackItem; $x.toString = $estr; return $x; }
+haxe.CallStack = function() { }
+$hxClasses["haxe.CallStack"] = haxe.CallStack;
+haxe.CallStack.__name__ = ["haxe","CallStack"];
+haxe.CallStack.callStack = function() {
+	var oldValue = Error.prepareStackTrace;
+	Error.prepareStackTrace = function(error,callsites) {
+		var stack = [];
+		var _g = 0;
+		while(_g < callsites.length) {
+			var site = callsites[_g];
+			++_g;
+			var method = null;
+			var fullName = site.getFunctionName();
+			if(fullName != null) {
+				var idx = fullName.lastIndexOf(".");
+				if(idx >= 0) {
+					var className = HxOverrides.substr(fullName,0,idx);
+					var methodName = HxOverrides.substr(fullName,idx + 1,null);
+					method = haxe.StackItem.Method(className,methodName);
+				}
+			}
+			stack.push(haxe.StackItem.FilePos(method,site.getFileName(),site.getLineNumber()));
+		}
+		return stack;
+	};
+	var a = haxe.CallStack.makeStack(new Error().stack);
+	a.shift();
+	Error.prepareStackTrace = oldValue;
+	return a;
+}
+haxe.CallStack.makeStack = function(s) {
+	if(typeof(s) == "string") {
+		var stack = s.split("\n");
+		var m = [];
+		var _g = 0;
+		while(_g < stack.length) {
+			var line = stack[_g];
+			++_g;
+			m.push(haxe.StackItem.Module(line));
+		}
+		return m;
+	} else return s;
+}
+haxe.Log = function() { }
+$hxClasses["haxe.Log"] = haxe.Log;
+haxe.Log.__name__ = ["haxe","Log"];
+haxe.Log.trace = function(v,infos) {
+	js.Boot.__trace(v,infos);
+}
 haxe.Serializer = function() {
 	this.buf = new StringBuf();
 	this.cache = new Array();
@@ -580,6 +998,11 @@ haxe.Serializer = function() {
 };
 $hxClasses["haxe.Serializer"] = haxe.Serializer;
 haxe.Serializer.__name__ = ["haxe","Serializer"];
+haxe.Serializer.run = function(v) {
+	var s = new haxe.Serializer();
+	s.serialize(v);
+	return s.toString();
+}
 haxe.Serializer.prototype = {
 	serializeException: function(e) {
 		this.buf.b += "x";
@@ -818,6 +1241,12 @@ haxe.Serializer.prototype = {
 		return this.buf.b;
 	}
 	,__class__: haxe.Serializer
+}
+haxe.Timer = function() { }
+$hxClasses["haxe.Timer"] = haxe.Timer;
+haxe.Timer.__name__ = ["haxe","Timer"];
+haxe.Timer.stamp = function() {
+	return new Date().getTime() / 1000;
 }
 haxe.Unserializer = function(buf) {
 	this.buf = buf;
@@ -1117,6 +1546,9 @@ haxe.ds.ObjectMap.prototype = {
 		}
 		return HxOverrides.iter(a);
 	}
+	,get: function(key) {
+		return this.h[key.__id__];
+	}
 	,set: function(key,value) {
 		var id = key.__id__ != null?key.__id__:key.__id__ = ++haxe.ds.ObjectMap.count;
 		this.h[id] = value;
@@ -1137,6 +1569,15 @@ haxe.ds.StringMap.prototype = {
 		if(this.h.hasOwnProperty(key)) a.push(key.substr(1));
 		}
 		return HxOverrides.iter(a);
+	}
+	,remove: function(key) {
+		key = "$" + key;
+		if(!this.h.hasOwnProperty(key)) return false;
+		delete(this.h[key]);
+		return true;
+	}
+	,exists: function(key) {
+		return this.h.hasOwnProperty("$" + key);
 	}
 	,get: function(key) {
 		return this.h["$" + key];
@@ -1172,6 +1613,9 @@ haxe.io.Bytes.alloc = function(length) {
 		a.push(0);
 	}
 	return new haxe.io.Bytes(length,a);
+}
+haxe.io.Bytes.ofData = function(b) {
+	return new haxe.io.Bytes(b.length,b);
 }
 haxe.io.Bytes.prototype = {
 	__class__: haxe.io.Bytes
@@ -1279,6 +1723,23 @@ var js = {}
 js.Boot = function() { }
 $hxClasses["js.Boot"] = js.Boot;
 js.Boot.__name__ = ["js","Boot"];
+js.Boot.__unhtml = function(s) {
+	return s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
+}
+js.Boot.__trace = function(v,i) {
+	var msg = i != null?i.fileName + ":" + i.lineNumber + ": ":"";
+	msg += js.Boot.__string_rec(v,"");
+	if(i != null && i.customParams != null) {
+		var _g = 0, _g1 = i.customParams;
+		while(_g < _g1.length) {
+			var v1 = _g1[_g];
+			++_g;
+			msg += "," + js.Boot.__string_rec(v1,"");
+		}
+	}
+	var d;
+	if(typeof(document) != "undefined" && (d = document.getElementById("haxe:trace")) != null) d.innerHTML += js.Boot.__unhtml(msg) + "<br/>"; else if(typeof(console) != "undefined" && console.log != null) console.log(msg);
+}
 js.Boot.__string_rec = function(o,s) {
 	if(o == null) return "null";
 	if(s.length >= 5) return "<...>";
@@ -1390,9 +1851,427 @@ js.Boot.__instanceof = function(o,cl) {
 js.Browser = function() { }
 $hxClasses["js.Browser"] = js.Browser;
 js.Browser.__name__ = ["js","Browser"];
+mconsole.PrinterBase = function() {
+	this.printPosition = true;
+	this.printLineNumbers = true;
+};
+$hxClasses["mconsole.PrinterBase"] = mconsole.PrinterBase;
+mconsole.PrinterBase.__name__ = ["mconsole","PrinterBase"];
+mconsole.PrinterBase.prototype = {
+	printLine: function(color,line,pos) {
+		throw "method not implemented in ConsolePrinterBase";
+	}
+	,print: function(level,params,indent,pos) {
+		params = params.slice();
+		var _g1 = 0, _g = params.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			params[i] = Std.string(params[i]);
+		}
+		var message = params.join(", ");
+		var nextPosition = "@ " + pos.className + "." + pos.methodName;
+		var nextLineNumber = Std.string(pos.lineNumber);
+		var lineColumn = "";
+		var emptyLineColumn = "";
+		if(this.printPosition) {
+			if(nextPosition != this.position) this.printLine(mconsole.ConsoleColor.none,nextPosition,pos);
+		}
+		if(this.printLineNumbers) {
+			emptyLineColumn = StringTools.lpad(""," ",5);
+			if(nextPosition != this.position || nextLineNumber != this.lineNumber) lineColumn = StringTools.lpad(nextLineNumber," ",4) + " "; else lineColumn = emptyLineColumn;
+		}
+		this.position = nextPosition;
+		this.lineNumber = nextLineNumber;
+		var color = (function($this) {
+			var $r;
+			switch( (level)[1] ) {
+			case 0:
+				$r = mconsole.ConsoleColor.white;
+				break;
+			case 1:
+				$r = mconsole.ConsoleColor.blue;
+				break;
+			case 2:
+				$r = mconsole.ConsoleColor.green;
+				break;
+			case 3:
+				$r = mconsole.ConsoleColor.yellow;
+				break;
+			case 4:
+				$r = mconsole.ConsoleColor.red;
+				break;
+			}
+			return $r;
+		}(this));
+		var indent1 = StringTools.lpad(""," ",indent * 2);
+		message = lineColumn + indent1 + message;
+		message = message.split("\n").join("\n" + emptyLineColumn + indent1);
+		this.printLine(color,message,pos);
+	}
+	,__class__: mconsole.PrinterBase
+}
+mconsole.ConsoleView = function() {
+	mconsole.PrinterBase.call(this);
+	this.atBottom = true;
+	this.projectHome = "D:\\Dev\\AlphaTab\\alphaSynth/";
+	var document = js.Browser.document;
+	this.element = document.createElement("pre");
+	this.element.id = "console";
+	var style = document.createElement("style");
+	this.element.appendChild(style);
+	var rules = document.createTextNode("#console {\n\tfont-family:monospace;\n\tbackground-color:#002B36;\n\tbackground-color:rgba(0%,16.9%,21.2%,0.95);\n\tpadding:8px;\n\theight:600px;\n\tmax-height:600px;\n\toverflow-y:scroll;\n\tposition:absolute;\n\tleft:0px;\n\ttop:0px;\n\tright:0px;\n\tmargin:0px;\n\tz-index:10000;\n}\n#console a { text-decoration:none; }\n#console a:hover div { background-color:#063642 }\n#console a div span { display:none; float:right; color:white; }\n#console a:hover div span { display:block; }");
+	style.type = "text/css";
+	if(style.styleSheet) style.styleSheet.cssText = rules.nodeValue; else style.appendChild(rules);
+	var me = this;
+	this.element.onscroll = function(e) {
+		me.updateScroll();
+	};
+};
+$hxClasses["mconsole.ConsoleView"] = mconsole.ConsoleView;
+mconsole.ConsoleView.__name__ = ["mconsole","ConsoleView"];
+mconsole.ConsoleView.__interfaces__ = [mconsole.Printer];
+mconsole.ConsoleView.__super__ = mconsole.PrinterBase;
+mconsole.ConsoleView.prototype = $extend(mconsole.PrinterBase.prototype,{
+	remove: function() {
+		js.Browser.document.body.removeChild(this.element);
+	}
+	,attach: function() {
+		js.Browser.document.body.appendChild(this.element);
+	}
+	,printLine: function(color,line,pos) {
+		var style = (function($this) {
+			var $r;
+			switch( (color)[1] ) {
+			case 0:
+				$r = "#839496";
+				break;
+			case 1:
+				$r = "#ffffff";
+				break;
+			case 2:
+				$r = "#248bd2";
+				break;
+			case 3:
+				$r = "#859900";
+				break;
+			case 4:
+				$r = "#b58900";
+				break;
+			case 5:
+				$r = "#dc322f";
+				break;
+			}
+			return $r;
+		}(this));
+		var file = pos.fileName + ":" + pos.lineNumber;
+		var fileName = pos.className.split(".").join("/") + ".hx";
+		var link = "";
+		this.element.innerHTML = this.element.innerHTML + "<a" + link + "><div style='color:" + style + "'>" + line + "<span>" + file + "</span></div></a>";
+		if(this.atBottom) this.element.scrollTop = this.element.scrollHeight;
+	}
+	,updateScroll: function() {
+		this.atBottom = this.element.scrollTop - (this.element.scrollHeight - this.element.clientHeight) == 0;
+	}
+	,__class__: mconsole.ConsoleView
+});
+mconsole.Console = function() { }
+$hxClasses["mconsole.Console"] = mconsole.Console;
+mconsole.Console.__name__ = ["mconsole","Console"];
+mconsole.Console.start = function() {
+	if(mconsole.Console.running) return;
+	mconsole.Console.running = true;
+	mconsole.Console.previousTrace = haxe.Log.trace;
+	haxe.Log.trace = mconsole.Console.haxeTrace;
+	if(mconsole.Console.hasConsole) {
+	} else {
+	}
+}
+mconsole.Console.stop = function() {
+	if(!mconsole.Console.running) return;
+	mconsole.Console.running = false;
+	haxe.Log.trace = mconsole.Console.previousTrace;
+	mconsole.Console.previousTrace = null;
+}
+mconsole.Console.addPrinter = function(printer) {
+	mconsole.Console.removePrinter(printer);
+	mconsole.Console.printers.push(printer);
+}
+mconsole.Console.removePrinter = function(printer) {
+	HxOverrides.remove(mconsole.Console.printers,printer);
+}
+mconsole.Console.haxeTrace = function(value,pos) {
+	var params = pos.customParams;
+	if(params == null) params = []; else pos.customParams = null;
+	var level = (function($this) {
+		var $r;
+		switch(value) {
+		case "log":
+			$r = mconsole.LogLevel.log;
+			break;
+		case "warn":
+			$r = mconsole.LogLevel.warn;
+			break;
+		case "info":
+			$r = mconsole.LogLevel.info;
+			break;
+		case "debug":
+			$r = mconsole.LogLevel.debug;
+			break;
+		case "error":
+			$r = mconsole.LogLevel.error;
+			break;
+		default:
+			$r = (function($this) {
+				var $r;
+				params.unshift(value);
+				$r = mconsole.LogLevel.log;
+				return $r;
+			}($this));
+		}
+		return $r;
+	}(this));
+	if(mconsole.Console.hasConsole) mconsole.Console.callConsole(Std.string(level),params);
+	mconsole.Console.print(level,params,pos);
+}
+mconsole.Console.print = function(level,params,pos) {
+	var _g = 0, _g1 = mconsole.Console.printers;
+	while(_g < _g1.length) {
+		var printer = _g1[_g];
+		++_g;
+		printer.print(level,params,mconsole.Console.groupDepth,pos);
+	}
+}
+mconsole.Console.log = function(message,pos) {
+	if(mconsole.Console.hasConsole) mconsole.Console.callConsole("log",[message]);
+	mconsole.Console.print(mconsole.LogLevel.log,[message],pos);
+}
+mconsole.Console.info = function(message,pos) {
+	if(mconsole.Console.hasConsole) mconsole.Console.callConsole("info",[message]);
+	mconsole.Console.print(mconsole.LogLevel.info,[message],pos);
+}
+mconsole.Console.debug = function(message,pos) {
+	if(mconsole.Console.hasConsole) mconsole.Console.callConsole("debug",[message]);
+	mconsole.Console.print(mconsole.LogLevel.debug,[message],pos);
+}
+mconsole.Console.warn = function(message,pos) {
+	if(mconsole.Console.hasConsole) mconsole.Console.callConsole("warn",[message]);
+	mconsole.Console.print(mconsole.LogLevel.warn,[message],pos);
+}
+mconsole.Console.error = function(message,stack,pos) {
+	if(stack == null) stack = haxe.CallStack.callStack();
+	var stackTrace = stack.length > 0?"\n" + mconsole.StackHelper.toString(stack):"";
+	if(mconsole.Console.hasConsole) mconsole.Console.callConsole("error",[message]);
+	mconsole.Console.print(mconsole.LogLevel.error,["Error: " + Std.string(message) + stackTrace],pos);
+}
+mconsole.Console.trace = function(pos) {
+	if(mconsole.Console.hasConsole) mconsole.Console.callConsole("trace",[]);
+	var stack = mconsole.StackHelper.toString(haxe.CallStack.callStack());
+	mconsole.Console.print(mconsole.LogLevel.error,["Stack trace:\n" + stack],pos);
+}
+mconsole.Console.assert = function(expression,message,pos) {
+	if(mconsole.Console.hasConsole) mconsole.Console.callConsole("assert",[expression,message]);
+	if(!expression) {
+		var stack = mconsole.StackHelper.toString(haxe.CallStack.callStack());
+		mconsole.Console.print(mconsole.LogLevel.error,["Assertion failed: " + Std.string(message) + "\n" + stack],pos);
+		throw message;
+	}
+}
+mconsole.Console.count = function(title,pos) {
+	if(mconsole.Console.hasConsole) mconsole.Console.callConsole("count",[title]);
+	var position = pos.fileName + ":" + pos.lineNumber;
+	var count = mconsole.Console.counts.exists(position)?mconsole.Console.counts.get(position) + 1:1;
+	mconsole.Console.counts.set(position,count);
+	mconsole.Console.print(mconsole.LogLevel.log,[title + ": " + count],pos);
+}
+mconsole.Console.group = function(message,pos) {
+	if(mconsole.Console.hasConsole) mconsole.Console.callConsole("group",[message]);
+	mconsole.Console.print(mconsole.LogLevel.log,[message],pos);
+	mconsole.Console.groupDepth += 1;
+}
+mconsole.Console.groupEnd = function(pos) {
+	if(mconsole.Console.hasConsole) mconsole.Console.callConsole("groupEnd",[]);
+	if(mconsole.Console.groupDepth > 0) mconsole.Console.groupDepth -= 1;
+}
+mconsole.Console.time = function(name,pos) {
+	if(mconsole.Console.hasConsole) mconsole.Console.callConsole("time",[name]);
+	mconsole.Console.times.set(name,haxe.Timer.stamp());
+}
+mconsole.Console.timeEnd = function(name,pos) {
+	if(mconsole.Console.hasConsole) mconsole.Console.callConsole("timeEnd",[name]);
+	if(mconsole.Console.times.exists(name)) {
+		mconsole.Console.print(mconsole.LogLevel.log,[name + ": " + ((haxe.Timer.stamp() - mconsole.Console.times.get(name)) * 1000 | 0) + "ms"],pos);
+		mconsole.Console.times.remove(name);
+	}
+}
+mconsole.Console.markTimeline = function(label,pos) {
+	if(mconsole.Console.hasConsole) mconsole.Console.callConsole("markTimeline",[label]);
+}
+mconsole.Console.profile = function(title,pos) {
+	if(mconsole.Console.hasConsole) mconsole.Console.callConsole("profile",[title]);
+}
+mconsole.Console.profileEnd = function(title,pos) {
+	if(mconsole.Console.hasConsole) mconsole.Console.callConsole("profileEnd",[title]);
+}
+mconsole.Console.enterDebugger = function() {
+	debugger;
+}
+mconsole.Console.detectConsole = function() {
+	if(console != null && console[mconsole.Console.dirxml] == null) mconsole.Console.dirxml = "log";
+	return console != undefined && console.log != undefined && console.warn != undefined;
+}
+mconsole.Console.callConsole = function(method,params) {
+	if(console[method] != null) {
+		if(method == "log" && js.Boot.__instanceof(params[0],Xml)) method = mconsole.Console.dirxml;
+		if(console[method].apply != null) console[method].apply(console,mconsole.Console.toConsoleValues(params)); else if(Function.prototype.bind != null) Function.prototype.bind.call(console[method],console).apply(console,mconsole.Console.toConsoleValues(params));
+	}
+}
+mconsole.Console.toConsoleValues = function(params) {
+	var _g1 = 0, _g = params.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		params[i] = mconsole.Console.toConsoleValue(params[i]);
+	}
+	return params;
+}
+mconsole.Console.toConsoleValue = function(value) {
+	var typeClass = Type.getClass(value);
+	var typeName = typeClass == null?"":Type.getClassName(typeClass);
+	if(typeName == "Xml") {
+		var parser = new DOMParser();
+		return parser.parseFromString(value.toString(),"text/xml").firstChild;
+	} else if(typeName == "Map" || typeName == "StringMap" || typeName == "IntMap") {
+		var $native = { };
+		var map = value;
+		var $it0 = map.keys();
+		while( $it0.hasNext() ) {
+			var key = $it0.next();
+			$native[Std.string(key)] = mconsole.Console.toConsoleValue(map.get(key));
+		}
+		return $native;
+	} else {
+		var _g = Type["typeof"](value);
+		var $e = (_g);
+		switch( $e[1] ) {
+		case 7:
+			var e = $e[2];
+			var $native = [];
+			var name = Type.getEnumName(e) + "." + Type.enumConstructor(value);
+			var params = Type.enumParameters(value);
+			if(params.length > 0) {
+				$native.push(name + "(");
+				var _g2 = 0, _g1 = params.length;
+				while(_g2 < _g1) {
+					var i = _g2++;
+					$native.push(mconsole.Console.toConsoleValue(params[i]));
+				}
+				$native.push(")");
+			} else return [name];
+			return $native;
+		default:
+		}
+		if(typeName == "Array" || typeName == "List" || typeName == "haxe.FastList") {
+			var $native = [];
+			var iterable = value;
+			var $it1 = $iterator(iterable)();
+			while( $it1.hasNext() ) {
+				var i = $it1.next();
+				$native.push(mconsole.Console.toConsoleValue(i));
+			}
+			return $native;
+		}
+	}
+	return value;
+}
+mconsole.ConsoleMacro = function() { }
+$hxClasses["mconsole.ConsoleMacro"] = mconsole.ConsoleMacro;
+mconsole.ConsoleMacro.__name__ = ["mconsole","ConsoleMacro"];
+mconsole.LogLevel = $hxClasses["mconsole.LogLevel"] = { __ename__ : ["mconsole","LogLevel"], __constructs__ : ["log","info","debug","warn","error"] }
+mconsole.LogLevel.log = ["log",0];
+mconsole.LogLevel.log.toString = $estr;
+mconsole.LogLevel.log.__enum__ = mconsole.LogLevel;
+mconsole.LogLevel.info = ["info",1];
+mconsole.LogLevel.info.toString = $estr;
+mconsole.LogLevel.info.__enum__ = mconsole.LogLevel;
+mconsole.LogLevel.debug = ["debug",2];
+mconsole.LogLevel.debug.toString = $estr;
+mconsole.LogLevel.debug.__enum__ = mconsole.LogLevel;
+mconsole.LogLevel.warn = ["warn",3];
+mconsole.LogLevel.warn.toString = $estr;
+mconsole.LogLevel.warn.__enum__ = mconsole.LogLevel;
+mconsole.LogLevel.error = ["error",4];
+mconsole.LogLevel.error.toString = $estr;
+mconsole.LogLevel.error.__enum__ = mconsole.LogLevel;
+mconsole.ConsoleColor = $hxClasses["mconsole.ConsoleColor"] = { __ename__ : ["mconsole","ConsoleColor"], __constructs__ : ["none","white","blue","green","yellow","red"] }
+mconsole.ConsoleColor.none = ["none",0];
+mconsole.ConsoleColor.none.toString = $estr;
+mconsole.ConsoleColor.none.__enum__ = mconsole.ConsoleColor;
+mconsole.ConsoleColor.white = ["white",1];
+mconsole.ConsoleColor.white.toString = $estr;
+mconsole.ConsoleColor.white.__enum__ = mconsole.ConsoleColor;
+mconsole.ConsoleColor.blue = ["blue",2];
+mconsole.ConsoleColor.blue.toString = $estr;
+mconsole.ConsoleColor.blue.__enum__ = mconsole.ConsoleColor;
+mconsole.ConsoleColor.green = ["green",3];
+mconsole.ConsoleColor.green.toString = $estr;
+mconsole.ConsoleColor.green.__enum__ = mconsole.ConsoleColor;
+mconsole.ConsoleColor.yellow = ["yellow",4];
+mconsole.ConsoleColor.yellow.toString = $estr;
+mconsole.ConsoleColor.yellow.__enum__ = mconsole.ConsoleColor;
+mconsole.ConsoleColor.red = ["red",5];
+mconsole.ConsoleColor.red.toString = $estr;
+mconsole.ConsoleColor.red.__enum__ = mconsole.ConsoleColor;
+mconsole.StackHelper = function() { }
+$hxClasses["mconsole.StackHelper"] = mconsole.StackHelper;
+mconsole.StackHelper.__name__ = ["mconsole","StackHelper"];
+mconsole.StackHelper.createFilters = function() {
+	var filters = new haxe.ds.StringMap();
+	filters.set("@ mconsole.ConsoleRedirect.haxeTrace:59",true);
+	return filters;
+}
+mconsole.StackHelper.toString = function(stack) {
+	return "null";
+}
+mconsole.StackItemHelper = function() { }
+$hxClasses["mconsole.StackItemHelper"] = mconsole.StackItemHelper;
+mconsole.StackItemHelper.__name__ = ["mconsole","StackItemHelper"];
+mconsole.StackItemHelper.toString = function(item,isFirst) {
+	if(isFirst == null) isFirst = false;
+	return (function($this) {
+		var $r;
+		var $e = (item);
+		switch( $e[1] ) {
+		case 1:
+			var module = $e[2];
+			$r = module;
+			break;
+		case 3:
+			var method = $e[3], className = $e[2];
+			$r = className + "." + method;
+			break;
+		case 4:
+			var v = $e[2];
+			$r = "Lambda(" + v + ")";
+			break;
+		case 2:
+			var line = $e[4], file = $e[3], s = $e[2];
+			$r = (s == null?file.split("::").join(".") + ":" + line:mconsole.StackItemHelper.toString(s)) + ":" + line;
+			break;
+		case 0:
+			$r = "(anonymous function)";
+			break;
+		}
+		return $r;
+	}(this));
+}
 function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; };
 var $_, $fid = 0;
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; };
+if(Array.prototype.indexOf) HxOverrides.remove = function(a,o) {
+	var i = a.indexOf(o);
+	if(i == -1) return false;
+	a.splice(i,1);
+	return true;
+};
 Math.__name__ = ["Math"];
 Math.NaN = Number.NaN;
 Math.NEGATIVE_INFINITY = Number.NEGATIVE_INFINITY;
@@ -1418,11 +2297,20 @@ var Bool = $hxClasses.Bool = Boolean;
 Bool.__ename__ = ["Bool"];
 var Class = $hxClasses.Class = { __name__ : ["Class"]};
 var Enum = { };
+Xml.Element = "element";
+Xml.PCData = "pcdata";
+Xml.CData = "cdata";
+Xml.Comment = "comment";
+Xml.DocType = "doctype";
+Xml.ProcessingInstruction = "processingInstruction";
+Xml.Document = "document";
 as.platform.TypeUtils.IsLittleEndian = true;
 var q = window.jQuery;
 js.JQuery = q;
 as.AlphaSynthFlashPlayerApi.AlphaSynthId = "AlphaSynth";
 as.AlphaSynthFlashPlayerApi.AlphaSynthWorkerId = "AlphaSynthWorker";
+as.log.LevelPrinter.MinLogLevel = 0;
+as.log.LevelPrinter.MaxLogLevel = 5;
 as.platform.TypeUtils.IntMax = 2147483647;
 haxe.Serializer.USE_CACHE = false;
 haxe.Serializer.USE_ENUM_INDEX = false;
@@ -1433,7 +2321,18 @@ haxe.ds.ObjectMap.count = 0;
 haxe.remoting.ExternalConnection.connections = new haxe.ds.StringMap();
 js.Browser.window = typeof window != "undefined" ? window : null;
 js.Browser.document = typeof window != "undefined" ? window.document : null;
-as.AlphaSynthFlashPlayerApi.main();
+mconsole.ConsoleView.CONSOLE_STYLES = "#console {\n\tfont-family:monospace;\n\tbackground-color:#002B36;\n\tbackground-color:rgba(0%,16.9%,21.2%,0.95);\n\tpadding:8px;\n\theight:600px;\n\tmax-height:600px;\n\toverflow-y:scroll;\n\tposition:absolute;\n\tleft:0px;\n\ttop:0px;\n\tright:0px;\n\tmargin:0px;\n\tz-index:10000;\n}\n#console a { text-decoration:none; }\n#console a:hover div { background-color:#063642 }\n#console a div span { display:none; float:right; color:white; }\n#console a:hover div span { display:block; }";
+mconsole.Console.defaultPrinter = new mconsole.ConsoleView();
+mconsole.Console.printers = [mconsole.Console.defaultPrinter];
+mconsole.Console.groupDepth = 0;
+mconsole.Console.times = new haxe.ds.StringMap();
+mconsole.Console.counts = new haxe.ds.StringMap();
+mconsole.Console.running = false;
+mconsole.Console.dirxml = "dirxml";
+mconsole.Console.hasConsole = mconsole.Console.detectConsole();
+mconsole.ConsoleMacro.__meta__ = { obj : { IgnoreCover : null}};
+mconsole.StackHelper.filters = mconsole.StackHelper.createFilters();
+as.AlphaSynthJs.main();
 function $hxExpose(src, path) {
 	var o = typeof window != "undefined" ? window : exports;
 	var parts = path.split(".");

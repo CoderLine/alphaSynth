@@ -21,7 +21,7 @@ import as.player.ISynthPlayerListener;
 import as.player.SynthPlayer;
 import as.player.SynthPlayerState;
 
-class AlphaSynthJsWorker implements ISynthPlayerListener
+class AlphaSynthJsWorker implements IAlphaSynthSync implements ISynthPlayerListener
 {
     public static var instance:AlphaSynthJsWorker;
     public static function main()
@@ -174,7 +174,7 @@ class AlphaSynthJsWorker implements ISynthPlayerListener
     {
         _main.postMessage( { 
             cmd: 'playerStateChanged',
-            state: state
+            state: Type.enumIndex(state)
         } );    
     }
     
