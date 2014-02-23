@@ -31,13 +31,13 @@ import js.html.Element;
  * API to control the AlphaSynthFlash Synthesizer.
  */
 @:expose("as.AlphaSynth")
-class AlphaSynthJs implements IAlphaSynth 
+class AlphaSynthFlashApi implements IAlphaSynth 
 {
     public var AlphaSynthId = "AlphaSynth";
-    public static var instance:AlphaSynthJs;
+    public static var instance:AlphaSynthFlashApi;
     public static function main()
     {
-        instance = new AlphaSynthJs();
+        instance = new AlphaSynthFlashApi();
     }
     
     private var _flash:ExternalConnection;
@@ -200,7 +200,7 @@ class AlphaSynthJs implements IAlphaSynth
             
             // initialize swf
             untyped swf.embedSWF(
-                asRoot + "alphaSynth.swf", 
+                asRoot + "alphaSynthFlashOnly.swf", 
                 "alphaSynthContainer", "1px", "1px", "11.4.0", 
                 swfObjectRoot + "expressInstall.swf", 
                 {}, {}, {id:"AlphaSynth"}

@@ -21,6 +21,7 @@ import as.ds.FixedArray.FixedArray;
 import as.synthesis.SynthHelper;
 import as.ds.LinkedList.LinkedList;
 import as.ds.LinkedList.LinkedListNode;
+import as.util.SynthConstants;
 import haxe.ds.GenericStack.GenericStack;
 
 class VoiceStealingMethod
@@ -67,10 +68,10 @@ class VoiceManager
             freeVoices.addLast(v);
         }
 
-        registry = new FixedArray<FixedArray<VoiceNode>>(Synthesizer.DefaultChannelCount);
+        registry = new FixedArray<FixedArray<VoiceNode>>(SynthConstants.DefaultChannelCount);
         for (i in 0 ... registry.length)
         {
-            registry[i] = new FixedArray(Synthesizer.DefaultKeyCount);
+            registry[i] = new FixedArray(SynthConstants.DefaultKeyCount);
         }
     }
 

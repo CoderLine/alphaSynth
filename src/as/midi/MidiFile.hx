@@ -46,6 +46,9 @@ class MidiFile
     
     public function new() 
     {
+        division = 0;
+        trackFormat = 0;
+        timingStandard = 0;
     } 
     
     public function combineTracks() : Void
@@ -69,6 +72,7 @@ class MidiFile
         var delta:Int = 0;
         var nextdelta:Int = TypeUtils.IntMax;
         var counters:FixedArray<Int> = new FixedArray<Int>(absEvents.length);
+        TypeUtils.clearIntArray(counters);
         while (eventCount < finalTrack.midiEvents.length)
         {
             for (x in 0 ... absEvents.length)

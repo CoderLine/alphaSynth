@@ -18,6 +18,7 @@
 package as.ds;
 
 import as.platform.Types.Float32;
+import as.platform.Types.TypeUtils;
 
 class CircularSampleBuffer
 {
@@ -29,6 +30,10 @@ class CircularSampleBuffer
     public function new(size:Int) 
     {
         _buffer = new FixedArray<Float32>(size);
+        _writePosition = 0;
+        _readPosition = 0;
+        _sampleCount = 0;
+        TypeUtils.clearFloat32Array(_buffer);
     }
     
     public var count(get, null):Int;
@@ -43,6 +48,7 @@ class CircularSampleBuffer
         _writePosition = 0;
         _sampleCount = 0;
         _buffer = new FixedArray<Float32>(_buffer.length);
+        TypeUtils.clearFloat32Array(_buffer);
     }
     
     public function write(data:FixedArray<Float32>, offset:Int, count:Int)

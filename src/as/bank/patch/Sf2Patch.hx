@@ -35,6 +35,7 @@ import as.sf2.Sf2Region;
 import as.synthesis.Synthesizer;
 import as.synthesis.SynthHelper;
 import as.synthesis.VoiceParameters;
+import as.util.SynthConstants;
 
 class Sf2Patch extends Patch
 {
@@ -60,6 +61,22 @@ class Sf2Patch extends Patch
     {
         super(name);
         _pan = new PanComponent();
+        _iniFilterFc = 0;
+        _filterQ = 0;
+        _sustainVolEnv = 0;
+        _initialAttn = 0;
+        _keyOverride = 0;
+        _velOverride = 0;
+        _keynumToModEnvHold = 0;
+        _keynumToModEnvDecay = 0;
+        _keynumToVolEnvHold = 0;
+        _keynumToVolEnvDecay = 0;
+        _modLfoToPitch = 0;
+        _vibLfoToPitch = 0;
+        _modEnvToPitch = 0;
+        _modLfoToFilterFc = 0;
+        _modEnvToFilterFc = 0;
+        _modLfoToVolume = 0;
     }
     
     public override function start(voiceparams:VoiceParameters):Bool 
@@ -104,10 +121,10 @@ class Sf2Patch extends Patch
         var x = startIndex;
         while (x < endIndex)
         {
-            voiceparams.envelopes[0].increment(Synthesizer.DefaultBlockSize);
-            voiceparams.envelopes[1].increment(Synthesizer.DefaultBlockSize);
-            voiceparams.lfos[0].increment(Synthesizer.DefaultBlockSize);
-            voiceparams.lfos[1].increment(Synthesizer.DefaultBlockSize);
+            voiceparams.envelopes[0].increment(SynthConstants.DefaultBlockSize);
+            voiceparams.envelopes[1].increment(SynthConstants.DefaultBlockSize);
+            voiceparams.lfos[0].increment(SynthConstants.DefaultBlockSize);
+            voiceparams.lfos[1].increment(SynthConstants.DefaultBlockSize);
 
             voiceparams.generators[0].getValues(voiceparams.generatorParams[0], voiceparams.blockBuffer, basePitch *
                 SynthHelper.centsToPitch(Std.int(voiceparams.envelopes[0].value * _modEnvToPitch +
@@ -134,13 +151,13 @@ class Sf2Patch extends Patch
                 SynthHelper.mixMonoToMonoInterpolation(x, volume, voiceparams);
             }
             
-            if ((voiceparams.envelopes[1].currentStage > EnvelopeStateEnum.Hold && volume <= Synthesizer.NonAudible) || voiceparams.generatorParams[0].currentState == GeneratorStateEnum.Finished)
+            if ((voiceparams.envelopes[1].currentStage > EnvelopeStateEnum.Hold && volume <= SynthConstants.NonAudible) || voiceparams.generatorParams[0].currentState == GeneratorStateEnum.Finished)
             {
                 voiceparams.state = VoiceStateEnum.Stopped;
                 return;
             }
             
-            x += Synthesizer.DefaultBlockSize * voiceparams.synth.audioChannels;
+            x += SynthConstants.DefaultBlockSize * voiceparams.synth.audioChannels;
         }
     }
     
@@ -275,11 +292,11 @@ class Sf2Patch extends Patch
         lfoInfo[0] = new LfoDescriptor();
         lfoInfo[0].delayTime = Math.pow(2, region.generators[GeneratorEnum.DelayModulationLFO] / 1200.0);
         lfoInfo[0].frequency = (Math.pow(2, region.generators[GeneratorEnum.FrequencyModulationLFO] / 1200.0) * 8.176);
-        lfoInfo[0].generator = DefaultGenerators.DefaultSine;
+        lfoInfo[0].generator = DefaultGenerators.defaultSine();
         lfoInfo[1] = new LfoDescriptor();
         lfoInfo[1].delayTime = Math.pow(2, region.generators[GeneratorEnum.DelayVibratoLFO] / 1200.0);
         lfoInfo[1].frequency = (Math.pow(2, region.generators[GeneratorEnum.FrequencyVibratoLFO] / 1200.0) * 8.176);
-        lfoInfo[1].generator = DefaultGenerators.DefaultSine;
+        lfoInfo[1].generator = DefaultGenerators.defaultSine();
     }
 
     private function loadFilter(region:Sf2Region)

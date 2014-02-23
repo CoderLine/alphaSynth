@@ -29,6 +29,7 @@ import as.platform.Types.TypeUtils;
 import as.synthesis.SynthHelper;
 import as.midi.MidiHelper;
 import as.platform.Types.Short;
+import as.util.SynthConstants;
 import haxe.io.Bytes;
 import haxe.io.Path;
 
@@ -45,27 +46,6 @@ class SynthEvent
 
 class Synthesizer
 {
-    public static var InterpolationMode = InterpolationEnum.Linear;
-
-    public static var TwoPi = 2.0 * Math.PI;      
-    public static var HalfPi = Math.PI / 2.0;     
-    public static inline var InverseSqrtOfTwo = 0.707106781186;
-    public static inline var DefaultLfoFrequency = 8.0;
-    public static inline var DefaultModDepth = 100;
-    public static inline var DefaultPolyphony = 40;    
-    public static inline var MinPolyphony = 5;         
-    public static inline var MaxPolyphony = 250;       
-    public static inline var DefaultBlockSize = 64;    
-    public static inline var MaxBufferSize = 0.05;   
-    public static inline var MinBufferSize = 0.001;  
-    public static inline var DenormLimit = 1e-38;   
-    public static inline var NonAudible = 1e-5;       
-    public static inline var SincWidth = 16;           
-    public static inline var SincResolution = 64;      
-    public static inline var MaxVoiceComponents = 4;   
-    public static inline var DefaultChannelCount = 16; 
-    public static inline var DefaultKeyCount = 128;    
-
     private var _voiceManager:VoiceManager;
     private var _masterVolume:Float32;
     private var _synthGain:Float32;
@@ -145,33 +125,49 @@ class Synthesizer
         
         this.sampleRate = sampleRate;
         this.audioChannels = audioChannels;
-        this.microBufferSize = SynthHelper.clampI(bufferSize, Std.int(MinBufferSize * sampleRate), Std.int(MaxBufferSize * sampleRate));
-        this.microBufferSize = Std.int(Math.ceil(this.microBufferSize /  DefaultBlockSize) * DefaultBlockSize); //ensure multiple of block size
+        this.microBufferSize = SynthHelper.clampI(bufferSize, Std.int(SynthConstants.MinBufferSize * sampleRate), Std.int(SynthConstants.MaxBufferSize * sampleRate));
+        this.microBufferSize = Std.int(Math.ceil(this.microBufferSize /  SynthConstants.DefaultBlockSize) * SynthConstants.DefaultBlockSize); //ensure multiple of block size
         this.microBufferCount = Std.int(Math.max(1, bufferCount));
         sampleBuffer = new FixedArray<Float32>((microBufferSize * microBufferCount * audioChannels));
+        TypeUtils.clearFloat32Array(sampleBuffer);
         littleEndian = true;
         
         //
         // Setup controllers
-        _bankSelect = new FixedArray<Int>(DefaultChannelCount);
-        programs = new FixedArray<Int>(DefaultChannelCount);
-        _channelPressure = new FixedArray<Float32>(DefaultChannelCount);
-        _pan = new FixedArray<Short>(DefaultChannelCount);
-        _volume = new FixedArray<Short>(DefaultChannelCount);
-        _expression = new FixedArray<Short>(DefaultChannelCount);
-        _modRange = new FixedArray<Short>(DefaultChannelCount);
-        _pitchBend = new FixedArray<Short>(DefaultChannelCount);
-        _pitchBendRange = new FixedArray<Short>(DefaultChannelCount);
-        _masterCoarseTune = new FixedArray<Short>(DefaultChannelCount);
-        _masterFineTune = new FixedArray<Short>(DefaultChannelCount);
-        _holdPedal = new FixedArray<Bool>(DefaultChannelCount);
-        _rpn = new FixedArray<Short>(DefaultChannelCount);
-        modWheel = new FixedArray<Float32>(DefaultChannelCount);
-        panPositions = new FixedArray<PanComponent>(DefaultChannelCount);
-        totalPitch = new FixedArray<Int>(DefaultChannelCount);
-        totalVolume = new FixedArray<Float32>(DefaultChannelCount);
+        _bankSelect = new FixedArray<Int>(SynthConstants.DefaultChannelCount);
+        TypeUtils.clearIntArray(_bankSelect);
+        programs = new FixedArray<Int>(SynthConstants.DefaultChannelCount);
+        TypeUtils.clearIntArray(programs);
+        _channelPressure = new FixedArray<Float32>(SynthConstants.DefaultChannelCount);
+        TypeUtils.clearFloat32Array(_channelPressure);
+        _pan = new FixedArray<Short>(SynthConstants.DefaultChannelCount);
+        TypeUtils.clearShortArray(_pan);
+        _volume = new FixedArray<Short>(SynthConstants.DefaultChannelCount);
+        TypeUtils.clearShortArray(_volume);
+        _expression = new FixedArray<Short>(SynthConstants.DefaultChannelCount);
+        TypeUtils.clearShortArray(_expression);
+        _modRange = new FixedArray<Short>(SynthConstants.DefaultChannelCount);
+        TypeUtils.clearShortArray(_modRange);
+        _pitchBend = new FixedArray<Short>(SynthConstants.DefaultChannelCount);
+        TypeUtils.clearShortArray(_pitchBend);
+        _pitchBendRange = new FixedArray<Short>(SynthConstants.DefaultChannelCount);
+        TypeUtils.clearShortArray(_pitchBendRange);
+        _masterCoarseTune = new FixedArray<Short>(SynthConstants.DefaultChannelCount);
+        TypeUtils.clearShortArray(_masterCoarseTune);
+        _masterFineTune = new FixedArray<Short>(SynthConstants.DefaultChannelCount);
+        TypeUtils.clearShortArray(_masterFineTune);
+        _holdPedal = new FixedArray<Bool>(SynthConstants.DefaultChannelCount);
+        _rpn = new FixedArray<Short>(SynthConstants.DefaultChannelCount);
+        TypeUtils.clearShortArray(_rpn);
+        modWheel = new FixedArray<Float32>(SynthConstants.DefaultChannelCount);
+        TypeUtils.clearFloat32Array(modWheel);
+        panPositions = new FixedArray<PanComponent>(SynthConstants.DefaultChannelCount);
+        totalPitch = new FixedArray<Int>(SynthConstants.DefaultChannelCount);
+        TypeUtils.clearIntArray(totalPitch);
+        totalVolume = new FixedArray<Float32>(SynthConstants.DefaultChannelCount);
+        TypeUtils.clearFloat32Array(totalVolume);
         
-        for (i in 0 ... DefaultChannelCount)
+        for (i in 0 ... SynthConstants.DefaultChannelCount)
         {
             panPositions[i] = new PanComponent();
         }
@@ -180,10 +176,11 @@ class Synthesizer
         //set controls to default values
         resetSynthControls();
         //create synth voices
-        _voiceManager = new VoiceManager(SynthHelper.clampI(polyphony, MinPolyphony, MaxPolyphony), this);
+        _voiceManager = new VoiceManager(SynthHelper.clampI(polyphony, SynthConstants.MinPolyphony, SynthConstants.MaxPolyphony), this);
         //create midi containers
         midiEventQueue = new LinkedList<SynthEvent>();
         midiEventCounts = new FixedArray<Int>(microBufferCount);
+        TypeUtils.clearIntArray(midiEventCounts);
     }
     
     public function loadBank(bank:PatchBank)
@@ -211,7 +208,7 @@ class Synthesizer
     
     public function resetSynthControls()
     {
-        for (x in 0 ... DefaultChannelCount)
+        for (x in 0 ... SynthConstants.DefaultChannelCount)
         {
             _bankSelect[x] = 0;
             _channelPressure[x] = 1.0; 
@@ -263,6 +260,7 @@ class Synthesizer
         {
             audioChannels = channels;
             sampleBuffer = new FixedArray<Float32>((microBufferSize * microBufferCount * audioChannels));
+            TypeUtils.clearFloat32Array(sampleBuffer);
         }
     }
     
@@ -358,7 +356,7 @@ class Synthesizer
     }
     private function updatePan(channel:Int)
     {
-        var value = Synthesizer.HalfPi * (_pan[channel] / 16383.0);
+        var value = SynthConstants.HalfPi * (_pan[channel] / 16383.0);
         panPositions[channel].left = Math.cos(value);
         panPositions[channel].right = Math.sin(value);
     }
@@ -541,10 +539,10 @@ class Synthesizer
                             _bankSelect[channel] = (channel == MidiHelper.DrumChannel) ? PatchBank.DrumBank : 0;
                     case ControllerTypeEnum.ModulationCoarse: //Modulation wheel coarse
                         _modRange[channel] = cast ((_modRange[channel] & 0x7F) | data2 << 7);
-                        modWheel[channel] = Synthesizer.DefaultModDepth * (_modRange[channel] / 16383.0); 
+                        modWheel[channel] = SynthConstants.DefaultModDepth * (_modRange[channel] / 16383.0); 
                     case ControllerTypeEnum.ModulationFine: //Modulation wheel fine
                         _modRange[channel] = cast ((_modRange[channel] & 0xFF80) | data2);
-                        modWheel[channel] = Synthesizer.DefaultModDepth * (_modRange[channel] / 16383.0);
+                        modWheel[channel] = SynthConstants.DefaultModDepth * (_modRange[channel] / 16383.0);
                     case ControllerTypeEnum.VolumeCoarse: //Channel volume coarse
                         _volume[channel] = cast ((_volume[channel] & 0x7F) | data2 << 7);
                         updateTotalVolume(channel);

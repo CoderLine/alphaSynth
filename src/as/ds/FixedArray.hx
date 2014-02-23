@@ -16,6 +16,9 @@
  * License along with this library.
  */
 package as.ds;
+import as.platform.Types.TypeUtils;
+import haxe.Serializer;
+import haxe.Unserializer;
 
 // todo abstract for javascript
 typedef FixedArrayData<T> = haxe.ds.Vector<T>;
@@ -27,7 +30,7 @@ abstract FixedArray<T>(FixedArrayData<T>)
     {
         this = new haxe.ds.Vector<T>(length);
 	}
-
+    
 	public inline function get(index:Int):Null<T> 
     {
 		return this[index];
@@ -40,8 +43,10 @@ abstract FixedArray<T>(FixedArrayData<T>)
     
     public inline function clone() : FixedArray<T>
     {
-        #if (flash||js)
+        #if flash
         return cast this.toData().slice();
+        #elseif js
+        return cast this.toData().slice(0);
         #elseif cs
         var c = new new haxe.ds.Vector<T>(length);
         this.toData().CopyTo(c, 0);
@@ -64,4 +69,27 @@ abstract FixedArray<T>(FixedArrayData<T>)
     {
         return untyped haxe.ds.Vector.fromArrayCopy(array);
 	}
+    
+    public static inline function serialize<T>(v:FixedArray<T>) : String
+    {
+        var s = new Serializer();
+        s.serialize(v.length);
+        for (i in 0 ... v.length)
+        {
+            s.serialize(v.get(i));
+        }
+        return s.toString();
+    }
+    
+    public static inline function unserialize<T>(data:String) : FixedArray<T>
+    {
+        var s = new Unserializer(data);
+        var length:Int = s.unserialize();
+        var v = new FixedArray<T>(length);
+        for (i in 0 ... length)
+        {
+            v.set(i, s.unserialize());
+        }
+        return v;
+    }
 }

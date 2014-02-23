@@ -21,6 +21,7 @@ import as.bank.components.Enum.GeneratorStateEnum;
 import as.bank.descriptors.GeneratorDescriptor;
 import as.platform.Types.Float32;
 import as.synthesis.Synthesizer;
+import as.util.SynthConstants;
 
 class SquareGenerator extends Generator
 {
@@ -28,7 +29,7 @@ class SquareGenerator extends Generator
     {
         super(description);
         if (endPhase < 0)
-            endPhase = Synthesizer.TwoPi;
+            endPhase = SynthConstants.TwoPi;
         if (startPhase < 0)
             startPhase = 0;
         if (loopEndPhase < 0)
@@ -36,7 +37,7 @@ class SquareGenerator extends Generator
         if (loopStartPhase < 0)
             loopStartPhase = startPhase;
         if (period < 0)
-            period = Synthesizer.TwoPi;
+            period = SynthConstants.TwoPi;
         if (rootKey < 0)
             rootKey = cast 69;
         frequency = 440;

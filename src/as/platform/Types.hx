@@ -80,6 +80,18 @@ class TypeUtils
 		#end
     }
     
+    public static inline function clearShortArray(a:FixedArray<Short>)
+    {
+		#if cs
+            CsArray.Clear(cast a, 0, a.length);
+		#else
+			for (i in 0... a.length)
+			{
+                a.set(i, 0);
+			}
+		#end
+    }
+    
     public static inline function clearFloat32Array(a:FixedArray<Float32>)
     {
 		#if cs

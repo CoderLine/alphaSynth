@@ -1,4 +1,4 @@
-<project name="alphaSynth" default="flash" basedir=".">
+<project name="alphaSynth" default="flashOnly" basedir=".">
     <description>
         a buildfile compiling alphaSynth
     </description>
@@ -17,11 +17,18 @@
     
     <property name="bin-flash" location="${bin}/flash"/>
     <property name="lib-flash" location="${bin-flash}/lib/alphaSynth"/>
-	<property name="haxe-flash-swf" location="${lib-flash}/alphaSynth.swf"/>
-	<property name="haxe-flash-js" location="${lib-flash}/alphaSynth.js"/>
+	<property name="haxe-flash-swf" location="${lib-flash}/alphaSynthFlashOnly.swf"/>
+	<property name="haxe-flash-api" location="${lib-flash}/alphaSynthFlashOnly.js"/>
+	<property name="haxe-flashjsworker-swf" location="${lib-flash}/alphaSynthJsWorker.swf"/>
+	<property name="haxe-flashjsworker-js" location="${lib-flash}/alphaSynthJsWorker.js"/>
+	<property name="haxe-flashjsworker-api" location="${lib-flash}/alphaSynthJsWorkerApi.js"/>
     
 	<!-- Haxe Builds -->
-	<target name="flash">
+    <target name="all" depends="flashOnly,flashJsWorker">
+        
+    </target>
+    
+	<target name="flashOnly">
 		<delete file="${haxe-flash-swf}" />
 		<delete file="${haxe-flash-js}" />
         <exec executable="haxe" failonerror="true">
@@ -48,10 +55,60 @@
             <arg value="${src}"/>
             
             <arg value="-main" />
-            <arg value="as.AlphaSynthJs" />
+            <arg value="as.AlphaSynthFlashApi" />
             
             <arg value="-js" />
-            <arg value="${haxe-flash-js}" />
+            <arg value="${haxe-flash-api}" />
+        </exec>
+	</target>	
+	<target name="flashJsWorker">
+		<delete file="${haxe-flashjsworker-swf}" />
+		<delete file="${haxe-flashjsworker-js}" />
+		<delete file="${haxe-flashjsworker-api}" />
+        <exec executable="haxe" failonerror="true">
+            <arg value="-cp" />
+            <arg value="${src}"/>
+            
+            <arg value="-main" />
+            <arg value="as.AlphaSynthFlashPlayer" />
+            
+            <arg value="-swf" />
+            <arg value="${haxe-flashjsworker-swf}" />
+            
+            <arg value="-lib" />
+            <arg value="format" />
+            
+            <arg value="-lib" />
+            <arg value="mconsole" />
+            
+            <arg value="-swf-version" />
+            <arg value="11.4" />
+        </exec>
+        <exec executable="haxe" failonerror="true">
+            <arg value="-cp" />
+            <arg value="${src}"/>
+            
+            <arg value="-main" />
+            <arg value="as.AlphaSynthJsWorker" />
+            
+            <arg value="-lib" />
+            <arg value="mconsole" />
+
+            <arg value="-D" />
+            <arg value="samsung" />
+
+            <arg value="-js" />
+            <arg value="${haxe-flashjsworker-js}" />
+        </exec>
+        <exec executable="haxe" failonerror="true">
+            <arg value="-cp" />
+            <arg value="${src}"/>
+            
+            <arg value="-main" />
+            <arg value="as.AlphaSynthFlashPlayerApi" />
+            
+            <arg value="-js" />
+            <arg value="${haxe-flashjsworker-api}" />
         </exec>
 	</target>	
 	

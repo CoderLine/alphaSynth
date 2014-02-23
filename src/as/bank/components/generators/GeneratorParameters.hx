@@ -30,7 +30,10 @@ class GeneratorParameters
     
     public function new() 
     {
-        
+        phase = 0;
+        currentStart = 0;
+        currentEnd = 0;
+        currentState = 0;
     }
     
     public function quickSetup(generator:Generator) : Void

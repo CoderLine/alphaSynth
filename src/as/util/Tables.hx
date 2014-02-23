@@ -32,30 +32,53 @@ import as.synthesis.SynthHelper;
 
 class Tables
 {
-    public static var EnvelopeTables:FixedArray<FixedArray<Float32>>;
-    public static var SemitoneTable:FixedArray<Float32>;
-    public static var CentTable:FixedArray<Float32>;
-    public static var SincTable:FixedArray<Float32>; 
-
-    public static function __init__()
+    private static var _isInitialized:Bool;
+    
+    public static var _envelopeTables:FixedArray<FixedArray<Float32>>;
+    public static var _semitoneTable:FixedArray<Float32>;
+    public static var _centTable:FixedArray<Float32>;
+    public static var _sincTable:FixedArray<Float32>; 
+    
+    public static function envelopeTables(index:Int):FixedArray<Float32>
     {
-        __init();
+        if (!_isInitialized) init();
+        return _envelopeTables[index];
     }
-    public static function __init()
+    
+    public static function semitoneTable(index:Int):Float32
+    {
+        if (!_isInitialized) init();
+        return _semitoneTable[index];
+    }
+    
+    public static function centTable(index:Int):Float32
+    {
+        if (!_isInitialized) init();
+        return _centTable[index];
+    }
+    
+    public static function sincTable(index:Int):Float32
+    {
+        if (!_isInitialized) init();
+        return _sincTable[index];
+    }
+
+    private static function init()
     {
         var EnvelopeSize = 64;
         var ExponentialCoeff = .09;
-        EnvelopeTables = new FixedArray<FixedArray<Float32>>(4);  
-        EnvelopeTables[0] = (removeDenormals(createSustainTable(EnvelopeSize)));
-        EnvelopeTables[1] = (removeDenormals(createLinearTable(EnvelopeSize)));
-        EnvelopeTables[2] = (removeDenormals(createExponentialTable(EnvelopeSize, ExponentialCoeff)));
-        EnvelopeTables[3] = (removeDenormals(createSineTable(EnvelopeSize)));
-        CentTable = createCentTable();
-        SemitoneTable = createSemitoneTable();
-        SincTable = createSincTable(Synthesizer.SincWidth, Synthesizer.SincResolution, .43, hammingWindow);
+        _envelopeTables = new FixedArray<FixedArray<Float32>>(4);  
+        _envelopeTables[0] = (removeDenormals(createSustainTable(EnvelopeSize)));
+        _envelopeTables[1] = (removeDenormals(createLinearTable(EnvelopeSize)));
+        _envelopeTables[2] = (removeDenormals(createExponentialTable(EnvelopeSize, ExponentialCoeff)));
+        _envelopeTables[3] = (removeDenormals(createSineTable(EnvelopeSize)));
+        _centTable = createCentTable();
+        _semitoneTable = createSemitoneTable();
+        _sincTable = createSincTable(SynthConstants.SincWidth, SynthConstants.SincResolution, .43, hammingWindow);
+        _isInitialized = true;
     }
     
-    public static function createSquareTable(size:Int, k:Int) : FixedArray<Float32>
+    private static function createSquareTable(size:Int, k:Int) : FixedArray<Float32>
     {//Uses Fourier Expansion up to k terms 
         var FourOverPi = 4 / Math.PI;
         var squaretable = new FixedArray<Float32>(size);
@@ -67,7 +90,7 @@ class Tables
             for (i in 1 ... (k+1))
             {
                 var twokminus1 = (2 * i) - 1;
-                value += Math.sin(Synthesizer.TwoPi * (twokminus1) * phase) / (twokminus1);
+                value += Math.sin(SynthConstants.TwoPi * (twokminus1) * phase) / (twokminus1);
             }
             squaretable[x] = SynthHelper.clampF((FourOverPi * value), -1, 1);
             phase += inc;
@@ -75,7 +98,7 @@ class Tables
         return squaretable;
     }
 
-    public static function createCentTable() : FixedArray<Float32>
+    private static function createCentTable() : FixedArray<Float32>
     {//-100 to 100 cents
         var cents = new FixedArray<Float32>(201);
         for(x in 0 ... cents.length)
@@ -85,7 +108,7 @@ class Tables
         return cents;
     }
     
-    public static function createSemitoneTable() : FixedArray<Float32>
+    private static function createSemitoneTable() : FixedArray<Float32>
     {//-127 to 127 semitones
         var table = new FixedArray<Float32>(255);
         for(x in 0 ... table.length)
@@ -95,7 +118,7 @@ class Tables
         return table;
     }
     
-    public static function createSustainTable(size:Int) : FixedArray<Float32>
+    private static function createSustainTable(size:Int) : FixedArray<Float32>
     {
         var table = new FixedArray<Float32>(size);
         for(x in 0 ... size)
@@ -105,7 +128,7 @@ class Tables
         return table;
     }
     
-    public static function createLinearTable(size:Int) : FixedArray<Float32>
+    private static function createLinearTable(size:Int) : FixedArray<Float32>
     {
         var table = new FixedArray<Float32>(size);
         for(x in 0 ... size)
@@ -115,7 +138,7 @@ class Tables
         return table;
     }
     
-    public static function createExponentialTable(size:Int, coeff:Float) : FixedArray<Float32>
+    private static function createExponentialTable(size:Int, coeff:Float) : FixedArray<Float32>
     {
         coeff = SynthHelper.clampF(coeff, .001, .9);
         var graph:FixedArray<Float32> = new FixedArray<Float32>(size);
@@ -132,7 +155,7 @@ class Tables
         return graph;
     }
     
-    public static function createSineTable(size:Int) : FixedArray<Float32>
+    private static function createSineTable(size:Int) : FixedArray<Float32>
     {
         var graph:FixedArray<Float32> = new FixedArray<Float32>(size);
         var inc:Float = (3.0 * Math.PI / 2.0) / (size - 1);
@@ -144,32 +167,33 @@ class Tables
         }
         return graph;
     }
+    
     private static function removeDenormals(data: FixedArray<Float32>) : FixedArray<Float32>
     {
         for (x in 0 ... data.length)
         {
-            if (Math.abs(data[x]) < Synthesizer.DenormLimit)
+            if (Math.abs(data[x]) < SynthConstants.DenormLimit)
                 data[x] = 0;
         }
         return data;
     }    
     
-    public static function vonHannWindow(i:Float, size:Int) : Float
+    private static function vonHannWindow(i:Float, size:Int) : Float
     {
-        return 0.5 - 0.5 * Math.cos(Synthesizer.TwoPi * (0.5 + i / size));
+        return 0.5 - 0.5 * Math.cos(SynthConstants.TwoPi * (0.5 + i / size));
     }
     
-    public static function hammingWindow(i:Float, size:Int) : Float
+    private static function hammingWindow(i:Float, size:Int) : Float
     {
-        return 0.54 - 0.46 * Math.cos(Synthesizer.TwoPi * i / size);  
+        return 0.54 - 0.46 * Math.cos(SynthConstants.TwoPi * i / size);  
     }
     
-    public static function blackmanWindow(i:Float, size:Int) : Float
+    private static function blackmanWindow(i:Float, size:Int) : Float
     {
-        return 0.42659 - 0.49656 * Math.cos(Synthesizer.TwoPi * i / size) + 0.076849 * Math.cos(4.0 * Math.PI * i / size);
+        return 0.42659 - 0.49656 * Math.cos(SynthConstants.TwoPi * i / size) + 0.076849 * Math.cos(4.0 * Math.PI * i / size);
     }    
     
-    public static function createSincTable(windowSize:Int, resolution:Int, cornerRatio:Float, windowFunction:Float->Int->Float) : FixedArray<Float32>
+    private static function createSincTable(windowSize:Int, resolution:Int, cornerRatio:Float, windowFunction:Float->Int->Float) : FixedArray<Float32>
     {
         var subWindow:Int = Std.int((windowSize / 2) + 1); 
         var table:FixedArray<Float32> = new FixedArray<Float32>((subWindow * resolution));
@@ -179,12 +203,12 @@ class Tables
             for (y in 0 ... resolution)
             {
                 var a = x + (y / cast(resolution,Float));
-                var sinc = Synthesizer.TwoPi * cornerRatio * a;
+                var sinc = SynthConstants.TwoPi * cornerRatio * a;
                 if (Math.abs(sinc) > 0.00001) 
                     sinc = Math.sin(sinc) / sinc; 
                 else 
                     sinc = 1.0;
-                table[x * Synthesizer.SincResolution + y] = (gain * sinc * windowFunction(a, windowSize));
+                table[x * SynthConstants.SincResolution + y] = (gain * sinc * windowFunction(a, windowSize));
             }
         }
         return table;

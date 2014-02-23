@@ -50,6 +50,7 @@ class Generator
         endPhase = description.endPhase;
         offset = description.offset;
         period = description.period;
+        frequency = 0;
         rootKey = description.rootkey;
         keyTrack = description.keyTrack;
         velocityTrack = description.velTrack;

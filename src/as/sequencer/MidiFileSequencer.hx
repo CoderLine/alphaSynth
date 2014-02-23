@@ -27,6 +27,7 @@ import as.platform.Types.Float32;
 import as.sequencer.MidiFileSequencer.MidiFileSequencerTempoChange;
 import as.synthesis.Synthesizer;
 import as.synthesis.SynthHelper;
+import as.util.SynthConstants;
 
 class MidiFileSequencerTempoChange
 {
@@ -80,9 +81,11 @@ class MidiFileSequencer
     public function new(synth:Synthesizer) 
     {
         this.synth = synth;
+        _eventIndex = 0;
+        _division = 0;
         _playbackRate = 1;
         isPlaying = false;
-        _blockList = new FixedArray<Bool>(Synthesizer.DefaultChannelCount);
+        _blockList = new FixedArray<Bool>(SynthConstants.DefaultChannelCount);
         _finished = new Array < Void->Void > (); 
         synth.addMidiMessageProcessed(midiEventProcessed);
     }

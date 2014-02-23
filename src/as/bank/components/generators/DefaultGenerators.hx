@@ -21,16 +21,32 @@ import as.bank.descriptors.GeneratorDescriptor;
 
 class DefaultGenerators
 {
-    public static var DefaultSine:Generator;
-    public static var DefaultSaw:Generator;
-    public static var DefaultSquare:Generator;
-    public static var DefaultTriangle:Generator;
-    
-    public static function __init__()
+    private static var _defaultSine:Generator;
+    private static var _defaultSaw:Generator;
+    private static var _defaultSquare:Generator;
+    private static var _defaultTriangle:Generator;
+  
+    public static function defaultSine():Generator
     {
-        DefaultSine = new SineGenerator(new GeneratorDescriptor());
-        DefaultSaw = new SawGenerator(new GeneratorDescriptor());
-        DefaultSquare = new SquareGenerator(new GeneratorDescriptor());
-        DefaultTriangle = new TriangleGenerator(new GeneratorDescriptor());
+        if (_defaultSine == null) _defaultSine = new SineGenerator(new GeneratorDescriptor());
+        return _defaultSine;
+    }
+   
+    public static function defaultSaw():Generator
+    {
+        if (_defaultSaw == null) _defaultSaw = new SawGenerator(new GeneratorDescriptor());
+        return _defaultSaw;
+    }
+    
+    public static function defaultSquare():Generator
+    {
+        if (_defaultSquare == null) _defaultSquare = new SquareGenerator(new GeneratorDescriptor());
+        return _defaultSquare;
+    }
+    
+    public static function defaultTriangle():Generator
+    {
+        if (_defaultTriangle == null) _defaultTriangle = new TriangleGenerator(new GeneratorDescriptor());
+        return _defaultTriangle;
     }
 }

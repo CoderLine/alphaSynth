@@ -23,6 +23,7 @@ import as.bank.components.generators.Generator;
 import as.platform.Types.Float32;
 import as.synthesis.Synthesizer;
 import as.synthesis.SynthHelper;
+import as.util.SynthConstants;
 import haxe.io.BytesInput;
 
 class LfoDescriptor
@@ -35,8 +36,8 @@ class LfoDescriptor
     public function new() 
     {
         delayTime = 0;
-        frequency = Synthesizer.DefaultLfoFrequency;
+        frequency = SynthConstants.DefaultLfoFrequency;
         depth = 1;
-        generator = DefaultGenerators.DefaultSine;
+        generator = DefaultGenerators.defaultSine();
     }
 }

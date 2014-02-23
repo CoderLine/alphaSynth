@@ -32,6 +32,7 @@ class MultiPatch extends Patch
     public function new(name:String) 
     {
         super(name);
+        _intervalType = 0;
     }
 
     public function findPatches(channel:Int, key:Int, velocity:Int, layers:Array<Patch>)

@@ -18,6 +18,7 @@
 package as.bank.components;
 
 import as.bank.components.Enum;
+import as.bank.components.generators.DefaultGenerators;
 import as.bank.components.generators.Generator;
 import as.bank.descriptors.LfoDescriptor;
 import as.platform.Types.Float32;
@@ -37,7 +38,15 @@ class Lfo
     
     public function new() 
     {
-        
+        _lfoState = 0;
+        _generator = DefaultGenerators.defaultSine();
+        _delayTime = 0;
+        _increment = 0;
+        _phase = 0;
+        frequency = 0;
+        currentState = 0;
+        value = 0;
+        depth = 0;
     }
     
     public function quickSetup(sampleRate:Int, lfoInfo:LfoDescriptor)

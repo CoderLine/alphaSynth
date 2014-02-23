@@ -24,6 +24,7 @@ import as.bank.descriptors.GeneratorDescriptor;
 import as.ds.FixedArray.FixedArray;
 import as.platform.Types.Float32;
 import as.synthesis.Synthesizer;
+import as.util.SynthConstants;
 
 class SampleGenerator extends Generator
 {
@@ -82,7 +83,7 @@ class SampleGenerator extends Generator
         var s2:Float32;
         var s3:Float32;
         var mu:Float32;        
-        switch (Synthesizer.InterpolationMode)
+        switch (SynthConstants.InterpolationMode)
         {
             case InterpolationEnum.Linear:
             {

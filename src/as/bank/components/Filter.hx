@@ -23,6 +23,7 @@ import as.ds.FixedArray.FixedArray;
 import as.platform.Types.Float32;
 import as.synthesis.Synthesizer;
 import as.synthesis.SynthHelper;
+import as.util.SynthConstants;
 
 class Filter
 {
@@ -46,7 +47,17 @@ class Filter
     
     public function new()
     {
-        
+        _a1 = 0;
+        _a2 = 0;
+        _b1 = 0;
+        _b2 = 0;
+        _m1 = 0;
+        _m2 = 0;
+        _m3 = 0;
+        _lastFc = 0;
+        filterMethod = FilterTypeEnum.None;
+        cutOff = 0;
+        resonance = 0;
     }
     
     public function disable()
@@ -120,7 +131,7 @@ class Filter
 
     private function configBiquadLowpass(fc:Float32, q:Float32)
     {
-        var w0 = Synthesizer.TwoPi * fc;
+        var w0 = SynthConstants.TwoPi * fc;
         var cosw0 = Math.cos(w0);
         var alpha = Math.sin(w0) / (2.0 * q);
         var a0inv = 1.0 / (1.0 + alpha);
@@ -132,7 +143,7 @@ class Filter
     
     private function configBiquadHighpass(fc:Float32, q:Float32)
     {
-        var w0 = Synthesizer.TwoPi * fc;
+        var w0 = SynthConstants.TwoPi * fc;
         var cosw0 = Math.cos(w0);
         var alpha = Math.sin(w0) / (2.0 * q);
         var a0inv = 1.0 / (1.0 + alpha);

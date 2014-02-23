@@ -47,6 +47,8 @@ class SynthPlayer
         Console.debug("Opening output");
         #if flash
         _output = new FlashOutput();
+        #elseif js
+        _output = new JsWorkerOutput();
         #end
         
         _output.addFinishedListener(function() {

@@ -22,6 +22,7 @@ import as.ds.FixedArray.FixedArray;
 import as.log.LevelPrinter;
 import as.log.MethodPrinter;
 import as.platform.Types.Float32;
+import as.player.FlashOutput.FlashOutputDevice;
 import as.util.HxWorker;
 import flash.display.Sprite;
 import flash.events.Event;
@@ -34,14 +35,11 @@ import haxe.Log;
 import haxe.PosInfos;
 import mconsole.LogLevel;
 
-class FlashOutputWorker extends Sprite
+class FlashOutputDevice
 {
     private static inline var BufferSize = 8192;
     private static inline var Latency = (BufferSize * 1000) / (2*SynthPlayer.SampleRate);
     private static inline var BufferCount = 10;
-    
-    private var _fromOutput:MessageChannel;
-    private var _toOutput:MessageChannel;
 
     private var _sound:Sound;
     private var _soundChannel:SoundChannel;
@@ -53,38 +51,52 @@ class FlashOutputWorker extends Sprite
     
     public function new()
     {
-        super();
         _finished = false;
-        
-        _fromOutput = Worker.current.getSharedProperty("fromOutput");
-		_toOutput = Worker.current.getSharedProperty("toOutput");
-		_toOutput.addEventListener(Event.CHANNEL_MESSAGE, handleMessage);
         
         _circularBuffer = new CircularSampleBuffer(BufferSize*BufferCount);
         _sound = new Sound();
         _sound.addEventListener(SampleDataEvent.SAMPLE_DATA, generateSound);
     }
     
-    private function handleMessage(_)
+    public function play()
     {
-        var cmd:String = _toOutput.receive();
-        switch(cmd)
+        requestBuffers();
+        _finished = false;
+        _soundChannel = _sound.play(_position);
+    }
+    
+    public function pause()
+    {
+        _position = Std.int(_soundChannel.position);
+        _soundChannel.stop();
+        _soundChannel = null;
+    }
+    
+    public function stop()
+    {
+        _position = 0;
+        _finished = true;
+        _circularBuffer.clear();
+        if (_soundChannel != null)
         {
-            case 'play':
-                play();
-            case 'pause':
-                pause();
-            case 'stop':
-                stop();
-            case 'seek':
-                var position = _toOutput.receive(true);
-                seek(position);
-            case 'finished':
-                _finished = true;
-            case 'synthesized':
-                var f = _toOutput.receive(true);
-                _circularBuffer.write(f, 0, f.length);
+            _soundChannel.stop();
+            _soundChannel = null;
         }
+    }
+    
+    public function seek(position:Int)
+    {
+        _position = position;
+    }
+    
+    public function finish()
+    {
+        _finished = true;
+    }
+    
+    public function addSamples(f:FixedArray<Float32>)
+    {
+        _circularBuffer.write(f, 0, f.length);
     }
     
     private function requestBuffers()
@@ -96,41 +108,9 @@ class FlashOutputWorker extends Sprite
         {
             for (i in 0 ... Std.int(BufferCount/2))
             {
-                _fromOutput.send("synthesize");
+                requestBuffer();
             }
         }
-    }
-    
-    private function play()
-    {
-        requestBuffers();
-        _finished = false;
-        _soundChannel = _sound.play(_position);
-    }
-    
-    private function pause()
-    {
-        _position = Std.int(_soundChannel.position);
-        _soundChannel.stop();
-        _soundChannel = null;
-    }
-    
-    private function stop()
-    {
-        _position = 0;
-        _finished = true;
-        _circularBuffer.clear();
-        if (_soundChannel != null)
-        {
-            _soundChannel.stop();
-            _soundChannel = null;
-        }
-    }
-    private function seek(position:Int)
-    {
-        //stop();
-        _position = position;
-        //play();
     }
     
     private function generateSound(e:SampleDataEvent)
@@ -139,7 +119,7 @@ class FlashOutputWorker extends Sprite
         {
             if (_finished)
             {
-                _fromOutput.send('finished');
+                finished();
                 stop();
             }
             else
@@ -163,15 +143,69 @@ class FlashOutputWorker extends Sprite
         
         if (_soundChannel.position != 0)
         {
-            _fromOutput.send("position");
-            _fromOutput.send(Std.int(_soundChannel.position - Latency));
+            positionChanged(Std.int(_soundChannel.position - Latency));
         }
         
         if (!_finished)
         {
             requestBuffers();
         }
-    }    
+    }      
+    
+    public var requestBuffer:Void->Void;
+    public var finished:Void->Void;
+    public var positionChanged:Int->Void;
+}
+
+class FlashOutputWorker extends Sprite
+{
+    
+    private var _fromOutput:MessageChannel;
+    private var _toOutput:MessageChannel;
+    
+    private var _device:FlashOutputDevice;
+    
+    public function new()
+    {
+        super();
+        _device = new FlashOutputDevice();
+        _device.requestBuffer = function() {
+            _fromOutput.send("synthesize");
+        };
+        _device.finished = function() {
+            _fromOutput.send('finished');
+        };
+        _device.positionChanged = function(pos:Int) {
+            _fromOutput.send("position");
+            _fromOutput.send(pos);
+        };
+        
+        _fromOutput = Worker.current.getSharedProperty("fromOutput");
+		_toOutput = Worker.current.getSharedProperty("toOutput");
+		_toOutput.addEventListener(Event.CHANNEL_MESSAGE, handleMessage);
+    }
+    
+    private function handleMessage(_)
+    {
+        var cmd:String = _toOutput.receive();
+        switch(cmd)
+        {
+            case 'play':
+                _device.play();
+            case 'pause':
+                _device.pause();
+            case 'stop':
+                _device.stop();
+            case 'seek':
+                var position = _toOutput.receive(true);
+                _device.seek(position);
+            case 'finished':
+                _device.finish();
+            case 'synthesized':
+                var f = _toOutput.receive(true);
+                _device.addSamples(f);
+        }
+    }  
 }
 
 class FlashOutput implements ISynthOutput
