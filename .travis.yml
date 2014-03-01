@@ -1,0 +1,35 @@
+# Travis build file for alphaTab
+
+# Well, our language is Haxe but as I we use Ant for building
+# we choose Java. 
+language: java
+  
+before_install:
+  # Install Haxe before build
+  - sudo apt-get update                               
+  - sudo apt-get install python-software-properties -y
+  - sudo add-apt-repository ppa:eyecreate/haxe -y
+  - sudo apt-get update
+  - sudo apt-get install haxe -y --force-yes
+  - mkdir ~/haxelib
+  - haxelib setup ~/haxelib
+  # Install NPM Packages 
+  - npm install uglify-js -g
+  # Work on head
+  - git checkout master
+
+# Actual build
+script:
+  - ant flash
+  
+# Push back rebuilt sources to repository
+env:
+  global:
+    secure: "f/ANcxlNIB9va8VlXAmi6TNRrJ9f3RDEZyY9fSb8e2yI7K/38H4n+EIxlyaW+XOyZ7W8SHJN4kOAeQ36vCljJjn9G76I6lfSCxk89/gD6htvO3nFoSdBYKAkhOa84xCBFShU4wT9YhUejJ9UALXoaHRrqbfNYQPAqNaCtOQjBuo="
+after_success: 
+  - git config --global user.name "travis-ci" 
+  - git config --global user.email "travis@travis-ci.org" 
+  - git status 
+  - git add -A 
+  - git commit -m "Travis autobuild $TRAVIS_BUILD_NUMBER"
+  - git push https://${GH_TOKEN}@github.com/CoderLine/alphaSynth master
