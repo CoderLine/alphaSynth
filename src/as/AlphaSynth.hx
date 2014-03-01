@@ -353,7 +353,8 @@ implements ISynthPlayerListener
     
     public static function init(asRoot:String, swfObjectRoot:String = '')
     {
-        var swf = untyped __js__("swfobject");
+        var swf:Dynamic = untyped __js__("swfobject");
+        
         if (asRoot != '' && !StringTools.endsWith(asRoot, "/"))
         {
             asRoot += "/";
@@ -365,27 +366,37 @@ implements ISynthPlayerListener
         
         if (swf)
         {
-            // check for existing instance
-            var alphaSynth:Element = Browser.document.getElementById("alphaSynthContainer");
-            if (alphaSynth != null)
+            var supportsFlashWorkers:Bool = swf.hasFlashPlayerVersion('11.4');
+            
+            if (supportsFlashWorkers)
+            {                    
+                // check for existing instance
+                var alphaSynth:Element = Browser.document.getElementById("alphaSynthContainer");
+                if (alphaSynth != null)
+                {
+                    trace('Skipped initialization, existing alphaSynthContainer found');
+                    return false;
+                }
+                
+                // create container
+                alphaSynth = Browser.document.createElement('div');
+                alphaSynth.setAttribute('id', 'alphaSynthContainer');
+                Browser.document.body.appendChild(alphaSynth);
+                
+                // initialize swf
+                untyped swf.embedSWF(
+                    asRoot + "alphaSynth.swf", 
+                    "alphaSynthContainer", "1px", "1px", "11.4.0", 
+                    swfObjectRoot + "expressInstall.swf", 
+                    {}, {}, {id:"AlphaSynth"}
+                );
+                return true;
+            }
+            else
             {
-                trace('Skipped initialization, existing alphaSynthContainer found');
+                trace('Error initializing alphaSynth: unsupported flash player');
                 return false;
             }
-            
-            // create container
-            alphaSynth = Browser.document.createElement('div');
-            alphaSynth.setAttribute('id', 'alphaSynthContainer');
-            Browser.document.body.appendChild(alphaSynth);
-            
-            // initialize swf
-            untyped swf.embedSWF(
-                asRoot + "alphaSynth.swf", 
-                "alphaSynthContainer", "1px", "1px", "11.4.0", 
-                swfObjectRoot + "expressInstall.swf", 
-                {}, {}, {id:"AlphaSynth"}
-            );
-            return true;
         }    
         else
         {
