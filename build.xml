@@ -10,6 +10,10 @@
     <!-- Main Properties -->
 	<property name="bin" location="bin"/>
 	<property name="src" location="src"/>
+    
+    <target name="all" depends="flash-min">
+    </target>
+
 
     <!--*************************************************************************
         Building Flash
@@ -19,8 +23,32 @@
     <property name="lib-flash" location="${bin-flash}/lib/alphaSynth"/>
 	<property name="haxe-flash-swf" location="${lib-flash}/alphaSynth.swf"/>
 	<property name="haxe-flash-js" location="${lib-flash}/alphaSynth.js"/>
+	<property name="haxe-flash-js-min" location="${lib-flash}/alphaSynth.min.js"/>
+    
+    <condition property="uglify" value="uglifyjs.cmd" else="uglifyjs">
+        <os family="windows" />
+    </condition>
+
+    <target name="minify">
+        <echo message="Minifying ${file}" />
+        <exec executable="${uglify}" failonerror="true">
+            <arg value="${file}" />
+            
+            <arg value="-o" />
+            <arg value="${file-min}" />
+            
+            <arg value="-c" />            
+        </exec>
+    </target>
     
 	<!-- Haxe Builds -->
+    <target name="flash-min" depends="flash">
+        <antcall target="minify">
+            <param name="file" value="${haxe-flash-js}" />
+            <param name="file-min" value="${haxe-flash-js-min}" />
+        </antcall>
+    </target>
+    
 	<target name="flash">
 		<delete file="${haxe-flash-swf}" />
 		<delete file="${haxe-flash-js}" />

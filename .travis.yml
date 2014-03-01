@@ -24,7 +24,7 @@ before_install:
 
 # Actual build
 script:
-  - ant flash
+  - ant all
   
 # Push back rebuilt sources to repository
 env:
