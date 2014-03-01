@@ -17,6 +17,9 @@ before_install:
   - npm install uglify-js -g
   # Work on head
   - git checkout master
+  # Install HaxeLib Packages
+  - haxelib install format
+  - haxelib install mconsole
 
 # Actual build
 script:
