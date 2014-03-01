@@ -20,7 +20,6 @@ package as.player;
 import as.ds.CircularSampleBuffer;
 import as.ds.FixedArray.FixedArray;
 import as.log.LevelPrinter;
-import as.log.MethodPrinter;
 import as.platform.Types.Float32;
 import as.util.HxWorker;
 import flash.display.Sprite;
