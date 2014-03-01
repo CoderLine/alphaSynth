@@ -28,7 +28,9 @@ script:
 # Push back rebuilt sources to repository
 env:
   global:
-  secure: "jaaHnIPjBA07y94vQVo/D5Gih0p+U6ByWKDN4coSy1vSTPfHkhR1Ouf61xt59uxosgaldklg6qITcvUDATxvs67XhyDSkAuPHZH01gaSjAuXCdJEcx5pJuUM+oigCFmAhQGLMD4jeDfPq6sc7bCRA+hF+Tza3/XFwXH0XhQUlvM="after_success: 
+  secure: "jaaHnIPjBA07y94vQVo/D5Gih0p+U6ByWKDN4coSy1vSTPfHkhR1Ouf61xt59uxosgaldklg6qITcvUDATxvs67XhyDSkAuPHZH01gaSjAuXCdJEcx5pJuUM+oigCFmAhQGLMD4jeDfPq6sc7bCRA+hF+Tza3/XFwXH0XhQUlvM="
+  
+after_success: 
   - git config --global user.name "travis-ci" 
   - git config --global user.email "travis@travis-ci.org" 
   - git status 
