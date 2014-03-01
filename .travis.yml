@@ -28,11 +28,10 @@ script:
 # Push back rebuilt sources to repository
 env:
   global:
-    secure: "f/ANcxlNIB9va8VlXAmi6TNRrJ9f3RDEZyY9fSb8e2yI7K/38H4n+EIxlyaW+XOyZ7W8SHJN4kOAeQ36vCljJjn9G76I6lfSCxk89/gD6htvO3nFoSdBYKAkhOa84xCBFShU4wT9YhUejJ9UALXoaHRrqbfNYQPAqNaCtOQjBuo="
-after_success: 
+  secure: "jaaHnIPjBA07y94vQVo/D5Gih0p+U6ByWKDN4coSy1vSTPfHkhR1Ouf61xt59uxosgaldklg6qITcvUDATxvs67XhyDSkAuPHZH01gaSjAuXCdJEcx5pJuUM+oigCFmAhQGLMD4jeDfPq6sc7bCRA+hF+Tza3/XFwXH0XhQUlvM="after_success: 
   - git config --global user.name "travis-ci" 
   - git config --global user.email "travis@travis-ci.org" 
   - git status 
   - git add -A 
   - git commit -m "Travis autobuild $TRAVIS_BUILD_NUMBER"
-  - git push https://${GH_TOKEN}@github.com/CoderLine/alphaSynth master
+  - git push -q https://${GH_TOKEN}@github.com/CoderLine/alphaSynth master
