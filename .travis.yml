@@ -15,11 +15,12 @@ before_install:
   - haxelib setup ~/haxelib
   # Install NPM Packages 
   - npm install uglify-js -g
-  # Work on head
-  - git checkout master
-  # Install HaxeLib Packages
+   # Install HaxeLib Packages
   - haxelib install format
   - haxelib install mconsole
+  # Work on head
+  - git checkout master
+
 
 # Actual build
 script:
@@ -28,7 +29,7 @@ script:
 # Push back rebuilt sources to repository
 env:
   global:
-  secure: "jaaHnIPjBA07y94vQVo/D5Gih0p+U6ByWKDN4coSy1vSTPfHkhR1Ouf61xt59uxosgaldklg6qITcvUDATxvs67XhyDSkAuPHZH01gaSjAuXCdJEcx5pJuUM+oigCFmAhQGLMD4jeDfPq6sc7bCRA+hF+Tza3/XFwXH0XhQUlvM="
+    secure: "jaaHnIPjBA07y94vQVo/D5Gih0p+U6ByWKDN4coSy1vSTPfHkhR1Ouf61xt59uxosgaldklg6qITcvUDATxvs67XhyDSkAuPHZH01gaSjAuXCdJEcx5pJuUM+oigCFmAhQGLMD4jeDfPq6sc7bCRA+hF+Tza3/XFwXH0XhQUlvM="
   
 after_success: 
   - git config --global user.name "travis-ci" 
