@@ -18,7 +18,9 @@
 package as.sf2;
 
 import as.ds.FixedArray.FixedArray;
+import as.ds.SampleArray;
 import as.platform.Types.Float32;
+import as.platform.Types.TypeUtils;
 import as.util.IOHelper;
 import haxe.io.Bytes;
 import haxe.io.BytesInput;
@@ -26,7 +28,7 @@ import haxe.io.BytesInput;
 class SoundFontSampleData
 {
     public var bitsPerSample(default, null):Int;
-    public var sampleData(default, null):FixedArray<Float32>;
+    public var sampleData(default, null):SampleArray;
     
     public function new(input:BytesInput) 
     {
@@ -50,7 +52,8 @@ class SoundFontSampleData
                 case "smpl":
                     bitsPerSample = 16;
                     rawSampleData = input.read(size);
-                    sampleData = new FixedArray<Float32>(Std.int(rawSampleData.length / 2));
+                    sampleData = new SampleArray(Std.int(rawSampleData.length / 2));
+                    TypeUtils.clearSampleArray(sampleData);
                 case "sm24":
                     if (rawSampleData == null || size != Std.int(Math.ceil(sampleData.length / 2.0)))
                     {//ignore this chunk if wrong size or if it comes first

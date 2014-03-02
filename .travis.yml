@@ -24,7 +24,7 @@ before_install:
 
 # Actual build
 script:
-  - ant all
+  - ant web-min
   
 # Push back rebuilt sources to repository
 env:

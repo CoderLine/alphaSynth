@@ -15,29 +15,18 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-package as.bank.descriptors;
+package as.main;
 
-import as.bank.components.Enum.WaveformEnum;
-import as.bank.components.generators.DefaultGenerators;
-import as.bank.components.generators.Generator;
-import as.platform.Types.Float32;
-import as.synthesis.Synthesizer;
-import as.synthesis.SynthHelper;
-import as.util.SynthConstants;
-import haxe.io.BytesInput;
+import as.player.SynthPlayer;
 
-class LfoDescriptor
+/**
+ * This main class for the C# target just implements an 
+ * empty container.
+ */
+class AlphaSynthCs
 {
-    public var delayTime:Float32;
-    public var frequency:Float32;
-    public var depth:Float32;
-    public var generator:Generator;
-
-    public function new() 
+    public function new()
     {
-        delayTime = 0;
-        frequency = SynthConstants.DefaultLfoFrequency;
-        depth = 1;
-        generator = DefaultGenerators.defaultSine();
+        
     }
 }

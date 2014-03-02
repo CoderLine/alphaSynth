@@ -17,6 +17,7 @@
  */
 package as.bank;
 import as.ds.FixedArray.FixedArray;
+import as.ds.SampleArray;
 import as.platform.Types.Float32;
 import as.platform.Types.Short;
 import as.sf2.SampleHeader;
@@ -33,7 +34,7 @@ class SampleDataAsset
     public var end:Float32;
     public var loopStart:Float32;
     public var loopEnd:Float32;
-    public var sampleData:FixedArray<Float32>;
+    public var sampleData:SampleArray;
     
     public function new(sample:SampleHeader, sampleData:SoundFontSampleData)
     {

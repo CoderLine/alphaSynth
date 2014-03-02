@@ -18,6 +18,7 @@
 package as.platform;
 
 import as.ds.FixedArray.FixedArray;
+import as.ds.SampleArray;
 import haxe.io.Bytes;
 import haxe.Serializer;
 import haxe.Unserializer;
@@ -80,17 +81,26 @@ class TypeUtils
 		#end
     }
     
-    public static inline function clearFloat32Array(a:FixedArray<Float32>)
+    public static inline function clearShortArray(a:FixedArray<Short>)
     {
 		#if cs
             CsArray.Clear(cast a, 0, a.length);
 		#else
 			for (i in 0... a.length)
 			{
-                a.set(i, 0.0);
+                a.set(i, 0);
 			}
 		#end
     }
+       
+    public static inline function clearSampleArray(a:SampleArray)
+    {
+        for (i in 0... a.length)
+        {
+            a.set(i, 0.0);
+        }
+    }
+    
     public static inline function clearObjectArray<T>(a:FixedArray<T>)
     {
 		#if cs

@@ -25,6 +25,7 @@ import as.ds.FixedArray.FixedArray;
 import as.platform.Types.TypeUtils;
 import as.synthesis.Synthesizer;
 import as.synthesis.VoiceParameters;
+import as.util.SynthConstants;
 
 class Patch
 {
@@ -39,10 +40,10 @@ class Patch
     private function new(name:String)
     {
         this.name = name;
-        generatorInfo = new FixedArray<Generator>(Synthesizer.MaxVoiceComponents);
-        envelopeInfo = new FixedArray<EnvelopeDescriptor>(Synthesizer.MaxVoiceComponents);
-        lfoInfo = new FixedArray<LfoDescriptor>(Synthesizer.MaxVoiceComponents);
-        filterInfo = new FixedArray<FilterDescriptor>(Synthesizer.MaxVoiceComponents);
+        generatorInfo = new FixedArray<Generator>(SynthConstants.MaxVoiceComponents);
+        envelopeInfo = new FixedArray<EnvelopeDescriptor>(SynthConstants.MaxVoiceComponents);
+        lfoInfo = new FixedArray<LfoDescriptor>(SynthConstants.MaxVoiceComponents);
+        filterInfo = new FixedArray<FilterDescriptor>(SynthConstants.MaxVoiceComponents);
         exclusiveGroup = 0;
         exclusiveGroupTarget = 0;
     }

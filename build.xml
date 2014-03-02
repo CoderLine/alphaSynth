@@ -1,4 +1,4 @@
-<project name="alphaSynth" default="flash" basedir=".">
+<project name="alphaSynth" default="all" basedir=".">
     <description>
         a buildfile compiling alphaSynth
     </description>
@@ -11,24 +11,22 @@
 	<property name="bin" location="bin"/>
 	<property name="src" location="src"/>
     
-    <target name="all" depends="flash-min">
-    </target>
-
-
     <!--*************************************************************************
         Building Flash
     **************************************************************************-->
     
     <property name="bin-flash" location="${bin}/flash"/>
     <property name="lib-flash" location="${bin-flash}/lib/alphaSynth"/>
-	<property name="haxe-flash-swf" location="${lib-flash}/alphaSynth.swf"/>
-	<property name="haxe-flash-js" location="${lib-flash}/alphaSynth.js"/>
-	<property name="haxe-flash-js-min" location="${lib-flash}/alphaSynth.min.js"/>
+	<property name="haxe-flash-full" location="${lib-flash}/alphaSynthFull.swf"/>
+	<property name="haxe-flash-player" location="${lib-flash}/alphaSynthPlayer.swf"/>
+	<property name="haxe-js-worker" location="${lib-flash}/alphaSynthWorker.js"/>
+	<property name="haxe-js-worker-min" location="${lib-flash}/alphaSynthWorker.min.js"/>
+	<property name="haxe-js-api" location="${lib-flash}/alphaSynth.js"/>    
+	<property name="haxe-js-api-min" location="${lib-flash}/alphaSynth.min.js"/>    
     
     <condition property="uglify" value="uglifyjs.cmd" else="uglifyjs">
         <os family="windows" />
-    </condition>
-
+    </condition>    
     <target name="minify">
         <echo message="Minifying ${file}" />
         <exec executable="${uglify}" failonerror="true">
@@ -42,25 +40,29 @@
     </target>
     
 	<!-- Haxe Builds -->
-    <target name="flash-min" depends="flash">
+    <target name="web-min" depends="web">
         <antcall target="minify">
-            <param name="file" value="${haxe-flash-js}" />
-            <param name="file-min" value="${haxe-flash-js-min}" />
+            <param name="file" value="${haxe-js-worker}" />
+            <param name="file-min" value="${haxe-js-worker-min}" />
+        </antcall>
+        <antcall target="minify">
+            <param name="file" value="${haxe-js-api}" />
+            <param name="file-min" value="${haxe-js-api-min}" />
         </antcall>
     </target>
     
-	<target name="flash">
-		<delete file="${haxe-flash-swf}" />
-		<delete file="${haxe-flash-js}" />
+	<!-- Haxe Builds -->
+    <target name="web">
+        <echo message="Building alphaSynth Flash (full)" />
         <exec executable="haxe" failonerror="true">
             <arg value="-cp" />
             <arg value="${src}"/>
             
             <arg value="-main" />
-            <arg value="as.AlphaSynth" />
+            <arg value="as.main.flash.AlphaSynthFlash" />
             
             <arg value="-swf" />
-            <arg value="${haxe-flash-swf}" />
+            <arg value="${haxe-flash-full}" />
             
             <arg value="-lib" />
             <arg value="format" />
@@ -71,18 +73,54 @@
             <arg value="-swf-version" />
             <arg value="11.4" />
         </exec>
+        
+        <echo message="Building alphaSynth Flash (player)" />
         <exec executable="haxe" failonerror="true">
             <arg value="-cp" />
             <arg value="${src}"/>
             
             <arg value="-main" />
-            <arg value="as.AlphaSynth" />
+            <arg value="as.main.webworker.flash.AlphaSynthFlashPlayer" />
             
-            <arg value="-js" />
-            <arg value="${haxe-flash-js}" />
+            <arg value="-swf" />
+            <arg value="${haxe-flash-player}" />
         </exec>
-	</target>	
-	
+        
+        <echo message="Building alphaSynth Js (WebWorker)" />
+        <exec executable="haxe" failonerror="true">
+            <arg value="-cp" />
+            <arg value="${src}"/>
+            
+            <arg value="-main" />
+            <arg value="as.main.webworker.AlphaSynthJsWorker" />
+            
+            <arg value="-lib" />
+            <arg value="mconsole" />
+
+            <arg value="-D" />
+            <arg value="samsung" />
+
+            <arg value="-js" />
+            <arg value="${haxe-js-worker}" />
+        </exec>
+        
+        <echo message="Building alphaSynth Js (API)" />
+        <exec executable="haxe" failonerror="true">
+            <arg value="-cp" />
+            <arg value="${src}"/>
+            
+            <arg value="-main" />
+            <arg value="as.main.AlphaSynthJs" />
+            
+            <arg value="-lib" />
+            <arg value="mconsole" />
+
+            <arg value="-js" />
+            <arg value="${haxe-js-api}" />
+        </exec>        
+        
+    </target>
+    
     <property name="bin-cs" location="${bin}/cs"/>
     <property name="haxe-cs" location="${bin-cs}/AlphaSynth.Core"/> 
     
@@ -104,7 +142,7 @@
             <arg value="no-root" />
             
             <arg value="-main" />
-            <arg value="as.AlphaSynth" />
+            <arg value="as.AlphaSynthCs" />
             
             <arg value="-cs" />
             <arg value="${haxe-cs}" />

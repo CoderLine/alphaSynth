@@ -15,16 +15,12 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-package as;
+package as.main;
+
 import as.player.SynthPlayerState;
 
 interface IAlphaSynth
 {
-    /**
-     * Is ready for play
-     */    
-    public function isReadyForPlay() : Bool;
-    
     /**
      * Starts the playback if possible
      */    
@@ -80,24 +76,6 @@ interface IAlphaSynth
      * @param data a serialized haxe.io.Bytes 
      */
     public function loadMidiData(data:String) : Void;
-    
-    /**
-     * Returns the current player state
-     * @return the current player state
-     */
-    public function getState() : SynthPlayerState;
-    
-    /**
-     * Returns whether the soundfont was loaded and parsed
-     * @return true if the soundfont was loaded and parsed
-     */    
-    public function isSoundFontLoaded() : Bool;
-    
-    /**
-     * Returns whether the midi data was loaded and parsed
-     * @return true if the midi data was loaded and parsed
-     */    
-    public function isMidiLoaded() : Bool;
     
     /**
      * Sets the logging level which alphaTab should use.

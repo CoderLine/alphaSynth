@@ -47,7 +47,25 @@ class UrlLoader
         request.method = method;
         loader.load(request);
     }
-    #else 
+    #elseif js
+    public function load()
+    {
+        var request = new js.html.XMLHttpRequest();
+        request.open(method, url, true);
+        request.responseType = "arraybuffer";
+        request.onload = function(e) {
+            var buffer = request.response;
+            if (buffer) 
+            {
+                fireComplete(Bytes.ofData(untyped new as.util.TypedArrays.Uint8Array(buffer)));
+            }
+        };
+        request.onprogress = function(e) {
+            fireProgress(e.loaded, e.total);
+        };
+        request.send(null);
+    }
+    #else
     #error Unsupported platform
     #end
     

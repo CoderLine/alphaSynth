@@ -21,6 +21,7 @@ import as.bank.PatchBank;
 import as.midi.MidiFile;
 import as.sequencer.MidiFileSequencer;
 import as.synthesis.Synthesizer;
+import as.util.SynthConstants;
 import as.util.UrlLoader;
 import haxe.Http;
 import haxe.io.Bytes;
@@ -28,9 +29,7 @@ import haxe.io.BytesInput;
 import haxe.Unserializer;
 
 class SynthPlayer 
-{
-    public static inline var SampleRate = 44100;
-    
+{   
     private var _output:ISynthOutput;
     private var _synth:Synthesizer;
     private var _sequencer:MidiFileSequencer;
@@ -47,6 +46,8 @@ class SynthPlayer
         Console.debug("Opening output");
         #if flash
         _output = new FlashOutput();
+        #elseif js
+        _output = new JsWorkerOutput();
         #end
         
         _output.addFinishedListener(function() {
@@ -68,7 +69,7 @@ class SynthPlayer
         });
         
         Console.debug("Creating synthesizer");
-        _synth = new Synthesizer(SampleRate, 2, 441, 3, 100);
+        _synth = new Synthesizer(SynthConstants.SampleRate, 2, 441, 3, 100);
         _sequencer = new MidiFileSequencer(_synth);
         _sequencer.addFinishedListener(_output.sequencerFinished);
     }

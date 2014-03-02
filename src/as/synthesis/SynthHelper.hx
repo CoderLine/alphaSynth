@@ -20,6 +20,7 @@ package as.synthesis;
 import as.platform.Types.Byte;
 import as.platform.Types.Float32;
 import as.platform.Types.Short;
+import as.util.SynthConstants;
 import as.util.Tables;
 
 class VoiceStateEnum
@@ -53,7 +54,7 @@ class PanComponent
         {
             case PanFormulaEnum.Neg3dBCenter:
             {
-                var dvalue = Synthesizer.HalfPi * (value + 1) / 2.0;
+                var dvalue = SynthConstants.HalfPi * (value + 1) / 2.0;
                 left = Math.cos(dvalue);
                 right = Math.sin(dvalue);
             }
@@ -64,9 +65,9 @@ class PanComponent
             }
             case PanFormulaEnum.ZeroCenter:
             {
-                var dvalue = Synthesizer.HalfPi * (value + 1.0) / 2.0;
-                left = (Math.cos(dvalue) / Synthesizer.InverseSqrtOfTwo);
-                right = (Math.sin(dvalue) / Synthesizer.InverseSqrtOfTwo);
+                var dvalue = SynthConstants.HalfPi * (value + 1.0) / 2.0;
+                left = (Math.cos(dvalue) / SynthConstants.InverseSqrtOfTwo);
+                right = (Math.sin(dvalue) / SynthConstants.InverseSqrtOfTwo);
             }
             default:
                 throw ("Invalid pan law selected.");
@@ -142,7 +143,7 @@ class SynthHelper
             key = -127;
         else if (key > 127)
             key = 127;
-        return Tables.SemitoneTable[127 + key];
+        return Tables.semitoneTable(127 + key);
     }
     public static function centsToPitch(cents: Int) : Float32
     {//does not return a frequency, only the 2^(1/12) value.
@@ -152,14 +153,14 @@ class SynthHelper
             key = -127;
         else if (key > 127)
             key = 127;
-        return Tables.SemitoneTable[127 + key] * Tables.CentTable[100 + cents];
+        return Tables.semitoneTable(127 + key) * Tables.centTable(100 + cents);
     }
 
     //Mixing
     public static function mixStereoToStereoInterpolation(startIndex: Int, leftVol: Float32, rightVol: Float32, voiceParams:VoiceParameters) : Void
     {
-        var inc_l = (leftVol - voiceParams.mixing[0]) / Synthesizer.DefaultBlockSize;
-        var inc_r = (rightVol - voiceParams.mixing[1]) / Synthesizer.DefaultBlockSize;
+        var inc_l = (leftVol - voiceParams.mixing[0]) / SynthConstants.DefaultBlockSize;
+        var inc_r = (rightVol - voiceParams.mixing[1]) / SynthConstants.DefaultBlockSize;
         var i = 0;
         while(i < voiceParams.blockBuffer.length)
         {
@@ -175,8 +176,8 @@ class SynthHelper
     
     public static function mixMonoToStereoInterpolation(startIndex: Int, leftVol: Float32, rightVol: Float32, voiceParams:VoiceParameters) : Void
     {
-        var inc_l = (leftVol - voiceParams.mixing[0]) / Synthesizer.DefaultBlockSize;
-        var inc_r = (rightVol - voiceParams.mixing[1]) / Synthesizer.DefaultBlockSize;
+        var inc_l = (leftVol - voiceParams.mixing[0]) / SynthConstants.DefaultBlockSize;
+        var inc_r = (rightVol - voiceParams.mixing[1]) / SynthConstants.DefaultBlockSize;
         for (i in 0 ... voiceParams.blockBuffer.length)
         {
             voiceParams.mixing[0] += inc_l;
@@ -190,7 +191,7 @@ class SynthHelper
     }
     public static function mixMonoToMonoInterpolation(startIndex: Int, volume: Float32, voiceParams:VoiceParameters) : Void
     {
-        var inc = (volume - voiceParams.mixing[0]) / Synthesizer.DefaultBlockSize;
+        var inc = (volume - voiceParams.mixing[0]) / SynthConstants.DefaultBlockSize;
         for (i in 0 ... voiceParams.blockBuffer.length)
         {
             voiceParams.mixing[0] += inc;

@@ -20,9 +20,11 @@ package as.bank.components;
 import as.bank.components.Enum;
 import as.bank.descriptors.EnvelopeDescriptor;
 import as.ds.FixedArray.FixedArray;
+import as.ds.SampleArray;
 import as.platform.Types.Float32;
 import as.platform.Types.Short;
 import as.synthesis.Synthesizer;
+import as.util.SynthConstants;
 import as.util.Tables;
 
 // TODO: reimplement this, it seems this implementation doesn't work as expected. 
@@ -40,16 +42,24 @@ class Envelope
     
     public function new() 
     {
+        value = 0;
+        depth = 0;
         _stages = new FixedArray<EnvelopeStage>(7);
         for (x in 0 ... _stages.length)
             _stages[x] = new EnvelopeStage();
-        _stages[0].graph = Tables.EnvelopeTables[0];
-        _stages[2].graph = Tables.EnvelopeTables[0];
+        _stages[0].graph = Tables.envelopeTables(0);
+        _stages[2].graph = Tables.envelopeTables(0);
         _stages[3].reverse = true;
-        _stages[4].graph = Tables.EnvelopeTables[0];
+        _stages[4].graph = Tables.envelopeTables(0);
         _stages[5].reverse = true;
-        _stages[6].graph = Tables.EnvelopeTables[0];
+        _stages[6].graph = Tables.envelopeTables(0);
         _stages[6].time = 100000000;
+        currentStage = EnvelopeStateEnum.Delay;
+        while (_stages[currentStage].time == 0)
+        {
+            currentStage++;
+        }
+        _stage = _stages[currentStage];
     }
     
     public function quickSetupDAHDSR(sampleRate:Int, note:Int, keyNumToHold:Short, keyNumToDecay:Short, susMod:Float32, envelopeInfo:EnvelopeDescriptor)
@@ -63,7 +73,7 @@ class Envelope
         _stages[1].offset = envelopeInfo.startLevel;
         _stages[1].scale = envelopeInfo.peakLevel - envelopeInfo.startLevel;
         _stages[1].time = Std.int(Math.max(0, Std.int(sampleRate * (envelopeInfo.attackTime))));
-        _stages[1].graph = Tables.EnvelopeTables[envelopeInfo.attackGraph];
+        _stages[1].graph = Tables.envelopeTables(envelopeInfo.attackGraph);
         // Hold
         _stages[2].offset = 0;
         _stages[2].scale = envelopeInfo.peakLevel;
@@ -72,7 +82,7 @@ class Envelope
         _stages[3].offset = envelopeInfo.sustainLevel * susMod;
         _stages[3].scale = envelopeInfo.peakLevel - envelopeInfo.sustainLevel * susMod;
         _stages[3].time = Std.int(Math.max(0, Std.int(sampleRate * (envelopeInfo.decayTime) * Math.pow(2, ((60 - note) * keyNumToDecay) / 1200.0))));
-        _stages[3].graph = Tables.EnvelopeTables[envelopeInfo.decayGraph];
+        _stages[3].graph = Tables.envelopeTables(envelopeInfo.decayGraph);
         // Sustain
         _stages[4].offset = 0;
         _stages[4].scale = envelopeInfo.sustainLevel * susMod;
@@ -81,7 +91,7 @@ class Envelope
         _stages[5].offset = 0;
         _stages[5].scale = _stages[3].time == 0 && _stages[4].time == 0 ? envelopeInfo.peakLevel : _stages[4].scale;
         _stages[5].time = Std.int(Math.max(0, Std.int(sampleRate * (envelopeInfo.releaseTime))));
-        _stages[5].graph = Tables.EnvelopeTables[envelopeInfo.releaseGraph];
+        _stages[5].graph = Tables.envelopeTables(envelopeInfo.releaseGraph);
 
         _index = 0;
         value = 0;
@@ -126,7 +136,7 @@ class Envelope
 
     public function release()
     {
-        if (value <= Synthesizer.NonAudible)
+        if (value <= SynthConstants.NonAudible)
         {
             _index = 0;
             currentStage = EnvelopeStateEnum.None;
@@ -145,7 +155,7 @@ class Envelope
 class EnvelopeStage
 {
     public var time:Int;
-    public var graph:FixedArray<Float32>;
+    public var graph:SampleArray;
     public var scale:Float32;
     public var offset:Float32;
     public var reverse:Bool;

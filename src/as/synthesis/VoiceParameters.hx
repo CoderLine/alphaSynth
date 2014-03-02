@@ -24,7 +24,11 @@ import as.bank.components.generators.GeneratorParameters;
 import as.bank.components.generators.TriangleGenerator;
 import as.bank.components.Lfo;
 import as.ds.FixedArray.FixedArray;
+import as.ds.SampleArray;
 import as.platform.Types.Float32;
+import as.platform.Types.TypeUtils;
+import as.synthesis.SynthHelper.VoiceStateEnum;
+import as.util.SynthConstants;
 
 class VoiceParameters
 {
@@ -36,9 +40,9 @@ class VoiceParameters
     public var synth:Synthesizer;
     public var pitchOffset:Int;
     public var volOffset:Float32;
-    public var blockBuffer:FixedArray<Float32>;
-    public var mixing:FixedArray<Float32>;
-    public var counters:FixedArray<Float32>;    
+    public var blockBuffer:SampleArray;
+    public var mixing:SampleArray;
+    public var counters:SampleArray;    
     public var generatorParams:FixedArray<GeneratorParameters>;
     public var generators:FixedArray<Generator>;  
     public var envelopes:FixedArray<Envelope>;
@@ -48,16 +52,25 @@ class VoiceParameters
     public function new(synth:Synthesizer)
     {
         this.synth = synth;
-        blockBuffer = new FixedArray<Float32>(Synthesizer.DefaultBlockSize);
+        channel = 0;
+        note = 0;
+        velocity = 0;
+        state = VoiceStateEnum.Stopped;
+        pitchOffset = 0;
+        volOffset = 0;
+        blockBuffer = new SampleArray(SynthConstants.DefaultBlockSize);
+        TypeUtils.clearSampleArray(blockBuffer);
         //create default number of each component
-        mixing = new FixedArray<Float32>(Synthesizer.MaxVoiceComponents);
-        counters = new FixedArray<Float32>(Synthesizer.MaxVoiceComponents);
-        generatorParams = new FixedArray<GeneratorParameters>(Synthesizer.MaxVoiceComponents);
+        mixing = new SampleArray(SynthConstants.MaxVoiceComponents);
+        TypeUtils.clearSampleArray(mixing);
+        counters = new SampleArray(SynthConstants.MaxVoiceComponents);
+        TypeUtils.clearSampleArray(counters);
+        generatorParams = new FixedArray<GeneratorParameters>(SynthConstants.MaxVoiceComponents);
         generators = null; //since this is set directly there is no need to initialize
-        envelopes = new FixedArray<Envelope>(Synthesizer.MaxVoiceComponents);
-        filters = new FixedArray<Filter>(Synthesizer.MaxVoiceComponents);
-        lfos = new FixedArray<Lfo>(Synthesizer.MaxVoiceComponents);
-        for (i in 0 ... Synthesizer.MaxVoiceComponents)
+        envelopes = new FixedArray<Envelope>(SynthConstants.MaxVoiceComponents);
+        filters = new FixedArray<Filter>(SynthConstants.MaxVoiceComponents);
+        lfos = new FixedArray<Lfo>(SynthConstants.MaxVoiceComponents);
+        for (i in 0 ... SynthConstants.MaxVoiceComponents)
         {
             generatorParams[i] = new GeneratorParameters();
             envelopes[i] = new Envelope();
