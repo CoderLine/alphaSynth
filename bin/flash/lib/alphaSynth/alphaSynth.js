@@ -2349,7 +2349,7 @@ mconsole.PrinterBase.prototype = {
 mconsole.ConsoleView = function() {
 	mconsole.PrinterBase.call(this);
 	this.atBottom = true;
-	this.projectHome = "D:\\Dev\\AlphaTab\\alphaSynth/";
+	this.projectHome = "/home/travis/build/CoderLine/alphaSynth/";
 	var document = js.Browser.document;
 	this.element = document.createElement("pre");
 	this.element.id = "console";
