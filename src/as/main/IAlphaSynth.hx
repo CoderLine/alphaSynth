@@ -18,6 +18,7 @@
 package as.main;
 
 import as.player.SynthPlayerState;
+import haxe.io.Bytes;
 
 interface IAlphaSynth
 {
@@ -76,6 +77,12 @@ interface IAlphaSynth
      * @param data a serialized haxe.io.Bytes 
      */
     public function loadMidiData(data:String) : Void;
+    
+    /**
+     * Loads a midi from the given data
+     * @param data the data 
+     */
+    public function loadMidiBytes(data:Bytes) : Void;
     
     /**
      * Sets the logging level which alphaTab should use.

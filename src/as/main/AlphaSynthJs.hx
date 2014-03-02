@@ -20,6 +20,7 @@ import as.log.LevelPrinter;
 import as.main.flash.AlphaSynthFlashApi;
 import as.main.webworker.flash.AlphaSynthFlashPlayerApi;
 import as.main.webworker.webaudio.AlphaSynthJsPlayerApi;
+import haxe.io.Bytes;
 import js.JQuery;
 
 /**
@@ -155,6 +156,16 @@ class AlphaSynthJs implements IAlphaSynthAsync
         if (realInstance == null) return;
         realInstance.loadMidiData(data);
     }
+    public function loadMidiBytes(data:Bytes) : Void
+    {
+        if (realInstance == null) return;
+        realInstance.loadMidiBytes(data);
+    }
+    public function loadMidiBytesData(data:Dynamic) : Void
+    {
+        loadMidiBytes(Bytes.ofData(data));
+    }
+    
     public function setLogLevel(level:Int) : Void
     {
         _printer.level = level;
@@ -166,7 +177,7 @@ class AlphaSynthJs implements IAlphaSynthAsync
     {
         if (realInstance == null) return;
         realInstance.on(events, fn);
-        if (events.indexOf("ready") >= 0 && ready)
+        if (events == "ready" && ready)
         {
             fn();
         }

@@ -576,7 +576,7 @@ as.main.AlphaSynthJs.init = function(asRoot,swfObjectRoot) {
 	var supportsFlashWorkers = swf.hasFlashPlayerVersion("11.4");
 	if(supportsWebAudio) {
 		if(mconsole.Console.hasConsole) mconsole.Console.callConsole("debug",["Will use webworkers for synthesizing and web audio api for playback"]);
-		mconsole.Console.print(mconsole.LogLevel.debug,["Will use webworkers for synthesizing and web audio api for playback"],{ fileName : "AlphaSynthJs.hx", lineNumber : 184, className : "as.main.AlphaSynthJs", methodName : "init"});
+		mconsole.Console.print(mconsole.LogLevel.debug,["Will use webworkers for synthesizing and web audio api for playback"],{ fileName : "AlphaSynthJs.hx", lineNumber : 195, className : "as.main.AlphaSynthJs", methodName : "init"});
 		var result = as.main.webworker.webaudio.AlphaSynthJsPlayerApi.init(asRoot);
 		if(result) {
 			as.main.AlphaSynthJs.instance.realInstance = new as.main.webworker.webaudio.AlphaSynthJsPlayerApi();
@@ -585,7 +585,7 @@ as.main.AlphaSynthJs.init = function(asRoot,swfObjectRoot) {
 		return result;
 	} else if(supportsWebWorkers) {
 		if(mconsole.Console.hasConsole) mconsole.Console.callConsole("debug",["Will use webworkers for synthesizing and flash for playback"]);
-		mconsole.Console.print(mconsole.LogLevel.debug,["Will use webworkers for synthesizing and flash for playback"],{ fileName : "AlphaSynthJs.hx", lineNumber : 195, className : "as.main.AlphaSynthJs", methodName : "init"});
+		mconsole.Console.print(mconsole.LogLevel.debug,["Will use webworkers for synthesizing and flash for playback"],{ fileName : "AlphaSynthJs.hx", lineNumber : 206, className : "as.main.AlphaSynthJs", methodName : "init"});
 		var result = as.main.webworker.flash.AlphaSynthFlashPlayerApi.init(asRoot,swfObjectRoot);
 		if(result) {
 			as.main.AlphaSynthJs.instance.realInstance = new as.main.webworker.flash.AlphaSynthFlashPlayerApi();
@@ -594,7 +594,7 @@ as.main.AlphaSynthJs.init = function(asRoot,swfObjectRoot) {
 		return result;
 	} else if(supportsFlashWorkers) {
 		if(mconsole.Console.hasConsole) mconsole.Console.callConsole("debug",["Will use flash for synthesizing and playback"]);
-		mconsole.Console.print(mconsole.LogLevel.debug,["Will use flash for synthesizing and playback"],{ fileName : "AlphaSynthJs.hx", lineNumber : 206, className : "as.main.AlphaSynthJs", methodName : "init"});
+		mconsole.Console.print(mconsole.LogLevel.debug,["Will use flash for synthesizing and playback"],{ fileName : "AlphaSynthJs.hx", lineNumber : 217, className : "as.main.AlphaSynthJs", methodName : "init"});
 		var result = as.main.flash.AlphaSynthFlashApi.init(asRoot,swfObjectRoot);
 		if(result) {
 			as.main.AlphaSynthJs.instance.realInstance = new as.main.flash.AlphaSynthFlashApi();
@@ -602,7 +602,7 @@ as.main.AlphaSynthJs.init = function(asRoot,swfObjectRoot) {
 		}
 		return result;
 	} else {
-		mconsole.Console.error("Incompatible browser",null,{ fileName : "AlphaSynthJs.hx", lineNumber : 217, className : "as.main.AlphaSynthJs", methodName : "init"});
+		mconsole.Console.error("Incompatible browser",null,{ fileName : "AlphaSynthJs.hx", lineNumber : 228, className : "as.main.AlphaSynthJs", methodName : "init"});
 		return false;
 	}
 }
@@ -610,12 +610,19 @@ as.main.AlphaSynthJs.prototype = {
 	on: function(events,fn) {
 		if(this.realInstance == null) return;
 		this.realInstance.on(events,fn);
-		if(events.indexOf("ready") >= 0 && this.ready) fn();
+		if(events == "ready" && this.ready) fn();
 	}
 	,setLogLevel: function(level) {
 		as.main.AlphaSynthJs._printer.level = level;
 		if(this.realInstance == null) return;
 		this.realInstance.setLogLevel(level);
+	}
+	,loadMidiBytesData: function(data) {
+		this.loadMidiBytes(haxe.io.Bytes.ofData(data));
+	}
+	,loadMidiBytes: function(data) {
+		if(this.realInstance == null) return;
+		this.realInstance.loadMidiBytes(data);
 	}
 	,loadMidiData: function(data) {
 		if(this.realInstance == null) return;
@@ -1264,7 +1271,7 @@ as.main.webworker.webaudio.AlphaSynthJsPlayerApi.prototype = {
 		this._synth.postMessage({ cmd : "loadMidiUrl", url : this.qualifyURL(url)});
 	}
 	,loadMidiBytes: function(data) {
-		this._synth.postMessage({ cmd : "loadMidiBytes", data : data});
+		this._synth.postMessage({ cmd : "loadMidiData", data : haxe.Serializer.run(data)});
 	}
 	,loadSoundFontData: function(data) {
 		this._synth.postMessage({ cmd : "loadSoundFontData", data : data});

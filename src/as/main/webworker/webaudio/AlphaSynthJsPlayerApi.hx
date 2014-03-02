@@ -21,8 +21,10 @@ import as.ds.FixedArray.FixedArray;
 import as.ds.SampleArray;
 import as.main.IAlphaSynthAsync;
 import as.platform.Types.Float32;
+import haxe.io.Bytes;
 import haxe.remoting.Context;
 import haxe.remoting.ExternalConnection;
+import haxe.Serializer;
 import js.Browser;
 import js.html.Element;
 import js.JQuery;
@@ -104,9 +106,9 @@ class AlphaSynthJsPlayerApi implements IAlphaSynthAsync
         _synth.postMessage( { cmd: 'loadSoundFontData', data: data} );
     }
     
-    public function loadMidiBytes(data:Dynamic /*Uint8Array */)
+    public function loadMidiBytes(data:Bytes)
     {
-        _synth.postMessage( { cmd: 'loadMidiBytes', data: data} );
+        _synth.postMessage( { cmd: 'loadMidiData', data: Serializer.run(data)} );
     }    
     
     public function loadMidiUrl(url:String) : Void

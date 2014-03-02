@@ -115,6 +115,11 @@ class AlphaSynthFlash implements IAlphaSynthSync implements ISynthPlayerListener
         _player.loadMidiData(data);
     }
     
+    public function loadMidiBytes(data:Bytes) : Void
+    {
+        _player.loadMidiBytes(data);
+    }
+    
     public function getState() : SynthPlayerState
     {
         return _player.state;

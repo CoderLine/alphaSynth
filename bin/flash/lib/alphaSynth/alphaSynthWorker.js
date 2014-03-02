@@ -1922,7 +1922,7 @@ as.main.webworker.AlphaSynthJsWorker.prototype = {
 	}
 	,setLogLevel: function(level) {
 		if(level < 0 || level > 5) {
-			mconsole.Console.error("invalid log level",null,{ fileName : "AlphaSynthJsWorker.hx", lineNumber : 154, className : "as.main.webworker.AlphaSynthJsWorker", methodName : "setLogLevel"});
+			mconsole.Console.error("invalid log level",null,{ fileName : "AlphaSynthJsWorker.hx", lineNumber : 161, className : "as.main.webworker.AlphaSynthJsWorker", methodName : "setLogLevel"});
 			return;
 		}
 		this._printer.level = level;
@@ -1935,6 +1935,9 @@ as.main.webworker.AlphaSynthJsWorker.prototype = {
 	}
 	,getState: function() {
 		return this._player.state;
+	}
+	,loadMidiBytes: function(data) {
+		this._player.loadMidiBytes(data);
 	}
 	,loadMidiData: function(data) {
 		this._player.loadMidiData(data);
@@ -2003,7 +2006,10 @@ as.main.webworker.AlphaSynthJsWorker.prototype = {
 			this.loadMidiUrl(data.url);
 			break;
 		case "loadMidiData":
-			this.loadMidiUrl(data.data);
+			this.loadMidiData(data.data);
+			break;
+		case "loadMidiBytes":
+			this.loadMidiBytes(data.data);
 			break;
 		case "getState":
 			this._main.postMessage({ cmd : "getState", value : this.getState()});
@@ -2750,7 +2756,7 @@ as.player.SynthPlayer.prototype = {
 			mconsole.Console.print(mconsole.LogLevel.info,["Midi successfully loaded"],{ fileName : "SynthPlayer.hx", lineNumber : 234, className : "as.player.SynthPlayer", methodName : "loadMidiBytes"});
 			if(this.isSoundFontLoaded && this.isMidiLoaded) this._events.onReadyForPlay();
 		} catch( e ) {
-			mconsole.Console.error("Could not load soundfont from bytes " + Std.string(e),null,{ fileName : "SynthPlayer.hx", lineNumber : 239, className : "as.player.SynthPlayer", methodName : "loadMidiBytes"});
+			mconsole.Console.error("Could not load midi from bytes " + Std.string(e),null,{ fileName : "SynthPlayer.hx", lineNumber : 239, className : "as.player.SynthPlayer", methodName : "loadMidiBytes"});
 			this.isMidiLoaded = false;
 			this._sequencer.unloadMidi();
 			this._events.onMidiLoadFailed();

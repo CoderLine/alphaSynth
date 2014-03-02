@@ -236,7 +236,7 @@ class SynthPlayer
         }
         catch (e:Dynamic)
         {
-            Console.error('Could not load soundfont from bytes ${e}');
+            Console.error('Could not load midi from bytes ${e}');
             isMidiLoaded = false;
             _sequencer.unloadMidi();
             _events.onMidiLoadFailed();

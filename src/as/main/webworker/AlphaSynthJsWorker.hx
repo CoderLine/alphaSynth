@@ -22,6 +22,7 @@ import as.main.IAlphaSynthSync;
 import as.player.ISynthPlayerListener;
 import as.player.SynthPlayer;
 import as.player.SynthPlayerState;
+import haxe.io.Bytes;
 
 /**
  * This class implements a HTML5 WebWorker based version of alphaSynth
@@ -69,7 +70,8 @@ class AlphaSynthJsWorker implements IAlphaSynthSync implements ISynthPlayerListe
             case 'loadSoundFontUrl': loadSoundFontUrl(data.url);
             case 'loadSoundFontData': loadSoundFontData(data.data);
             case 'loadMidiUrl': loadMidiUrl(data.url);
-            case 'loadMidiData': loadMidiUrl(data.data);
+            case 'loadMidiData': loadMidiData(data.data);
+            case 'loadMidiBytes': loadMidiBytes(data.data);
             case 'getState': _main.postMessage( { cmd: 'getState', value: getState() } );
             case 'isSoundFontLoaded': _main.postMessage( { cmd: 'isSoundFontLoaded', value: isSoundFontLoaded() } );
             case 'isMidiLoaded': _main.postMessage( { cmd: 'isMidiLoaded', value: isMidiLoaded() } );
@@ -130,6 +132,11 @@ class AlphaSynthJsWorker implements IAlphaSynthSync implements ISynthPlayerListe
     public function loadMidiData(data:String) : Void
     {
         _player.loadMidiData(data);
+    }
+    
+    public function loadMidiBytes(data:Bytes) : Void
+    {
+        _player.loadMidiBytes(data);
     }
     
     public function getState() : SynthPlayerState
