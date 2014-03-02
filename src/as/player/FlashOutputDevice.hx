@@ -138,7 +138,7 @@ class FlashOutputDevice
         
         if (_soundChannel.position != 0)
         {
-            positionChanged(Std.int(_soundChannel.position - Latency));
+            positionChanged(Std.int(_soundChannel.position - _bufferTime));
         }
         
         if (!_finished)
