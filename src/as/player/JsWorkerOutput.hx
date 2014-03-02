@@ -17,6 +17,7 @@
  */
 package as.player;
 import as.ds.FixedArray.FixedArray;
+import as.ds.SampleArray;
 import as.platform.Types.Float32;
 
 class JsWorkerOutput implements ISynthOutput
@@ -97,7 +98,7 @@ class JsWorkerOutput implements ISynthOutput
         }
     }
     
-    public function addSamples(samples:FixedArray<Float32>)
+    public function addSamples(samples:SampleArray)
     {
         _workerSelf.postMessage( { cmd: 'playerAddSamples', samples: samples } );        
     }

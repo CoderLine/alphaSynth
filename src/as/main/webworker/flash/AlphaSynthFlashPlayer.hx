@@ -15,17 +15,18 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-package as;
+package as.main.webworker.flash;
 
 import as.ds.FixedArray.FixedArray;
+import as.ds.SampleArray;
 import as.platform.Types.Float32;
 import as.player.FlashOutputDevice;
 import haxe.remoting.Context;
 import haxe.remoting.ExternalConnection;
 
 /**
- * This main class for the flash target implements a 
- * flash sample player.
+ * This class implements a flash based audio output device
+ * for alphaSynth. It can be controlled via a JS API.
  */
 class AlphaSynthFlashPlayer 
 {
@@ -65,7 +66,7 @@ class AlphaSynthFlashPlayer
     
     public function addSamples(samples:String)
     {
-        var sampleData:FixedArray<Float32> = FixedArray.unserialize(samples);
+        var sampleData:SampleArray = SampleArray.unserialize(samples);
         _output.addSamples(sampleData);
     }
     

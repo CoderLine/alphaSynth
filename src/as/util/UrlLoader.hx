@@ -40,7 +40,7 @@ class UrlLoader
             var buffer = request.response;
             if (buffer) 
             {
-                fireComplete(Bytes.ofData(untyped new Uint8Array(buffer)));
+                fireComplete(Bytes.ofData(untyped new as.util.TypedArrays.Uint8Array(buffer)));
             }
         };
         request.onprogress = function(e) {

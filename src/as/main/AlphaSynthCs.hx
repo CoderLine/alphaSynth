@@ -15,24 +15,18 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-package as.log;
+package as.main;
 
-import haxe.Log;
-import haxe.PosInfos;
-import mconsole.LogLevel;
-import mconsole.Printer;
+import as.player.SynthPlayer;
 
-class MethodPrinter implements Printer
+/**
+ * This main class for the C# target just implements an 
+ * empty container.
+ */
+class AlphaSynthCs
 {
-    private var _target:LogLevel->Array<Dynamic>->PosInfos->Void;
-    
-    public function new(target:LogLevel->Array<Dynamic>->PosInfos->Void) 
+    public function new()
     {
-        _target = target;
-    }
-    
-    public function print(level:LogLevel, params:Array<Dynamic>, indent:Int, pos:PosInfos):Void 
-    {
-        _target(level, params, pos);
+        
     }
 }

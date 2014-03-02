@@ -20,6 +20,7 @@ package as.bank.components;
 import as.bank.components.Enum;
 import as.bank.descriptors.EnvelopeDescriptor;
 import as.ds.FixedArray.FixedArray;
+import as.ds.SampleArray;
 import as.platform.Types.Float32;
 import as.platform.Types.Short;
 import as.synthesis.Synthesizer;
@@ -154,7 +155,7 @@ class Envelope
 class EnvelopeStage
 {
     public var time:Int;
-    public var graph:FixedArray<Float32>;
+    public var graph:SampleArray;
     public var scale:Float32;
     public var offset:Float32;
     public var reverse:Bool;

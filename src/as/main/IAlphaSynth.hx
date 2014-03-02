@@ -15,7 +15,8 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-package as;
+package as.main;
+
 import as.player.SynthPlayerState;
 
 interface IAlphaSynth

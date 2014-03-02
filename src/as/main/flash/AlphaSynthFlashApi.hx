@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-package as;
+package as.main.flash;
 
 import as.player.SynthPlayerState;
 import haxe.Serializer;
@@ -27,8 +27,7 @@ import js.JQuery;
 import js.html.Element;
 
 /**
- * This main class for the JavaScript target acts as 
- * API to control the AlphaSynthFlash Synthesizer.
+ * This class implements the JavaScript API for initializing and controlling the flash based alphaSynth
  */
 class AlphaSynthFlashApi implements IAlphaSynthAsync 
 {
@@ -37,18 +36,19 @@ class AlphaSynthFlashApi implements IAlphaSynthAsync
     private var _flash:ExternalConnection;
     private var _events:JQuery;
     
-    public var ready:Bool;
-    
     public function new()
     {
-        ready = false;
-        
         var ctx = new Context();
         ctx.addObject("JsAlphaSynth", this);
         _flash = ExternalConnection.flashConnect("default", AlphaSynthId, ctx);
         
         // todo: get rid of jQuery dependency
         _events = new JQuery('<span></span>');
+    }
+    
+    public function startup()
+    {
+        
     }
     
     public function isReadyForPlay() : Void
@@ -159,8 +159,6 @@ class AlphaSynthFlashApi implements IAlphaSynthAsync
         var args = untyped __js__("Array.prototype.slice.call(arguments)");
         switch(event)
         {
-            case "ready":
-                ready = true;
             case "log":
                 log(untyped args[1], untyped args[2]);
         }

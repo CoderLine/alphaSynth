@@ -30,7 +30,7 @@
             <arg value="${src}"/>
             
             <arg value="-main" />
-            <arg value="as.AlphaSynthFlash" />
+            <arg value="as.main.flash.AlphaSynthFlash" />
             
             <arg value="-swf" />
             <arg value="${haxe-flash-full}" />
@@ -51,7 +51,7 @@
             <arg value="${src}"/>
             
             <arg value="-main" />
-            <arg value="as.AlphaSynthFlashPlayer" />
+            <arg value="as.main.webworker.flash.AlphaSynthFlashPlayer" />
             
             <arg value="-swf" />
             <arg value="${haxe-flash-player}" />
@@ -63,7 +63,7 @@
             <arg value="${src}"/>
             
             <arg value="-main" />
-            <arg value="as.AlphaSynthJsWorker" />
+            <arg value="as.main.webworker.AlphaSynthJsWorker" />
             
             <arg value="-lib" />
             <arg value="mconsole" />
@@ -81,7 +81,7 @@
             <arg value="${src}"/>
             
             <arg value="-main" />
-            <arg value="as.AlphaSynthJs" />
+            <arg value="as.main.AlphaSynthJs" />
             
             <arg value="-lib" />
             <arg value="mconsole" />

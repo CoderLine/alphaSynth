@@ -280,181 +280,6 @@ var Xml = function() { }
 $hxClasses["Xml"] = Xml;
 Xml.__name__ = ["Xml"];
 var as = {}
-as.player = {}
-as.player.ISynthPlayerListener = function() { }
-$hxClasses["as.player.ISynthPlayerListener"] = as.player.ISynthPlayerListener;
-as.player.ISynthPlayerListener.__name__ = ["as","player","ISynthPlayerListener"];
-as.player.ISynthPlayerListener.prototype = {
-	__class__: as.player.ISynthPlayerListener
-}
-as.IAlphaSynth = function() { }
-$hxClasses["as.IAlphaSynth"] = as.IAlphaSynth;
-as.IAlphaSynth.__name__ = ["as","IAlphaSynth"];
-as.IAlphaSynth.prototype = {
-	__class__: as.IAlphaSynth
-}
-as.IAlphaSynthSync = function() { }
-$hxClasses["as.IAlphaSynthSync"] = as.IAlphaSynthSync;
-as.IAlphaSynthSync.__name__ = ["as","IAlphaSynthSync"];
-as.IAlphaSynthSync.__interfaces__ = [as.IAlphaSynth];
-as.IAlphaSynthSync.prototype = {
-	__class__: as.IAlphaSynthSync
-}
-as.AlphaSynthJsWorker = function() {
-	mconsole.Console.hasConsole = false;
-	mconsole.Console.start();
-	mconsole.Console.removePrinter(mconsole.Console.defaultPrinter);
-	mconsole.Console.addPrinter(this._printer = new as.log.LevelPrinter($bind(this,this.sendLog)));
-	this._main = self;
-	this._main.addEventListener("message",$bind(this,this.handleMessage),false);
-	this._player = new as.player.SynthPlayer();
-	this._player._events.add(this);
-	this.onReady();
-};
-$hxClasses["as.AlphaSynthJsWorker"] = as.AlphaSynthJsWorker;
-as.AlphaSynthJsWorker.__name__ = ["as","AlphaSynthJsWorker"];
-as.AlphaSynthJsWorker.__interfaces__ = [as.player.ISynthPlayerListener,as.IAlphaSynthSync];
-as.AlphaSynthJsWorker.main = function() {
-	as.AlphaSynthJsWorker.instance = new as.AlphaSynthJsWorker();
-}
-as.AlphaSynthJsWorker.prototype = {
-	sendLog: function(level,s) {
-		this._main.postMessage({ cmd : "log", level : level, message : s});
-	}
-	,onReadyForPlay: function() {
-		this._main.postMessage({ cmd : "readyForPlay", value : this.isReadyForPlay()});
-	}
-	,onMidiLoadFailed: function() {
-		this._main.postMessage({ cmd : "midiFileLoadFailed"});
-	}
-	,onMidiLoaded: function() {
-		this._main.postMessage({ cmd : "midiFileLoaded"});
-	}
-	,onMidiLoad: function(loaded,full) {
-		this._main.postMessage({ cmd : "midiLoad", loaded : loaded, full : full});
-	}
-	,onSoundFontLoadFailed: function() {
-		this._main.postMessage({ cmd : "soundFontLoadFailed"});
-	}
-	,onSoundFontLoaded: function() {
-		this._main.postMessage({ cmd : "soundFontLoaded"});
-	}
-	,onSoundFontLoad: function(loaded,full) {
-		this._main.postMessage({ cmd : "soundFontLoad", loaded : loaded, full : full});
-	}
-	,onFinished: function() {
-		this._main.postMessage({ cmd : "finished"});
-	}
-	,onPlayerStateChanged: function(state) {
-		this._main.postMessage({ cmd : "playerStateChanged", state : state[1]});
-	}
-	,onPositionChanged: function(currentTime,endTime,currentTick,endTick) {
-		this._main.postMessage({ cmd : "positionChanged", currentTime : currentTime, endTime : endTime, currentTick : currentTick, endTick : endTick});
-	}
-	,onReady: function() {
-		this._main.postMessage({ cmd : "ready"});
-	}
-	,setLogLevel: function(level) {
-		if(level < 0 || level > 5) {
-			mconsole.Console.error("invalid log level",null,{ fileName : "AlphaSynthJsWorker.hx", lineNumber : 148, className : "as.AlphaSynthJsWorker", methodName : "setLogLevel"});
-			return;
-		}
-		this._printer.level = level;
-	}
-	,isMidiLoaded: function() {
-		return this._player.isMidiLoaded;
-	}
-	,isSoundFontLoaded: function() {
-		return this._player.isSoundFontLoaded;
-	}
-	,getState: function() {
-		return this._player.state;
-	}
-	,loadMidiData: function(data) {
-		this._player.loadMidiData(data);
-	}
-	,loadMidiUrl: function(url) {
-		this._player.loadMidiUrl(url);
-	}
-	,loadSoundFontData: function(data) {
-		this._player.loadSoundFontData(data);
-	}
-	,loadSoundFontUrl: function(url) {
-		this._player.loadSoundFontUrl(url);
-	}
-	,setPositionTime: function(millis) {
-		this._player.set_timePosition(millis);
-	}
-	,setPositionTick: function(tick) {
-		this._player.set_tickPosition(tick);
-	}
-	,stop: function() {
-		this._player.stop();
-	}
-	,playPause: function() {
-		this._player.playPause();
-	}
-	,pause: function() {
-		this._player.pause();
-	}
-	,play: function() {
-		this._player.play();
-	}
-	,isReadyForPlay: function() {
-		return this._player.get_isReady();
-	}
-	,handleMessage: function(e) {
-		var data = e.data;
-		switch(data.cmd) {
-		case "play":
-			this.play();
-			break;
-		case "pause":
-			this.pause();
-			break;
-		case "isReadyForPlay":
-			this._main.postMessage({ cmd : "isReadyForPlay", value : this.isReadyForPlay()});
-			break;
-		case "playPause":
-			this.playPause();
-			break;
-		case "stop":
-			this.stop();
-			break;
-		case "setPositionTick":
-			this.setPositionTick(data.tick);
-			break;
-		case "setPositionTime":
-			this.setPositionTime(data.time);
-			break;
-		case "loadSoundFontUrl":
-			this.loadSoundFontUrl(data.url);
-			break;
-		case "loadSoundFontData":
-			this.loadSoundFontData(data.data);
-			break;
-		case "loadMidiUrl":
-			this.loadMidiUrl(data.url);
-			break;
-		case "loadMidiData":
-			this.loadMidiUrl(data.data);
-			break;
-		case "getState":
-			this._main.postMessage({ cmd : "getState", value : this.getState()});
-			break;
-		case "isSoundFontLoaded":
-			this._main.postMessage({ cmd : "isSoundFontLoaded", value : this.isSoundFontLoaded()});
-			break;
-		case "isMidiLoaded":
-			this._main.postMessage({ cmd : "isMidiLoaded", value : this.isMidiLoaded()});
-			break;
-		case "setLogLevel":
-			this.setLogLevel(data.level);
-			break;
-		}
-	}
-	,__class__: as.AlphaSynthJsWorker
-}
 as.bank = {}
 as.bank.AssetManager = function() {
 	this.patchAssets = new Array();
@@ -1913,6 +1738,53 @@ as.ds.LinkedList.prototype = {
 	}
 	,__class__: as.ds.LinkedList
 }
+as.ds._SampleArray = {}
+as.ds._SampleArray.SampleArray_Impl_ = function() { }
+$hxClasses["as.ds._SampleArray.SampleArray_Impl_"] = as.ds._SampleArray.SampleArray_Impl_;
+as.ds._SampleArray.SampleArray_Impl_.__name__ = ["as","ds","_SampleArray","SampleArray_Impl_"];
+as.ds._SampleArray.SampleArray_Impl_._new = function(length) {
+	return new Float32Array(length);
+}
+as.ds._SampleArray.SampleArray_Impl_.get = function(this1,index) {
+	return this1[index];
+}
+as.ds._SampleArray.SampleArray_Impl_.set = function(this1,index,val) {
+	return this1[index] = val;
+}
+as.ds._SampleArray.SampleArray_Impl_.get_length = function(this1) {
+	return this1.length;
+}
+as.ds._SampleArray.SampleArray_Impl_.toData = function(this1) {
+	return this1;
+}
+as.ds._SampleArray.SampleArray_Impl_.blit = function(src,srcPos,dest,destPos,len) {
+	dest.set(src.subarray(srcPos,srcPos + len),destPos);
+}
+as.ds._SampleArray.SampleArray_Impl_.fromArrayCopy = function(array) {
+	return new Float32Array(array);
+}
+as.ds._SampleArray.SampleArray_Impl_.serialize = function(v) {
+	var s = new haxe.Serializer();
+	s.serialize(v.length);
+	var _g1 = 0, _g = v.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		s.serialize(v[i]);
+	}
+	return s.toString();
+}
+as.ds._SampleArray.SampleArray_Impl_.unserialize = function(data) {
+	var s = new haxe.Unserializer(data);
+	var length = s.unserialize();
+	var v = new Float32Array(length);
+	var _g = 0;
+	while(_g < length) {
+		var i = _g++;
+		var val = s.unserialize();
+		v[i] = val;
+	}
+	return v;
+}
 var mconsole = {}
 mconsole.Printer = function() { }
 $hxClasses["mconsole.Printer"] = mconsole.Printer;
@@ -1971,6 +1843,183 @@ as.log.LevelPrinter.prototype = {
 		this._target(intLevel,message);
 	}
 	,__class__: as.log.LevelPrinter
+}
+as.main = {}
+as.main.IAlphaSynth = function() { }
+$hxClasses["as.main.IAlphaSynth"] = as.main.IAlphaSynth;
+as.main.IAlphaSynth.__name__ = ["as","main","IAlphaSynth"];
+as.main.IAlphaSynth.prototype = {
+	__class__: as.main.IAlphaSynth
+}
+as.main.IAlphaSynthSync = function() { }
+$hxClasses["as.main.IAlphaSynthSync"] = as.main.IAlphaSynthSync;
+as.main.IAlphaSynthSync.__name__ = ["as","main","IAlphaSynthSync"];
+as.main.IAlphaSynthSync.__interfaces__ = [as.main.IAlphaSynth];
+as.main.IAlphaSynthSync.prototype = {
+	__class__: as.main.IAlphaSynthSync
+}
+as.player = {}
+as.player.ISynthPlayerListener = function() { }
+$hxClasses["as.player.ISynthPlayerListener"] = as.player.ISynthPlayerListener;
+as.player.ISynthPlayerListener.__name__ = ["as","player","ISynthPlayerListener"];
+as.player.ISynthPlayerListener.prototype = {
+	__class__: as.player.ISynthPlayerListener
+}
+as.main.webworker = {}
+as.main.webworker.AlphaSynthJsWorker = function() {
+	mconsole.Console.hasConsole = false;
+	mconsole.Console.start();
+	mconsole.Console.removePrinter(mconsole.Console.defaultPrinter);
+	mconsole.Console.addPrinter(this._printer = new as.log.LevelPrinter($bind(this,this.sendLog)));
+	this._main = self;
+	this._main.addEventListener("message",$bind(this,this.handleMessage),false);
+	this._player = new as.player.SynthPlayer();
+	this._player._events.add(this);
+	this.onReady();
+};
+$hxClasses["as.main.webworker.AlphaSynthJsWorker"] = as.main.webworker.AlphaSynthJsWorker;
+as.main.webworker.AlphaSynthJsWorker.__name__ = ["as","main","webworker","AlphaSynthJsWorker"];
+as.main.webworker.AlphaSynthJsWorker.__interfaces__ = [as.player.ISynthPlayerListener,as.main.IAlphaSynthSync];
+as.main.webworker.AlphaSynthJsWorker.main = function() {
+	as.main.webworker.AlphaSynthJsWorker.instance = new as.main.webworker.AlphaSynthJsWorker();
+}
+as.main.webworker.AlphaSynthJsWorker.prototype = {
+	sendLog: function(level,s) {
+		this._main.postMessage({ cmd : "log", level : level, message : s});
+	}
+	,onReadyForPlay: function() {
+		this._main.postMessage({ cmd : "readyForPlay", value : this.isReadyForPlay()});
+	}
+	,onMidiLoadFailed: function() {
+		this._main.postMessage({ cmd : "midiFileLoadFailed"});
+	}
+	,onMidiLoaded: function() {
+		this._main.postMessage({ cmd : "midiFileLoaded"});
+	}
+	,onMidiLoad: function(loaded,full) {
+		this._main.postMessage({ cmd : "midiLoad", loaded : loaded, full : full});
+	}
+	,onSoundFontLoadFailed: function() {
+		this._main.postMessage({ cmd : "soundFontLoadFailed"});
+	}
+	,onSoundFontLoaded: function() {
+		this._main.postMessage({ cmd : "soundFontLoaded"});
+	}
+	,onSoundFontLoad: function(loaded,full) {
+		this._main.postMessage({ cmd : "soundFontLoad", loaded : loaded, full : full});
+	}
+	,onFinished: function() {
+		this._main.postMessage({ cmd : "finished"});
+	}
+	,onPlayerStateChanged: function(state) {
+		this._main.postMessage({ cmd : "playerStateChanged", state : state[1]});
+	}
+	,onPositionChanged: function(currentTime,endTime,currentTick,endTick) {
+		this._main.postMessage({ cmd : "positionChanged", currentTime : currentTime, endTime : endTime, currentTick : currentTick, endTick : endTick});
+	}
+	,onReady: function() {
+		this._main.postMessage({ cmd : "ready"});
+	}
+	,setLogLevel: function(level) {
+		if(level < 0 || level > 5) {
+			mconsole.Console.error("invalid log level",null,{ fileName : "AlphaSynthJsWorker.hx", lineNumber : 154, className : "as.main.webworker.AlphaSynthJsWorker", methodName : "setLogLevel"});
+			return;
+		}
+		this._printer.level = level;
+	}
+	,isMidiLoaded: function() {
+		return this._player.isMidiLoaded;
+	}
+	,isSoundFontLoaded: function() {
+		return this._player.isSoundFontLoaded;
+	}
+	,getState: function() {
+		return this._player.state;
+	}
+	,loadMidiData: function(data) {
+		this._player.loadMidiData(data);
+	}
+	,loadMidiUrl: function(url) {
+		this._player.loadMidiUrl(url);
+	}
+	,loadSoundFontData: function(data) {
+		this._player.loadSoundFontData(data);
+	}
+	,loadSoundFontUrl: function(url) {
+		this._player.loadSoundFontUrl(url);
+	}
+	,setPositionTime: function(millis) {
+		this._player.set_timePosition(millis);
+	}
+	,setPositionTick: function(tick) {
+		this._player.set_tickPosition(tick);
+	}
+	,stop: function() {
+		this._player.stop();
+	}
+	,playPause: function() {
+		this._player.playPause();
+	}
+	,pause: function() {
+		this._player.pause();
+	}
+	,play: function() {
+		this._player.play();
+	}
+	,isReadyForPlay: function() {
+		return this._player.get_isReady();
+	}
+	,handleMessage: function(e) {
+		var data = e.data;
+		switch(data.cmd) {
+		case "play":
+			this.play();
+			break;
+		case "pause":
+			this.pause();
+			break;
+		case "isReadyForPlay":
+			this._main.postMessage({ cmd : "isReadyForPlay", value : this.isReadyForPlay()});
+			break;
+		case "playPause":
+			this.playPause();
+			break;
+		case "stop":
+			this.stop();
+			break;
+		case "setPositionTick":
+			this.setPositionTick(data.tick);
+			break;
+		case "setPositionTime":
+			this.setPositionTime(data.time);
+			break;
+		case "loadSoundFontUrl":
+			this.loadSoundFontUrl(data.url);
+			break;
+		case "loadSoundFontData":
+			this.loadSoundFontData(data.data);
+			break;
+		case "loadMidiUrl":
+			this.loadMidiUrl(data.url);
+			break;
+		case "loadMidiData":
+			this.loadMidiUrl(data.data);
+			break;
+		case "getState":
+			this._main.postMessage({ cmd : "getState", value : this.getState()});
+			break;
+		case "isSoundFontLoaded":
+			this._main.postMessage({ cmd : "isSoundFontLoaded", value : this.isSoundFontLoaded()});
+			break;
+		case "isMidiLoaded":
+			this._main.postMessage({ cmd : "isMidiLoaded", value : this.isMidiLoaded()});
+			break;
+		case "setLogLevel":
+			this.setLogLevel(data.level);
+			break;
+		}
+	}
+	,__class__: as.main.webworker.AlphaSynthJsWorker
 }
 as.midi = {}
 as.midi.MidiFile = function() {
@@ -2481,7 +2530,7 @@ as.platform.TypeUtils.clearShortArray = function(a) {
 		a[i] = 0;
 	}
 }
-as.platform.TypeUtils.clearFloat32Array = function(a) {
+as.platform.TypeUtils.clearSampleArray = function(a) {
 	var _g1 = 0, _g = a.length;
 	while(_g1 < _g) {
 		var i = _g1++;
@@ -2527,7 +2576,7 @@ as.player.JsWorkerOutput = function() {
 	this._finishedListeners = new Array();
 	this._sampleRequestListeners = new Array();
 	if(mconsole.Console.hasConsole) mconsole.Console.callConsole("debug",["Initializing js output worker"]);
-	mconsole.Console.print(mconsole.LogLevel.debug,["Initializing js output worker"],{ fileName : "JsWorkerOutput.hx", lineNumber : 36, className : "as.player.JsWorkerOutput", methodName : "new"});
+	mconsole.Console.print(mconsole.LogLevel.debug,["Initializing js output worker"],{ fileName : "JsWorkerOutput.hx", lineNumber : 37, className : "as.player.JsWorkerOutput", methodName : "new"});
 	this._workerSelf = self;
 	this._workerSelf.addEventListener("message",$bind(this,this.handleMessage),false);
 };
@@ -3458,8 +3507,8 @@ as.sf2.SoundFontSampleData = function(input) {
 		case "smpl":
 			this.bitsPerSample = 16;
 			rawSampleData = input.read(size1);
-			this.sampleData = new Array(rawSampleData.length / 2 | 0);
-			as.platform.TypeUtils.clearFloat32Array(this.sampleData);
+			this.sampleData = new Float32Array(rawSampleData.length / 2 | 0);
+			as.platform.TypeUtils.clearSampleArray(this.sampleData);
 			break;
 		case "sm24":
 			if(rawSampleData == null || size1 != (Math.ceil(this.sampleData.length / 2.0) | 0)) input.read(size1); else {
@@ -3847,15 +3896,15 @@ as.synthesis.Synthesizer = function(sampleRate,audioChannels,bufferSize,bufferCo
 	this.microBufferSize = as.synthesis.SynthHelper.clampI(bufferSize,0.001 * sampleRate | 0,0.05 * sampleRate | 0);
 	this.microBufferSize = Math.ceil(this.microBufferSize / 64) * 64 | 0;
 	this.microBufferCount = Math.max(1,bufferCount) | 0;
-	this.sampleBuffer = new Array(this.microBufferSize * this.microBufferCount * audioChannels);
-	as.platform.TypeUtils.clearFloat32Array(this.sampleBuffer);
+	this.sampleBuffer = new Float32Array(this.microBufferSize * this.microBufferCount * audioChannels);
+	as.platform.TypeUtils.clearSampleArray(this.sampleBuffer);
 	this.littleEndian = true;
 	this._bankSelect = new Array(16);
 	as.platform.TypeUtils.clearIntArray(this._bankSelect);
 	this.programs = new Array(16);
 	as.platform.TypeUtils.clearIntArray(this.programs);
-	this._channelPressure = new Array(16);
-	as.platform.TypeUtils.clearFloat32Array(this._channelPressure);
+	this._channelPressure = new Float32Array(16);
+	as.platform.TypeUtils.clearSampleArray(this._channelPressure);
 	this._pan = new Array(16);
 	as.platform.TypeUtils.clearShortArray(this._pan);
 	this._volume = new Array(16);
@@ -3875,13 +3924,13 @@ as.synthesis.Synthesizer = function(sampleRate,audioChannels,bufferSize,bufferCo
 	this._holdPedal = new Array(16);
 	this._rpn = new Array(16);
 	as.platform.TypeUtils.clearShortArray(this._rpn);
-	this.modWheel = new Array(16);
-	as.platform.TypeUtils.clearFloat32Array(this.modWheel);
+	this.modWheel = new Float32Array(16);
+	as.platform.TypeUtils.clearSampleArray(this.modWheel);
 	this.panPositions = new Array(16);
 	this.totalPitch = new Array(16);
 	as.platform.TypeUtils.clearIntArray(this.totalPitch);
-	this.totalVolume = new Array(16);
-	as.platform.TypeUtils.clearFloat32Array(this.totalVolume);
+	this.totalVolume = new Float32Array(16);
+	as.platform.TypeUtils.clearSampleArray(this.totalVolume);
 	var _g = 0;
 	while(_g < 16) {
 		var i = _g++;
@@ -4210,15 +4259,15 @@ as.synthesis.Synthesizer.prototype = {
 		this.convertWorkingBuffer(buffer,this.sampleBuffer);
 	}
 	,synthesize: function() {
-		as.platform.TypeUtils.clearFloat32Array(this.sampleBuffer);
+		as.platform.TypeUtils.clearSampleArray(this.sampleBuffer);
 		this.fillWorkingBuffer();
 	}
 	,setAudioChannelCount: function(channels) {
 		channels = as.synthesis.SynthHelper.clampI(channels,1,2);
 		if(this.audioChannels != channels) {
 			this.audioChannels = channels;
-			this.sampleBuffer = new Array(this.microBufferSize * this.microBufferCount * this.audioChannels);
-			as.platform.TypeUtils.clearFloat32Array(this.sampleBuffer);
+			this.sampleBuffer = new Float32Array(this.microBufferSize * this.microBufferCount * this.audioChannels);
+			as.platform.TypeUtils.clearSampleArray(this.sampleBuffer);
 		}
 	}
 	,getProgram: function(channel) {
@@ -4313,7 +4362,7 @@ $hxClasses["as.synthesis.Voice"] = as.synthesis.Voice;
 as.synthesis.Voice.__name__ = ["as","synthesis","Voice"];
 as.synthesis.Voice.prototype = {
 	configure: function(channel,note,velocity,patch) {
-		as.platform.TypeUtils.clearFloat32Array(this.voiceParams.mixing);
+		as.platform.TypeUtils.clearSampleArray(this.voiceParams.mixing);
 		this.voiceParams.pitchOffset = 0;
 		this.voiceParams.volOffset = 0;
 		this.voiceParams.noteOffPending = false;
@@ -4481,12 +4530,12 @@ as.synthesis.VoiceParameters = function(synth) {
 	this.state = 0;
 	this.pitchOffset = 0;
 	this.volOffset = 0;
-	this.blockBuffer = new Array(64);
-	as.platform.TypeUtils.clearFloat32Array(this.blockBuffer);
-	this.mixing = new Array(4);
-	as.platform.TypeUtils.clearFloat32Array(this.mixing);
-	this.counters = new Array(4);
-	as.platform.TypeUtils.clearFloat32Array(this.counters);
+	this.blockBuffer = new Float32Array(64);
+	as.platform.TypeUtils.clearSampleArray(this.blockBuffer);
+	this.mixing = new Float32Array(4);
+	as.platform.TypeUtils.clearSampleArray(this.mixing);
+	this.counters = new Float32Array(4);
+	as.platform.TypeUtils.clearSampleArray(this.counters);
 	this.generatorParams = new Array(4);
 	this.generators = null;
 	this.envelopes = new Array(4);
@@ -4616,7 +4665,7 @@ as.util.Tables.init = function() {
 }
 as.util.Tables.createSquareTable = function(size,k) {
 	var FourOverPi = 4 / Math.PI;
-	var squaretable = new Array(size);
+	var squaretable = new Float32Array(size);
 	var inc = 1.0 / size;
 	var phase = 0;
 	var _g = 0;
@@ -4635,7 +4684,7 @@ as.util.Tables.createSquareTable = function(size,k) {
 	return squaretable;
 }
 as.util.Tables.createCentTable = function() {
-	var cents = new Array(201);
+	var cents = new Float32Array(201);
 	var _g1 = 0, _g = cents.length;
 	while(_g1 < _g) {
 		var x = _g1++;
@@ -4644,7 +4693,7 @@ as.util.Tables.createCentTable = function() {
 	return cents;
 }
 as.util.Tables.createSemitoneTable = function() {
-	var table = new Array(255);
+	var table = new Float32Array(255);
 	var _g1 = 0, _g = table.length;
 	while(_g1 < _g) {
 		var x = _g1++;
@@ -4653,7 +4702,7 @@ as.util.Tables.createSemitoneTable = function() {
 	return table;
 }
 as.util.Tables.createSustainTable = function(size) {
-	var table = new Array(size);
+	var table = new Float32Array(size);
 	var _g = 0;
 	while(_g < size) {
 		var x = _g++;
@@ -4662,7 +4711,7 @@ as.util.Tables.createSustainTable = function(size) {
 	return table;
 }
 as.util.Tables.createLinearTable = function(size) {
-	var table = new Array(size);
+	var table = new Float32Array(size);
 	var _g = 0;
 	while(_g < size) {
 		var x = _g++;
@@ -4672,7 +4721,7 @@ as.util.Tables.createLinearTable = function(size) {
 }
 as.util.Tables.createExponentialTable = function(size,coeff) {
 	coeff = as.synthesis.SynthHelper.clampF(coeff,.001,.9);
-	var graph = new Array(size);
+	var graph = new Float32Array(size);
 	var val = 0;
 	var _g = 0;
 	while(_g < size) {
@@ -4688,7 +4737,7 @@ as.util.Tables.createExponentialTable = function(size,coeff) {
 	return graph;
 }
 as.util.Tables.createSineTable = function(size) {
-	var graph = new Array(size);
+	var graph = new Float32Array(size);
 	var inc = 3.0 * Math.PI / 2.0 / (size - 1);
 	var phase = 0;
 	var _g = 0;
@@ -4718,7 +4767,7 @@ as.util.Tables.blackmanWindow = function(i,size) {
 }
 as.util.Tables.createSincTable = function(windowSize,resolution,cornerRatio,windowFunction) {
 	var subWindow = windowSize / 2 + 1 | 0;
-	var table = new Array(subWindow * resolution);
+	var table = new Float32Array(subWindow * resolution);
 	var gain = 2.0 * cornerRatio;
 	var _g = 0;
 	while(_g < subWindow) {
@@ -6478,5 +6527,5 @@ mconsole.Console.running = false;
 mconsole.Console.dirxml = "dirxml";
 mconsole.Console.hasConsole = mconsole.Console.detectConsole();
 mconsole.StackHelper.filters = mconsole.StackHelper.createFilters();
-as.AlphaSynthJsWorker.main();
+as.main.webworker.AlphaSynthJsWorker.main();
 })();

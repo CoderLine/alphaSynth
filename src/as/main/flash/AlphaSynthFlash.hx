@@ -15,8 +15,9 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-package as;
+package as.main.flash;
 
+import as.ds.SampleArray;
 import as.log.LevelPrinter;
 import as.player.ISynthPlayerListener;
 import as.player.SynthPlayer;
@@ -26,12 +27,13 @@ import haxe.remoting.Context;
 import haxe.remoting.ExternalConnection;
 
 /**
- * This main class for the flash target provives
- * a full AlphaSynth synthesizer.
+ * This class implements a flash based alphaSynth which can be controlled
+ * via a JS api.
  */
 class AlphaSynthFlash implements IAlphaSynthSync implements ISynthPlayerListener
 {
     public var AlphaSynthId = "AlphaSynth";
+    
     public static var instance:AlphaSynthFlash;
     public static function main()
     {

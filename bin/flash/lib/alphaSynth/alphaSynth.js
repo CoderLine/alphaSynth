@@ -274,31 +274,426 @@ var Xml = function() { }
 $hxClasses["Xml"] = Xml;
 Xml.__name__ = ["Xml"];
 var as = {}
-as.IAlphaSynth = function() { }
-$hxClasses["as.IAlphaSynth"] = as.IAlphaSynth;
-as.IAlphaSynth.__name__ = ["as","IAlphaSynth"];
-as.IAlphaSynth.prototype = {
-	__class__: as.IAlphaSynth
+as.bank = {}
+as.bank.components = {}
+as.bank.components.GeneratorStateEnum = function() { }
+$hxClasses["as.bank.components.GeneratorStateEnum"] = as.bank.components.GeneratorStateEnum;
+as.bank.components.GeneratorStateEnum.__name__ = ["as","bank","components","GeneratorStateEnum"];
+as.bank.components.EnvelopeStateEnum = function() { }
+$hxClasses["as.bank.components.EnvelopeStateEnum"] = as.bank.components.EnvelopeStateEnum;
+as.bank.components.EnvelopeStateEnum.__name__ = ["as","bank","components","EnvelopeStateEnum"];
+as.bank.components.LfoStateEnum = function() { }
+$hxClasses["as.bank.components.LfoStateEnum"] = as.bank.components.LfoStateEnum;
+as.bank.components.LfoStateEnum.__name__ = ["as","bank","components","LfoStateEnum"];
+as.bank.components.WaveformEnum = function() { }
+$hxClasses["as.bank.components.WaveformEnum"] = as.bank.components.WaveformEnum;
+as.bank.components.WaveformEnum.__name__ = ["as","bank","components","WaveformEnum"];
+as.bank.components.InterpolationEnum = function() { }
+$hxClasses["as.bank.components.InterpolationEnum"] = as.bank.components.InterpolationEnum;
+as.bank.components.InterpolationEnum.__name__ = ["as","bank","components","InterpolationEnum"];
+as.bank.components.LoopModeEnum = function() { }
+$hxClasses["as.bank.components.LoopModeEnum"] = as.bank.components.LoopModeEnum;
+as.bank.components.LoopModeEnum.__name__ = ["as","bank","components","LoopModeEnum"];
+as.bank.components.FilterTypeEnum = function() { }
+$hxClasses["as.bank.components.FilterTypeEnum"] = as.bank.components.FilterTypeEnum;
+as.bank.components.FilterTypeEnum.__name__ = ["as","bank","components","FilterTypeEnum"];
+as.ds = {}
+as.ds.CircularSampleBuffer = function(size) {
+	this._buffer = new Float32Array(size);
+	this._writePosition = 0;
+	this._readPosition = 0;
+	this._sampleCount = 0;
+	as.platform.TypeUtils.clearSampleArray(this._buffer);
+};
+$hxClasses["as.ds.CircularSampleBuffer"] = as.ds.CircularSampleBuffer;
+as.ds.CircularSampleBuffer.__name__ = ["as","ds","CircularSampleBuffer"];
+as.ds.CircularSampleBuffer.prototype = {
+	read: function(data,offset,count) {
+		if(count > this._sampleCount) count = this._sampleCount;
+		var samplesRead = 0;
+		var readToEnd = Math.min(this._buffer.length - this._readPosition,count) | 0;
+		var srcPos = this._readPosition;
+		data.set(this._buffer.subarray(srcPos,srcPos + readToEnd),offset);
+		samplesRead += readToEnd;
+		this._readPosition += readToEnd;
+		this._readPosition %= this._buffer.length;
+		if(samplesRead < count) {
+			var srcPos = this._readPosition;
+			data.set(this._buffer.subarray(srcPos,srcPos + (count - samplesRead)),offset + samplesRead);
+			this._readPosition += count - samplesRead;
+			samplesRead = count;
+		}
+		this._sampleCount -= samplesRead;
+		return samplesRead;
+	}
+	,write: function(data,offset,count) {
+		var samplesWritten = 0;
+		if(count > this._buffer.length - this._sampleCount) count = this._buffer.length - this._sampleCount;
+		var writeToEnd = Math.min(this._buffer.length - this._writePosition,count) | 0;
+		this._buffer.set(data.subarray(offset,offset + writeToEnd),this._writePosition);
+		this._writePosition += writeToEnd;
+		this._writePosition %= this._buffer.length;
+		samplesWritten += writeToEnd;
+		if(samplesWritten < count) {
+			var srcPos = offset + samplesWritten;
+			this._buffer.set(data.subarray(srcPos,srcPos + (count - samplesWritten)),this._writePosition);
+			this._writePosition += count - samplesWritten;
+			samplesWritten = count;
+		}
+		this._sampleCount += samplesWritten;
+		return samplesWritten;
+	}
+	,clear: function() {
+		this._readPosition = 0;
+		this._writePosition = 0;
+		this._sampleCount = 0;
+		this._buffer = new Float32Array(this._buffer.length);
+		as.platform.TypeUtils.clearSampleArray(this._buffer);
+	}
+	,get_count: function() {
+		return this._sampleCount;
+	}
+	,__class__: as.ds.CircularSampleBuffer
 }
-as.IAlphaSynthAsync = function() { }
-$hxClasses["as.IAlphaSynthAsync"] = as.IAlphaSynthAsync;
-as.IAlphaSynthAsync.__name__ = ["as","IAlphaSynthAsync"];
-as.IAlphaSynthAsync.__interfaces__ = [as.IAlphaSynth];
-as.IAlphaSynthAsync.prototype = {
-	__class__: as.IAlphaSynthAsync
+as.ds._FixedArray = {}
+as.ds._FixedArray.FixedArray_Impl_ = function() { }
+$hxClasses["as.ds._FixedArray.FixedArray_Impl_"] = as.ds._FixedArray.FixedArray_Impl_;
+as.ds._FixedArray.FixedArray_Impl_.__name__ = ["as","ds","_FixedArray","FixedArray_Impl_"];
+as.ds._FixedArray.FixedArray_Impl_._new = function(length) {
+	return new Array(length);
 }
-as.AlphaSynthFlashApi = function() {
+as.ds._FixedArray.FixedArray_Impl_.get = function(this1,index) {
+	return this1[index];
+}
+as.ds._FixedArray.FixedArray_Impl_.set = function(this1,index,val) {
+	return this1[index] = val;
+}
+as.ds._FixedArray.FixedArray_Impl_.clone = function(this1) {
+	return this1.slice(0);
+}
+as.ds._FixedArray.FixedArray_Impl_.get_length = function(this1) {
+	return this1.length;
+}
+as.ds._FixedArray.FixedArray_Impl_.blit = function(src,srcPos,dest,destPos,len) {
+	haxe.ds._Vector.Vector_Impl_.blit(src,srcPos,dest,destPos,len);
+}
+as.ds._FixedArray.FixedArray_Impl_.fromArrayCopy = function(array) {
+	return (function($this) {
+		var $r;
+		var vec = new Array(array.length);
+		{
+			var _g1 = 0, _g = array.length;
+			while(_g1 < _g) {
+				var i = _g1++;
+				vec[i] = array[i];
+			}
+		}
+		$r = vec;
+		return $r;
+	}(this));
+}
+as.ds._FixedArray.FixedArray_Impl_.serialize = function(v) {
+	var s = new haxe.Serializer();
+	s.serialize(v.length);
+	var _g1 = 0, _g = v.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		s.serialize(v[i]);
+	}
+	return s.toString();
+}
+as.ds._FixedArray.FixedArray_Impl_.unserialize = function(data) {
+	var s = new haxe.Unserializer(data);
+	var length = s.unserialize();
+	var v = new Array(length);
+	var _g = 0;
+	while(_g < length) {
+		var i = _g++;
+		var val = s.unserialize();
+		v[i] = val;
+	}
+	return v;
+}
+as.ds._SampleArray = {}
+as.ds._SampleArray.SampleArray_Impl_ = function() { }
+$hxClasses["as.ds._SampleArray.SampleArray_Impl_"] = as.ds._SampleArray.SampleArray_Impl_;
+as.ds._SampleArray.SampleArray_Impl_.__name__ = ["as","ds","_SampleArray","SampleArray_Impl_"];
+as.ds._SampleArray.SampleArray_Impl_._new = function(length) {
+	return new Float32Array(length);
+}
+as.ds._SampleArray.SampleArray_Impl_.get = function(this1,index) {
+	return this1[index];
+}
+as.ds._SampleArray.SampleArray_Impl_.set = function(this1,index,val) {
+	return this1[index] = val;
+}
+as.ds._SampleArray.SampleArray_Impl_.get_length = function(this1) {
+	return this1.length;
+}
+as.ds._SampleArray.SampleArray_Impl_.toData = function(this1) {
+	return this1;
+}
+as.ds._SampleArray.SampleArray_Impl_.blit = function(src,srcPos,dest,destPos,len) {
+	dest.set(src.subarray(srcPos,srcPos + len),destPos);
+}
+as.ds._SampleArray.SampleArray_Impl_.fromArrayCopy = function(array) {
+	return new Float32Array(array);
+}
+as.ds._SampleArray.SampleArray_Impl_.serialize = function(v) {
+	var s = new haxe.Serializer();
+	s.serialize(v.length);
+	var _g1 = 0, _g = v.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		s.serialize(v[i]);
+	}
+	return s.toString();
+}
+as.ds._SampleArray.SampleArray_Impl_.unserialize = function(data) {
+	var s = new haxe.Unserializer(data);
+	var length = s.unserialize();
+	var v = new Float32Array(length);
+	var _g = 0;
+	while(_g < length) {
+		var i = _g++;
+		var val = s.unserialize();
+		v[i] = val;
+	}
+	return v;
+}
+var mconsole = {}
+mconsole.Printer = function() { }
+$hxClasses["mconsole.Printer"] = mconsole.Printer;
+mconsole.Printer.__name__ = ["mconsole","Printer"];
+mconsole.Printer.prototype = {
+	__class__: mconsole.Printer
+}
+as.log = {}
+as.log.LevelPrinter = function(target) {
+	this._target = target;
+	this.level = as.log.LevelPrinter.logLevelToInt(mconsole.LogLevel.log);
+};
+$hxClasses["as.log.LevelPrinter"] = as.log.LevelPrinter;
+as.log.LevelPrinter.__name__ = ["as","log","LevelPrinter"];
+as.log.LevelPrinter.__interfaces__ = [mconsole.Printer];
+as.log.LevelPrinter.logLevelToInt = function(level) {
+	switch( (level)[1] ) {
+	case 4:
+		return 4;
+	case 3:
+		return 3;
+	case 1:
+		return 2;
+	case 2:
+		return 1;
+	case 0:
+		return 0;
+	}
+}
+as.log.LevelPrinter.prototype = {
+	printLine: function(level,message) {
+		this._target(level,message);
+	}
+	,print: function(level,params,indent,pos) {
+		var intLevel = as.log.LevelPrinter.logLevelToInt(level);
+		if(intLevel < this.level) return;
+		params = params.slice();
+		var _g1 = 0, _g = params.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			params[i] = Std.string(params[i]);
+		}
+		var message = params.join(", ");
+		var nextPosition = "@ " + pos.className + "." + pos.methodName;
+		var nextLineNumber = Std.string(pos.lineNumber);
+		var lineColumn = "";
+		var emptyLineColumn = "";
+		if(nextPosition != this._position) this._target(intLevel,nextPosition);
+		emptyLineColumn = StringTools.lpad(""," ",5);
+		if(nextPosition != this._position || nextLineNumber != this._lineNumber) lineColumn = StringTools.lpad("L" + nextLineNumber," ",6) + ": "; else lineColumn = emptyLineColumn;
+		this._position = nextPosition;
+		this._lineNumber = nextLineNumber;
+		var indent1 = StringTools.lpad(""," ",indent * 2);
+		message = lineColumn + indent1 + message;
+		message = message.split("\n").join("\n" + emptyLineColumn + indent1);
+		this._target(intLevel,message);
+	}
+	,__class__: as.log.LevelPrinter
+}
+as.main = {}
+as.main.IAlphaSynth = function() { }
+$hxClasses["as.main.IAlphaSynth"] = as.main.IAlphaSynth;
+as.main.IAlphaSynth.__name__ = ["as","main","IAlphaSynth"];
+as.main.IAlphaSynth.prototype = {
+	__class__: as.main.IAlphaSynth
+}
+as.main.IAlphaSynthAsync = function() { }
+$hxClasses["as.main.IAlphaSynthAsync"] = as.main.IAlphaSynthAsync;
+as.main.IAlphaSynthAsync.__name__ = ["as","main","IAlphaSynthAsync"];
+as.main.IAlphaSynthAsync.__interfaces__ = [as.main.IAlphaSynth];
+as.main.IAlphaSynthAsync.prototype = {
+	__class__: as.main.IAlphaSynthAsync
+}
+as.main.AlphaSynthJs = function() {
 	this.AlphaSynthId = "AlphaSynth";
-	this.ready = false;
+};
+$hxClasses["as.main.AlphaSynthJs"] = as.main.AlphaSynthJs;
+$hxExpose(as.main.AlphaSynthJs, "as.AlphaSynth");
+as.main.AlphaSynthJs.__name__ = ["as","main","AlphaSynthJs"];
+as.main.AlphaSynthJs.__interfaces__ = [as.main.IAlphaSynthAsync];
+as.main.AlphaSynthJs.main = function() {
+	mconsole.Console.hasConsole = false;
+	mconsole.Console.start();
+	mconsole.Console.removePrinter(mconsole.Console.defaultPrinter);
+	mconsole.Console.addPrinter(as.main.AlphaSynthJs._printer = new as.log.LevelPrinter(as.main.AlphaSynthJs.log));
+	as.main.AlphaSynthJs.instance = new as.main.AlphaSynthJs();
+}
+as.main.AlphaSynthJs.log = function(level,message) {
+	var console = window.console;
+	switch(level) {
+	case 0:
+		console.log(message);
+		break;
+	case 1:
+		console.debug(message);
+		break;
+	case 2:
+		console.info(message);
+		break;
+	case 3:
+		console.warn(message);
+		break;
+	case 4:
+		console.error(message);
+		break;
+	}
+}
+as.main.AlphaSynthJs.init = function(asRoot,swfObjectRoot) {
+	if(swfObjectRoot == null) swfObjectRoot = "";
+	var swf = swfobject;
+	var supportsWebAudio = !!window.ScriptProcessorNode;
+	var supportsWebWorkers = !!window.Worker;
+	var supportsFlashWorkers = swf.hasFlashPlayerVersion("11.4");
+	if(supportsWebAudio) {
+		if(mconsole.Console.hasConsole) mconsole.Console.callConsole("debug",["Will use webworkers for synthesizing and web audio api for playback"]);
+		mconsole.Console.print(mconsole.LogLevel.debug,["Will use webworkers for synthesizing and web audio api for playback"],{ fileName : "AlphaSynthJs.hx", lineNumber : 186, className : "as.main.AlphaSynthJs", methodName : "init"});
+		var result = as.main.webworker.webaudio.AlphaSynthJsPlayerApi.init(asRoot);
+		if(result) {
+			as.main.AlphaSynthJs.instance.realInstance = new as.main.webworker.webaudio.AlphaSynthJsPlayerApi();
+			as.main.AlphaSynthJs.instance.startup();
+		}
+		return result;
+	} else if(supportsWebWorkers) {
+		if(mconsole.Console.hasConsole) mconsole.Console.callConsole("debug",["Will use webworkers for synthesizing and flash for playback"]);
+		mconsole.Console.print(mconsole.LogLevel.debug,["Will use webworkers for synthesizing and flash for playback"],{ fileName : "AlphaSynthJs.hx", lineNumber : 197, className : "as.main.AlphaSynthJs", methodName : "init"});
+		var result = as.main.webworker.flash.AlphaSynthFlashPlayerApi.init(asRoot,swfObjectRoot);
+		if(result) {
+			as.main.AlphaSynthJs.instance.realInstance = new as.main.webworker.flash.AlphaSynthFlashPlayerApi();
+			as.main.AlphaSynthJs.instance.startup();
+		}
+		return result;
+	} else if(supportsFlashWorkers) {
+		if(mconsole.Console.hasConsole) mconsole.Console.callConsole("debug",["Will use flash for synthesizing and playback"]);
+		mconsole.Console.print(mconsole.LogLevel.debug,["Will use flash for synthesizing and playback"],{ fileName : "AlphaSynthJs.hx", lineNumber : 208, className : "as.main.AlphaSynthJs", methodName : "init"});
+		var result = as.main.flash.AlphaSynthFlashApi.init(asRoot,swfObjectRoot);
+		if(result) {
+			as.main.AlphaSynthJs.instance.realInstance = new as.main.flash.AlphaSynthFlashApi();
+			as.main.AlphaSynthJs.instance.startup();
+		}
+		return result;
+	} else {
+		mconsole.Console.error("Incompatible browser",null,{ fileName : "AlphaSynthJs.hx", lineNumber : 219, className : "as.main.AlphaSynthJs", methodName : "init"});
+		return false;
+	}
+}
+as.main.AlphaSynthJs.prototype = {
+	on: function(events,fn) {
+		if(this.realInstance == null) return;
+		this.realInstance.on(events,fn);
+		if(events.indexOf("ready") >= 0 && this.ready) fn();
+	}
+	,setLogLevel: function(level) {
+		as.main.AlphaSynthJs._printer.level = level;
+		if(this.realInstance == null) return;
+		this.realInstance.setLogLevel(level);
+	}
+	,loadMidiData: function(data) {
+		if(this.realInstance == null) return;
+		this.realInstance.loadMidiData(data);
+	}
+	,loadMidiUrl: function(url) {
+		if(this.realInstance == null) return;
+		this.realInstance.loadMidiUrl(url);
+	}
+	,loadSoundFontData: function(data) {
+		if(this.realInstance == null) return;
+		this.realInstance.loadSoundFontData(data);
+	}
+	,loadSoundFontUrl: function(url) {
+		if(this.realInstance == null) return;
+		this.realInstance.loadSoundFontUrl(url);
+	}
+	,setPositionTime: function(millis) {
+		if(this.realInstance == null) return;
+		this.realInstance.setPositionTime(millis);
+	}
+	,setPositionTick: function(tick) {
+		if(this.realInstance == null) return;
+		this.realInstance.setPositionTick(tick);
+	}
+	,stop: function() {
+		if(this.realInstance == null) return;
+		this.realInstance.stop();
+	}
+	,playPause: function() {
+		if(this.realInstance == null) return;
+		this.realInstance.playPause();
+	}
+	,pause: function() {
+		if(this.realInstance == null) return;
+		this.realInstance.pause();
+	}
+	,play: function() {
+		if(this.realInstance == null) return;
+		this.realInstance.play();
+	}
+	,isMidiLoaded: function() {
+		if(this.realInstance == null) return;
+		this.realInstance.isMidiLoaded();
+	}
+	,isSoundFontLoaded: function() {
+		if(this.realInstance == null) return;
+		this.realInstance.isSoundFontLoaded();
+	}
+	,getState: function() {
+		if(this.realInstance == null) return;
+		this.realInstance.getState();
+	}
+	,isReadyForPlay: function() {
+		if(this.realInstance == null) return;
+		this.realInstance.isReadyForPlay();
+	}
+	,startup: function() {
+		var _g = this;
+		this.realInstance.on("ready",function() {
+			_g.ready = true;
+		});
+		this.realInstance.startup();
+	}
+	,__class__: as.main.AlphaSynthJs
+}
+as.main.flash = {}
+as.main.flash.AlphaSynthFlashApi = function() {
+	this.AlphaSynthId = "AlphaSynth";
 	var ctx = new haxe.remoting.Context();
 	ctx.addObject("JsAlphaSynth",this);
 	this._flash = haxe.remoting.ExternalConnection.flashConnect("default",this.AlphaSynthId,ctx);
 	this._events = new js.JQuery("<span></span>");
 };
-$hxClasses["as.AlphaSynthFlashApi"] = as.AlphaSynthFlashApi;
-as.AlphaSynthFlashApi.__name__ = ["as","AlphaSynthFlashApi"];
-as.AlphaSynthFlashApi.__interfaces__ = [as.IAlphaSynthAsync];
-as.AlphaSynthFlashApi.init = function(asRoot,swfObjectRoot) {
+$hxClasses["as.main.flash.AlphaSynthFlashApi"] = as.main.flash.AlphaSynthFlashApi;
+as.main.flash.AlphaSynthFlashApi.__name__ = ["as","main","flash","AlphaSynthFlashApi"];
+as.main.flash.AlphaSynthFlashApi.__interfaces__ = [as.main.IAlphaSynthAsync];
+as.main.flash.AlphaSynthFlashApi.init = function(asRoot,swfObjectRoot) {
 	if(swfObjectRoot == null) swfObjectRoot = "";
 	var swf = swfobject;
 	if(asRoot != "" && !StringTools.endsWith(asRoot,"/")) asRoot += "/";
@@ -306,7 +701,7 @@ as.AlphaSynthFlashApi.init = function(asRoot,swfObjectRoot) {
 	if(swf) {
 		var alphaSynth = js.Browser.document.getElementById("alphaSynthContainer");
 		if(alphaSynth != null) {
-			haxe.Log.trace("Skipped initialization, existing alphaSynthContainer found",{ fileName : "AlphaSynthFlashApi.hx", lineNumber : 190, className : "as.AlphaSynthFlashApi", methodName : "init"});
+			haxe.Log.trace("Skipped initialization, existing alphaSynthContainer found",{ fileName : "AlphaSynthFlashApi.hx", lineNumber : 188, className : "as.main.flash.AlphaSynthFlashApi", methodName : "init"});
 			return false;
 		}
 		alphaSynth = js.Browser.document.createElement("div");
@@ -315,17 +710,14 @@ as.AlphaSynthFlashApi.init = function(asRoot,swfObjectRoot) {
 		swf.embedSWF(asRoot + "alphaSynthFull.swf","alphaSynthContainer","1px","1px","11.4.0",swfObjectRoot + "expressInstall.swf",{ },{ allowScriptAccess : "always"},{ id : "AlphaSynth"});
 		return true;
 	} else {
-		haxe.Log.trace("Error initializing alphaSynth: swfobject not found",{ fileName : "AlphaSynthFlashApi.hx", lineNumber : 211, className : "as.AlphaSynthFlashApi", methodName : "init"});
+		haxe.Log.trace("Error initializing alphaSynth: swfobject not found",{ fileName : "AlphaSynthFlashApi.hx", lineNumber : 209, className : "as.main.flash.AlphaSynthFlashApi", methodName : "init"});
 		return false;
 	}
 }
-as.AlphaSynthFlashApi.prototype = {
+as.main.flash.AlphaSynthFlashApi.prototype = {
 	trigger: function(event) {
 		var args = Array.prototype.slice.call(arguments);
 		switch(event) {
-		case "ready":
-			this.ready = true;
-			break;
 		case "log":
 			this.log(args[1],args[2]);
 			break;
@@ -409,19 +801,22 @@ as.AlphaSynthFlashApi.prototype = {
 		var v = this._flash.resolve("FlashAlphaSynth").resolve("isReadyForPlay").call([]);
 		this._events.trigger('isReadyForPlay', [v]);
 	}
-	,__class__: as.AlphaSynthFlashApi
+	,startup: function() {
+	}
+	,__class__: as.main.flash.AlphaSynthFlashApi
 }
-as.AlphaSynthFlashPlayerApi = function() {
-	this.ready = false;
+as.main.webworker = {}
+as.main.webworker.flash = {}
+as.main.webworker.flash.AlphaSynthFlashPlayerApi = function() {
 	var ctx = new haxe.remoting.Context();
 	ctx.addObject("JsAlphaSynth",this);
 	this._flash = haxe.remoting.ExternalConnection.flashConnect("default","AlphaSynth",ctx);
 	this._events = new js.JQuery("<span></span>");
 };
-$hxClasses["as.AlphaSynthFlashPlayerApi"] = as.AlphaSynthFlashPlayerApi;
-as.AlphaSynthFlashPlayerApi.__name__ = ["as","AlphaSynthFlashPlayerApi"];
-as.AlphaSynthFlashPlayerApi.__interfaces__ = [as.IAlphaSynthAsync];
-as.AlphaSynthFlashPlayerApi.init = function(asRoot,swfObjectRoot) {
+$hxClasses["as.main.webworker.flash.AlphaSynthFlashPlayerApi"] = as.main.webworker.flash.AlphaSynthFlashPlayerApi;
+as.main.webworker.flash.AlphaSynthFlashPlayerApi.__name__ = ["as","main","webworker","flash","AlphaSynthFlashPlayerApi"];
+as.main.webworker.flash.AlphaSynthFlashPlayerApi.__interfaces__ = [as.main.IAlphaSynthAsync];
+as.main.webworker.flash.AlphaSynthFlashPlayerApi.init = function(asRoot,swfObjectRoot) {
 	if(swfObjectRoot == null) swfObjectRoot = "";
 	var swf = swfobject;
 	if(asRoot != "" && !StringTools.endsWith(asRoot,"/")) asRoot += "/";
@@ -429,7 +824,7 @@ as.AlphaSynthFlashPlayerApi.init = function(asRoot,swfObjectRoot) {
 	if(swf) {
 		var alphaSynth = js.Browser.document.getElementById("alphaSynthContainer");
 		if(alphaSynth != null) {
-			haxe.Log.trace("Skipped initialization, existing alphaSynthContainer found",{ fileName : "AlphaSynthFlashPlayerApi.hx", lineNumber : 242, className : "as.AlphaSynthFlashPlayerApi", methodName : "init"});
+			haxe.Log.trace("Skipped initialization, existing alphaSynthContainer found",{ fileName : "AlphaSynthFlashPlayerApi.hx", lineNumber : 249, className : "as.main.webworker.flash.AlphaSynthFlashPlayerApi", methodName : "init"});
 			return false;
 		}
 		alphaSynth = js.Browser.document.createElement("div");
@@ -439,11 +834,11 @@ as.AlphaSynthFlashPlayerApi.init = function(asRoot,swfObjectRoot) {
 		swf.embedSWF(asRoot + "alphaSynthPlayer.swf","alphaSynthContainer","1px","1px","11.0.0",swfObjectRoot + "expressInstall.swf",{ },{ allowScriptAccess : "always"},{ id : "AlphaSynth"});
 		return true;
 	} else {
-		haxe.Log.trace("Error initializing alphaSynth: swfobject not found",{ fileName : "AlphaSynthFlashPlayerApi.hx", lineNumber : 268, className : "as.AlphaSynthFlashPlayerApi", methodName : "init"});
+		haxe.Log.trace("Error initializing alphaSynth: swfobject not found",{ fileName : "AlphaSynthFlashPlayerApi.hx", lineNumber : 275, className : "as.main.webworker.flash.AlphaSynthFlashPlayerApi", methodName : "init"});
 		return false;
 	}
 }
-as.AlphaSynthFlashPlayerApi.prototype = {
+as.main.webworker.flash.AlphaSynthFlashPlayerApi.prototype = {
 	log: function(level,message) {
 		var console = window.console;
 		switch(level) {
@@ -621,250 +1016,287 @@ as.AlphaSynthFlashPlayerApi.prototype = {
 	,isReadyForPlay: function() {
 		this._synth.postMessage({ cmd : "isReadyForPlay"});
 	}
-	,__class__: as.AlphaSynthFlashPlayerApi
+	,startup: function() {
+	}
+	,__class__: as.main.webworker.flash.AlphaSynthFlashPlayerApi
 }
-as.AlphaSynthJs = function() {
-	this.AlphaSynthId = "AlphaSynth";
+as.main.webworker.webaudio = {}
+as.main.webworker.webaudio.AlphaSynthJsPlayer = function() {
+	this._finished = false;
+	this._circularBuffer = new as.ds.CircularSampleBuffer(40960);
+	window.AudioContext = window.AudioContext || window.webkitAudioContext;
+	this._context = new AudioContext();
+	this._buffer = this._context.createBuffer(2,4096,44100);
+	this._audioNode = this._context.createScriptProcessor(4096,0,2);
+	this._audioNode.onaudioprocess = $bind(this,this.generateSound);
 };
-$hxClasses["as.AlphaSynthJs"] = as.AlphaSynthJs;
-$hxExpose(as.AlphaSynthJs, "as.AlphaSynth");
-as.AlphaSynthJs.__name__ = ["as","AlphaSynthJs"];
-as.AlphaSynthJs.__interfaces__ = [as.IAlphaSynthAsync];
-as.AlphaSynthJs.main = function() {
-	mconsole.Console.hasConsole = false;
-	mconsole.Console.start();
-	mconsole.Console.removePrinter(mconsole.Console.defaultPrinter);
-	mconsole.Console.addPrinter(as.AlphaSynthJs._printer = new as.log.LevelPrinter(as.AlphaSynthJs.log));
-	as.AlphaSynthJs.instance = new as.AlphaSynthJs();
-}
-as.AlphaSynthJs.log = function(level,message) {
-	var console = window.console;
-	switch(level) {
-	case 0:
-		console.log(message);
-		break;
-	case 1:
-		console.debug(message);
-		break;
-	case 2:
-		console.info(message);
-		break;
-	case 3:
-		console.warn(message);
-		break;
-	case 4:
-		console.error(message);
-		break;
-	}
-}
-as.AlphaSynthJs.init = function(asRoot,swfObjectRoot) {
-	if(swfObjectRoot == null) swfObjectRoot = "";
-	var swf = swfobject;
-	var supportsWebWorkers = !!window.Worker;
-	var supportsFlashWorkers = swf.hasFlashPlayerVersion("11.4");
-	if(supportsWebWorkers) {
-		if(mconsole.Console.hasConsole) mconsole.Console.callConsole("debug",["Will use webworkers for synthesizing"]);
-		mconsole.Console.print(mconsole.LogLevel.debug,["Will use webworkers for synthesizing"],{ fileName : "AlphaSynthJs.hx", lineNumber : 170, className : "as.AlphaSynthJs", methodName : "init"});
-		var result = as.AlphaSynthFlashPlayerApi.init(asRoot,swfObjectRoot);
-		if(result) as.AlphaSynthJs.instance.realInstance = new as.AlphaSynthFlashPlayerApi();
-		return result;
-	} else if(supportsFlashWorkers) {
-		if(mconsole.Console.hasConsole) mconsole.Console.callConsole("debug",["Will use flash for synthesizing"]);
-		mconsole.Console.print(mconsole.LogLevel.debug,["Will use flash for synthesizing"],{ fileName : "AlphaSynthJs.hx", lineNumber : 180, className : "as.AlphaSynthJs", methodName : "init"});
-		var result = as.AlphaSynthFlashApi.init(asRoot,swfObjectRoot);
-		if(result) as.AlphaSynthJs.instance.realInstance = new as.AlphaSynthFlashApi();
-		return result;
-	} else {
-		mconsole.Console.error("Incompatible browser",null,{ fileName : "AlphaSynthJs.hx", lineNumber : 190, className : "as.AlphaSynthJs", methodName : "init"});
-		return false;
-	}
-}
-as.AlphaSynthJs.prototype = {
-	on: function(events,fn) {
-		if(this.realInstance == null) return;
-		this.realInstance.on(events,fn);
-	}
-	,setLogLevel: function(level) {
-		as.AlphaSynthJs._printer.level = level;
-		if(this.realInstance == null) return;
-		this.realInstance.setLogLevel(level);
-	}
-	,loadMidiData: function(data) {
-		if(this.realInstance == null) return;
-		this.realInstance.loadMidiData(data);
-	}
-	,loadMidiUrl: function(url) {
-		if(this.realInstance == null) return;
-		this.realInstance.loadMidiUrl(url);
-	}
-	,loadSoundFontData: function(data) {
-		if(this.realInstance == null) return;
-		this.realInstance.loadSoundFontData(data);
-	}
-	,loadSoundFontUrl: function(url) {
-		if(this.realInstance == null) return;
-		this.realInstance.loadSoundFontUrl(url);
-	}
-	,setPositionTime: function(millis) {
-		if(this.realInstance == null) return;
-		this.realInstance.setPositionTime(millis);
-	}
-	,setPositionTick: function(tick) {
-		if(this.realInstance == null) return;
-		this.realInstance.setPositionTick(tick);
-	}
-	,stop: function() {
-		if(this.realInstance == null) return;
-		this.realInstance.stop();
-	}
-	,playPause: function() {
-		if(this.realInstance == null) return;
-		this.realInstance.playPause();
-	}
-	,pause: function() {
-		if(this.realInstance == null) return;
-		this.realInstance.pause();
-	}
-	,play: function() {
-		if(this.realInstance == null) return;
-		this.realInstance.play();
-	}
-	,isMidiLoaded: function() {
-		if(this.realInstance == null) return;
-		this.realInstance.isMidiLoaded();
-	}
-	,isSoundFontLoaded: function() {
-		if(this.realInstance == null) return;
-		this.realInstance.isSoundFontLoaded();
-	}
-	,getState: function() {
-		if(this.realInstance == null) return;
-		this.realInstance.getState();
-	}
-	,isReadyForPlay: function() {
-		if(this.realInstance == null) return;
-		this.realInstance.isReadyForPlay();
-	}
-	,__class__: as.AlphaSynthJs
-}
-as.ds = {}
-as.ds._FixedArray = {}
-as.ds._FixedArray.FixedArray_Impl_ = function() { }
-$hxClasses["as.ds._FixedArray.FixedArray_Impl_"] = as.ds._FixedArray.FixedArray_Impl_;
-as.ds._FixedArray.FixedArray_Impl_.__name__ = ["as","ds","_FixedArray","FixedArray_Impl_"];
-as.ds._FixedArray.FixedArray_Impl_._new = function(length) {
-	return new Array(length);
-}
-as.ds._FixedArray.FixedArray_Impl_.get = function(this1,index) {
-	return this1[index];
-}
-as.ds._FixedArray.FixedArray_Impl_.set = function(this1,index,val) {
-	return this1[index] = val;
-}
-as.ds._FixedArray.FixedArray_Impl_.clone = function(this1) {
-	return this1.slice(0);
-}
-as.ds._FixedArray.FixedArray_Impl_.get_length = function(this1) {
-	return this1.length;
-}
-as.ds._FixedArray.FixedArray_Impl_.blit = function(src,srcPos,dest,destPos,len) {
-	haxe.ds._Vector.Vector_Impl_.blit(src,srcPos,dest,destPos,len);
-}
-as.ds._FixedArray.FixedArray_Impl_.fromArrayCopy = function(array) {
-	return (function($this) {
-		var $r;
-		var vec = new Array(array.length);
-		{
-			var _g1 = 0, _g = array.length;
+$hxClasses["as.main.webworker.webaudio.AlphaSynthJsPlayer"] = as.main.webworker.webaudio.AlphaSynthJsPlayer;
+as.main.webworker.webaudio.AlphaSynthJsPlayer.__name__ = ["as","main","webworker","webaudio","AlphaSynthJsPlayer"];
+as.main.webworker.webaudio.AlphaSynthJsPlayer.prototype = {
+	generateSound: function(e) {
+		var left = e.outputBuffer.getChannelData(0);
+		var right = e.outputBuffer.getChannelData(1);
+		var samples = left.length + right.length;
+		if(this._circularBuffer._sampleCount < samples) {
+			if(this._finished) {
+				if(this.finished != null) this.finished();
+				this.stop();
+			} else {
+			}
+		} else {
+			var buffer = new Float32Array(samples);
+			this._circularBuffer.read(buffer,0,buffer.length);
+			var s = 0;
+			var _g1 = 0, _g = left.length;
 			while(_g1 < _g) {
 				var i = _g1++;
-				vec[i] = array[i];
+				left[i] = buffer[s++];
+				right[i] = buffer[s++];
 			}
 		}
-		$r = vec;
-		return $r;
-	}(this));
-}
-as.ds._FixedArray.FixedArray_Impl_.serialize = function(v) {
-	var s = new haxe.Serializer();
-	s.serialize(v.length);
-	var _g1 = 0, _g = v.length;
-	while(_g1 < _g) {
-		var i = _g1++;
-		s.serialize(v[i]);
+		if(this.positionChanged != null) this.positionChanged(this._context.currentTime * 1000 - this._startTime - this._pauseTime - 4096000 / 88200 | 0);
+		if(!this._finished) this.requestBuffers();
 	}
-	return s.toString();
-}
-as.ds._FixedArray.FixedArray_Impl_.unserialize = function(data) {
-	var s = new haxe.Unserializer(data);
-	var length = s.unserialize();
-	var v = new Array(length);
-	var _g = 0;
-	while(_g < length) {
-		var i = _g++;
-		var val = s.unserialize();
-		v[i] = val;
+	,calcPosition: function() {
+		return this._context.currentTime * 1000 - this._startTime - this._pauseTime - 4096000 / 88200;
 	}
-	return v;
-}
-var mconsole = {}
-mconsole.Printer = function() { }
-$hxClasses["mconsole.Printer"] = mconsole.Printer;
-mconsole.Printer.__name__ = ["mconsole","Printer"];
-mconsole.Printer.prototype = {
-	__class__: mconsole.Printer
-}
-as.log = {}
-as.log.LevelPrinter = function(target) {
-	this._target = target;
-	this.level = as.log.LevelPrinter.logLevelToInt(mconsole.LogLevel.log);
-};
-$hxClasses["as.log.LevelPrinter"] = as.log.LevelPrinter;
-as.log.LevelPrinter.__name__ = ["as","log","LevelPrinter"];
-as.log.LevelPrinter.__interfaces__ = [mconsole.Printer];
-as.log.LevelPrinter.logLevelToInt = function(level) {
-	switch( (level)[1] ) {
-	case 4:
-		return 4;
-	case 3:
-		return 3;
-	case 1:
-		return 2;
-	case 2:
-		return 1;
-	case 0:
-		return 0;
-	}
-}
-as.log.LevelPrinter.prototype = {
-	printLine: function(level,message) {
-		this._target(level,message);
-	}
-	,print: function(level,params,indent,pos) {
-		var intLevel = as.log.LevelPrinter.logLevelToInt(level);
-		if(intLevel < this.level) return;
-		params = params.slice();
-		var _g1 = 0, _g = params.length;
-		while(_g1 < _g) {
-			var i = _g1++;
-			params[i] = Std.string(params[i]);
+	,requestBuffers: function() {
+		var count = 20480.;
+		if(this._circularBuffer._sampleCount < count) {
+			var _g = 0;
+			while(_g < 5) {
+				var i = _g++;
+				if(this.requestBuffer != null) this.requestBuffer();
+			}
 		}
-		var message = params.join(", ");
-		var nextPosition = "@ " + pos.className + "." + pos.methodName;
-		var nextLineNumber = Std.string(pos.lineNumber);
-		var lineColumn = "";
-		var emptyLineColumn = "";
-		if(nextPosition != this._position) this._target(intLevel,nextPosition);
-		emptyLineColumn = StringTools.lpad(""," ",5);
-		if(nextPosition != this._position || nextLineNumber != this._lineNumber) lineColumn = StringTools.lpad("L" + nextLineNumber," ",6) + ": "; else lineColumn = emptyLineColumn;
-		this._position = nextPosition;
-		this._lineNumber = nextLineNumber;
-		var indent1 = StringTools.lpad(""," ",indent * 2);
-		message = lineColumn + indent1 + message;
-		message = message.split("\n").join("\n" + emptyLineColumn + indent1);
-		this._target(intLevel,message);
 	}
-	,__class__: as.log.LevelPrinter
+	,addSamples: function(f) {
+		this._circularBuffer.write(f,0,f.length);
+	}
+	,finish: function() {
+		this._finished = true;
+	}
+	,seek: function(position) {
+		this._startTime = this._context.currentTime * 1000 - position | 0;
+		this._pauseTime = 0;
+	}
+	,stop: function() {
+		this._finished = true;
+		this._paused = false;
+		this._source.stop();
+		this._source = null;
+		this._circularBuffer.clear();
+		this._audioNode.disconnect();
+	}
+	,pause: function() {
+		this._source.stop();
+		this._source = null;
+		this._paused = true;
+		this._pauseStart = this._context.currentTime * 1000 | 0;
+		this._audioNode.disconnect();
+	}
+	,play: function() {
+		this.requestBuffers();
+		this._finished = false;
+		if(this._paused) {
+			this._paused = false;
+			this._pauseTime += this._context.currentTime * 1000 - this._pauseStart | 0;
+		} else {
+			this._startTime = this._context.currentTime * 1000 | 0;
+			this._pauseTime = 0;
+		}
+		this._source = this._context.createBufferSource();
+		this._source.buffer = this._buffer;
+		this._source.loop = true;
+		this._source.connect(this._audioNode);
+		this._source.start(0);
+		this._audioNode.connect(this._context.destination);
+	}
+	,__class__: as.main.webworker.webaudio.AlphaSynthJsPlayer
+}
+as.main.webworker.webaudio.AlphaSynthJsPlayerApi = function() {
+	this._player = new as.main.webworker.webaudio.AlphaSynthJsPlayer();
+	this._player.positionChanged = $bind(this,this.playerPositionChanged);
+	this._player.requestBuffer = $bind(this,this.playerSampleRequest);
+	this._player.finished = $bind(this,this.playerFinished);
+	this._events = new js.JQuery("<span></span>");
+};
+$hxClasses["as.main.webworker.webaudio.AlphaSynthJsPlayerApi"] = as.main.webworker.webaudio.AlphaSynthJsPlayerApi;
+as.main.webworker.webaudio.AlphaSynthJsPlayerApi.__name__ = ["as","main","webworker","webaudio","AlphaSynthJsPlayerApi"];
+as.main.webworker.webaudio.AlphaSynthJsPlayerApi.__interfaces__ = [as.main.IAlphaSynthAsync];
+as.main.webworker.webaudio.AlphaSynthJsPlayerApi.init = function(asRoot) {
+	if(asRoot != "" && !StringTools.endsWith(asRoot,"/")) asRoot += "/";
+	js.Browser.window.AlphaSynthWorker = new Worker(asRoot + "alphaSynthWorker.js");
+	return true;
+}
+as.main.webworker.webaudio.AlphaSynthJsPlayerApi.prototype = {
+	log: function(level,message) {
+		var console = window.console;
+		switch(level) {
+		case 0:
+			console.log(message);
+			break;
+		case 1:
+			console.debug(message);
+			break;
+		case 2:
+			console.info(message);
+			break;
+		case 3:
+			console.warn(message);
+			break;
+		case 4:
+			console.error(message);
+			break;
+		}
+	}
+	,playerPositionChanged: function(pos) {
+		this._synth.postMessage({ cmd : "playerPositionChanged", pos : pos});
+	}
+	,playerFinished: function() {
+		this._synth.postMessage({ cmd : "playerFinished"});
+	}
+	,playerSampleRequest: function() {
+		this._synth.postMessage({ cmd : "playerSampleRequest"});
+	}
+	,playerReady: function() {
+		this._synth = js.Browser.window.AlphaSynthWorker;
+		this._synth.addEventListener("message",$bind(this,this.handleWorkerMessage),false);
+		this._synth.postMessage({ cmd : "playerReady"});
+		this._events.trigger('ready');
+	}
+	,on: function(events,fn) {
+		this._events.on(events,fn);
+	}
+	,handleWorkerMessage: function(e) {
+		var data = e.data;
+		switch(data.cmd) {
+		case "isReadyForPlay":
+			this._events.trigger(data.cmd, [data.value]);
+			break;
+		case "getState":
+			this._events.trigger(data.cmd, [data.value]);
+			break;
+		case "isSoundFontLoaded":
+			this._events.trigger(data.cmd, [data.value]);
+			break;
+		case "isMidiLoaded":
+			this._events.trigger(data.cmd, [data.value]);
+			break;
+		case "positionChanged":
+			this._events.trigger(data.cmd, [data.currentTime, data.endTime, data.currentTick, data.endTick]);
+			break;
+		case "playerStateChanged":
+			this._events.trigger(data.cmd, [data.state]);
+			break;
+		case "finished":
+			this._events.trigger(data.cmd);
+			break;
+		case "soundFontLoad":
+			this._events.trigger(data.cmd, [data.loaded, data.full]);
+			break;
+		case "soundFontLoaded":
+			this._events.trigger(data.cmd);
+			break;
+		case "soundFontLoadFailed":
+			this._events.trigger(data.cmd);
+			break;
+		case "midiLoad":
+			this._events.trigger(data.cmd, [data.loaded, data.full]);
+			break;
+		case "midiFileLoaded":
+			this._events.trigger(data.cmd);
+			break;
+		case "midiFileLoadFailed":
+			this._events.trigger(data.cmd);
+			break;
+		case "readyForPlay":
+			this._events.trigger(data.cmd, data.value);
+			break;
+		case "log":
+			this.log(data.level,data.message);
+			break;
+		case "playerSequencerFinished":
+			this._player.finish();
+			break;
+		case "playerAddSamples":
+			this._player.addSamples(data.samples);
+			break;
+		case "playerPlay":
+			this._player.play();
+			break;
+		case "playerPause":
+			this._player.pause();
+			break;
+		case "playerStop":
+			this._player.stop();
+			break;
+		case "playerSeek":
+			this._player.seek(data.pos);
+			break;
+		}
+	}
+	,qualifyURL: function(url) {
+		var img = js.Browser.document.createElement("img");
+		img.onerror = function(e) {
+		};
+		img.src = url;
+		url = img.src;
+		img.src = null;
+		return url;
+	}
+	,setLogLevel: function(level) {
+		this._synth.postMessage({ cmd : "setLogLevel", level : level});
+	}
+	,isMidiLoaded: function() {
+		this._synth.postMessage({ cmd : "isMidiLoaded"});
+	}
+	,isSoundFontLoaded: function() {
+		this._synth.postMessage({ cmd : "isSoundFontLoaded"});
+	}
+	,getState: function() {
+		this._synth.postMessage({ cmd : "getState"});
+	}
+	,loadMidiData: function(data) {
+		this._synth.postMessage({ cmd : "loadMidiData", data : data});
+	}
+	,loadMidiUrl: function(url) {
+		this._synth.postMessage({ cmd : "loadMidiUrl", url : this.qualifyURL(url)});
+	}
+	,loadMidiBytes: function(data) {
+		this._synth.postMessage({ cmd : "loadMidiBytes", data : data});
+	}
+	,loadSoundFontData: function(data) {
+		this._synth.postMessage({ cmd : "loadSoundFontData", data : data});
+	}
+	,loadSoundFontUrl: function(url) {
+		this._synth.postMessage({ cmd : "loadSoundFontUrl", url : this.qualifyURL(url)});
+	}
+	,setPositionTime: function(millis) {
+		this._synth.postMessage({ cmd : "setPositionTime", time : millis});
+	}
+	,setPositionTick: function(tick) {
+		this._synth.postMessage({ cmd : "setPositionTick", tick : tick});
+	}
+	,stop: function() {
+		this._synth.postMessage({ cmd : "stop"});
+	}
+	,playPause: function() {
+		this._synth.postMessage({ cmd : "playPause"});
+	}
+	,pause: function() {
+		this._synth.postMessage({ cmd : "pause"});
+	}
+	,play: function() {
+		this._synth.postMessage({ cmd : "play"});
+	}
+	,isReadyForPlay: function() {
+		this._synth.postMessage({ cmd : "isReadyForPlay"});
+	}
+	,startup: function() {
+		this.playerReady();
+	}
+	,__class__: as.main.webworker.webaudio.AlphaSynthJsPlayerApi
 }
 as.platform = {}
 as.platform.TypeUtils = function() { }
@@ -884,7 +1316,7 @@ as.platform.TypeUtils.clearShortArray = function(a) {
 		a[i] = 0;
 	}
 }
-as.platform.TypeUtils.clearFloat32Array = function(a) {
+as.platform.TypeUtils.clearSampleArray = function(a) {
 	var _g1 = 0, _g = a.length;
 	while(_g1 < _g) {
 		var i = _g1++;
@@ -930,6 +1362,10 @@ as.player.SynthPlayerState.Playing.__enum__ = as.player.SynthPlayerState;
 as.player.SynthPlayerState.Paused = ["Paused",2];
 as.player.SynthPlayerState.Paused.toString = $estr;
 as.player.SynthPlayerState.Paused.__enum__ = as.player.SynthPlayerState;
+as.util = {}
+as.util.SynthConstants = function() { }
+$hxClasses["as.util.SynthConstants"] = as.util.SynthConstants;
+as.util.SynthConstants.__name__ = ["as","util","SynthConstants"];
 var haxe = {}
 haxe.StackItem = $hxClasses["haxe.StackItem"] = { __ename__ : ["haxe","StackItem"], __constructs__ : ["CFunction","Module","FilePos","Method","Lambda"] }
 haxe.StackItem.CFunction = ["CFunction",0];
@@ -2307,11 +2743,67 @@ Xml.Document = "document";
 as.platform.TypeUtils.IsLittleEndian = true;
 var q = window.jQuery;
 js.JQuery = q;
-as.AlphaSynthFlashPlayerApi.AlphaSynthId = "AlphaSynth";
-as.AlphaSynthFlashPlayerApi.AlphaSynthWorkerId = "AlphaSynthWorker";
+as.bank.components.GeneratorStateEnum.PreLoop = 0;
+as.bank.components.GeneratorStateEnum.Loop = 1;
+as.bank.components.GeneratorStateEnum.PostLoop = 2;
+as.bank.components.GeneratorStateEnum.Finished = 3;
+as.bank.components.EnvelopeStateEnum.Delay = 0;
+as.bank.components.EnvelopeStateEnum.Attack = 1;
+as.bank.components.EnvelopeStateEnum.Hold = 2;
+as.bank.components.EnvelopeStateEnum.Decay = 3;
+as.bank.components.EnvelopeStateEnum.Sustain = 4;
+as.bank.components.EnvelopeStateEnum.Release = 5;
+as.bank.components.EnvelopeStateEnum.None = 6;
+as.bank.components.LfoStateEnum.Delay = 0;
+as.bank.components.LfoStateEnum.Sustain = 1;
+as.bank.components.WaveformEnum.Sine = 0;
+as.bank.components.WaveformEnum.Square = 1;
+as.bank.components.WaveformEnum.Saw = 2;
+as.bank.components.WaveformEnum.Triangle = 3;
+as.bank.components.WaveformEnum.SampleData = 4;
+as.bank.components.WaveformEnum.WhiteNoise = 5;
+as.bank.components.InterpolationEnum.None = 0;
+as.bank.components.InterpolationEnum.Linear = 1;
+as.bank.components.InterpolationEnum.Cosine = 2;
+as.bank.components.InterpolationEnum.CubicSpline = 3;
+as.bank.components.InterpolationEnum.Sinc = 4;
+as.bank.components.LoopModeEnum.NoLoop = 0;
+as.bank.components.LoopModeEnum.OneShot = 1;
+as.bank.components.LoopModeEnum.Continuous = 2;
+as.bank.components.LoopModeEnum.LoopUntilNoteOff = 3;
+as.bank.components.FilterTypeEnum.None = 0;
+as.bank.components.FilterTypeEnum.BiquadLowpass = 1;
+as.bank.components.FilterTypeEnum.BiquadHighpass = 2;
+as.bank.components.FilterTypeEnum.OnePoleLowpass = 3;
 as.log.LevelPrinter.MinLogLevel = 0;
 as.log.LevelPrinter.MaxLogLevel = 5;
+as.main.webworker.flash.AlphaSynthFlashPlayerApi.AlphaSynthId = "AlphaSynth";
+as.main.webworker.flash.AlphaSynthFlashPlayerApi.AlphaSynthWorkerId = "AlphaSynthWorker";
+as.main.webworker.webaudio.AlphaSynthJsPlayer.BufferSize = 4096;
+as.main.webworker.webaudio.AlphaSynthJsPlayer.Latency = 4096000 / 88200;
+as.main.webworker.webaudio.AlphaSynthJsPlayer.BufferCount = 10;
+as.main.webworker.webaudio.AlphaSynthJsPlayerApi.AlphaSynthWorkerId = "AlphaSynthWorker";
 as.platform.TypeUtils.IntMax = 2147483647;
+as.util.SynthConstants.InterpolationMode = 1;
+as.util.SynthConstants.SampleRate = 44100;
+as.util.SynthConstants.TwoPi = 2.0 * Math.PI;
+as.util.SynthConstants.HalfPi = Math.PI / 2.0;
+as.util.SynthConstants.InverseSqrtOfTwo = 0.707106781186;
+as.util.SynthConstants.DefaultLfoFrequency = 8.0;
+as.util.SynthConstants.DefaultModDepth = 100;
+as.util.SynthConstants.DefaultPolyphony = 40;
+as.util.SynthConstants.MinPolyphony = 5;
+as.util.SynthConstants.MaxPolyphony = 250;
+as.util.SynthConstants.DefaultBlockSize = 64;
+as.util.SynthConstants.MaxBufferSize = 0.05;
+as.util.SynthConstants.MinBufferSize = 0.001;
+as.util.SynthConstants.DenormLimit = 1e-38;
+as.util.SynthConstants.NonAudible = 1e-5;
+as.util.SynthConstants.SincWidth = 16;
+as.util.SynthConstants.SincResolution = 64;
+as.util.SynthConstants.MaxVoiceComponents = 4;
+as.util.SynthConstants.DefaultChannelCount = 16;
+as.util.SynthConstants.DefaultKeyCount = 128;
 haxe.Serializer.USE_CACHE = false;
 haxe.Serializer.USE_ENUM_INDEX = false;
 haxe.Serializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%:";
@@ -2332,7 +2824,7 @@ mconsole.Console.dirxml = "dirxml";
 mconsole.Console.hasConsole = mconsole.Console.detectConsole();
 mconsole.ConsoleMacro.__meta__ = { obj : { IgnoreCover : null}};
 mconsole.StackHelper.filters = mconsole.StackHelper.createFilters();
-as.AlphaSynthJs.main();
+as.main.AlphaSynthJs.main();
 function $hxExpose(src, path) {
 	var o = typeof window != "undefined" ? window : exports;
 	var parts = path.split(".");

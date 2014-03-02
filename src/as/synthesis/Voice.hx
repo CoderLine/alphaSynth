@@ -61,7 +61,7 @@ class Voice
     
     public function configure(channel:Int, note:Int, velocity:Int, patch:Patch)
     {
-        TypeUtils.clearFloat32Array(voiceParams.mixing);
+        TypeUtils.clearSampleArray(voiceParams.mixing);
         voiceParams.pitchOffset = 0;
         voiceParams.volOffset = 0;
         voiceParams.noteOffPending = false;

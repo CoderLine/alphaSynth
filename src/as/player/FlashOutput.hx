@@ -18,6 +18,7 @@
 package as.player;
 
 import as.ds.FixedArray.FixedArray;
+import as.ds.SampleArray;
 import as.platform.Types.Float32;
 import as.util.HxWorker;
 import flash.display.Sprite;
@@ -172,7 +173,7 @@ class FlashOutput implements ISynthOutput
         }
     }
     
-    public function addSamples(samples:FixedArray<Float32>)
+    public function addSamples(samples:SampleArray)
     {
         _toOutput.send("synthesized");
         _toOutput.send(samples);        

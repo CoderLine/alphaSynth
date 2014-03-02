@@ -19,6 +19,7 @@ package as.player;
 
 import as.ds.CircularSampleBuffer;
 import as.ds.FixedArray.FixedArray;
+import as.ds.SampleArray;
 import as.platform.Types.Float32;
 import as.util.SynthConstants;
 import flash.events.SampleDataEvent;
@@ -84,7 +85,7 @@ class FlashOutputDevice
         _finished = true;
     }
     
-    public function addSamples(f:FixedArray<Float32>)
+    public function addSamples(f:SampleArray)
     {
         _circularBuffer.write(f, 0, f.length);
     }
@@ -122,7 +123,7 @@ class FlashOutputDevice
         }
         else
         {
-            var buffer = new FixedArray<Float32>(BufferSize);
+            var buffer = new SampleArray(BufferSize);
             _circularBuffer.read(buffer, 0, buffer.length);
             
             for (i in 0 ... BufferSize)

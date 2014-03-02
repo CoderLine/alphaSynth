@@ -15,9 +15,11 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-package as;
+package as.main.webworker.flash;
 
 import as.ds.FixedArray.FixedArray;
+import as.ds.SampleArray;
+import as.main.IAlphaSynthAsync;
 import as.platform.Types.Float32;
 import haxe.remoting.Context;
 import haxe.remoting.ExternalConnection;
@@ -25,6 +27,10 @@ import js.Browser;
 import js.html.Element;
 import js.JQuery;
 
+/**
+ * This class implements a JavaScript API for initializing and controlling
+ * a WebWorker based alphaSynth which uses a Flash based Audio Output.
+ */
 class AlphaSynthFlashPlayerApi implements IAlphaSynthAsync
 {
     public static inline var AlphaSynthId = "AlphaSynth";
@@ -34,18 +40,19 @@ class AlphaSynthFlashPlayerApi implements IAlphaSynthAsync
     private var _synth:Dynamic;
     private var _events:JQuery;
     
-    public var ready:Bool;
-    
     public function new()
     {
-        ready = false;
-        
         var ctx = new Context();
         ctx.addObject("JsAlphaSynth", this);
         _flash = ExternalConnection.flashConnect("default", AlphaSynthId, ctx);
                 
         // todo: get rid of jQuery dependency
         _events = new JQuery('<span></span>');
+    }
+    
+    public function startup()
+    {
+        
     }
     
     //
@@ -165,7 +172,7 @@ class AlphaSynthFlashPlayerApi implements IAlphaSynthAsync
             case 'log': log(data.level, data.message);
             // flash player communication
             case 'playerSequencerFinished': _flash.FlashAlphaSynth.sequencerFinished.call([]);
-            case 'playerAddSamples': _flash.FlashAlphaSynth.addSamples.call([FixedArray.serialize(data.samples)]);
+            case 'playerAddSamples': _flash.FlashAlphaSynth.addSamples.call([SampleArray.serialize(data.samples)]);
             case 'playerPlay': _flash.FlashAlphaSynth.play.call([]);
             case 'playerPause': _flash.FlashAlphaSynth.pause.call([]);
             case 'playerStop': _flash.FlashAlphaSynth.stop.call([]);

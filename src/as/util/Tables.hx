@@ -26,6 +26,7 @@ import as.bank.components.generators.TriangleGenerator;
 import as.bank.components.generators.WhiteNoiseGenerator;
 import as.bank.descriptors.GeneratorDescriptor;
 import as.ds.FixedArray.FixedArray;
+import as.ds.SampleArray;
 import as.platform.Types.Float32;
 import as.synthesis.Synthesizer;
 import as.synthesis.SynthHelper;
@@ -34,12 +35,12 @@ class Tables
 {
     private static var _isInitialized:Bool;
     
-    public static var _envelopeTables:FixedArray<FixedArray<Float32>>;
-    public static var _semitoneTable:FixedArray<Float32>;
-    public static var _centTable:FixedArray<Float32>;
-    public static var _sincTable:FixedArray<Float32>; 
+    public static var _envelopeTables:FixedArray<SampleArray>;
+    public static var _semitoneTable:SampleArray;
+    public static var _centTable:SampleArray;
+    public static var _sincTable:SampleArray; 
     
-    public static function envelopeTables(index:Int):FixedArray<Float32>
+    public static function envelopeTables(index:Int):SampleArray
     {
         if (!_isInitialized) init();
         return _envelopeTables[index];
@@ -67,7 +68,7 @@ class Tables
     {
         var EnvelopeSize = 64;
         var ExponentialCoeff = .09;
-        _envelopeTables = new FixedArray<FixedArray<Float32>>(4);  
+        _envelopeTables = new FixedArray<SampleArray>(4);  
         _envelopeTables[0] = (removeDenormals(createSustainTable(EnvelopeSize)));
         _envelopeTables[1] = (removeDenormals(createLinearTable(EnvelopeSize)));
         _envelopeTables[2] = (removeDenormals(createExponentialTable(EnvelopeSize, ExponentialCoeff)));
@@ -78,10 +79,10 @@ class Tables
         _isInitialized = true;
     }
     
-    private static function createSquareTable(size:Int, k:Int) : FixedArray<Float32>
+    private static function createSquareTable(size:Int, k:Int) : SampleArray
     {//Uses Fourier Expansion up to k terms 
         var FourOverPi = 4 / Math.PI;
-        var squaretable = new FixedArray<Float32>(size);
+        var squaretable = new SampleArray(size);
         var inc = 1.0 / size;
         var phase:Float = 0;
         for (x in 0 ... size)
@@ -98,9 +99,9 @@ class Tables
         return squaretable;
     }
 
-    private static function createCentTable() : FixedArray<Float32>
+    private static function createCentTable() : SampleArray
     {//-100 to 100 cents
-        var cents = new FixedArray<Float32>(201);
+        var cents = new SampleArray(201);
         for(x in 0 ... cents.length)
         {
             cents[x] = Math.pow(2.0, (x - 100.0) / 1200.0);
@@ -108,9 +109,9 @@ class Tables
         return cents;
     }
     
-    private static function createSemitoneTable() : FixedArray<Float32>
+    private static function createSemitoneTable() : SampleArray
     {//-127 to 127 semitones
-        var table = new FixedArray<Float32>(255);
+        var table = new SampleArray(255);
         for(x in 0 ... table.length)
         {
             table[x] = Math.pow(2.0, (x - 127.0) / 12.0);
@@ -118,9 +119,9 @@ class Tables
         return table;
     }
     
-    private static function createSustainTable(size:Int) : FixedArray<Float32>
+    private static function createSustainTable(size:Int) : SampleArray
     {
-        var table = new FixedArray<Float32>(size);
+        var table = new SampleArray(size);
         for(x in 0 ... size)
         {
             table[x] = 1;
@@ -128,9 +129,9 @@ class Tables
         return table;
     }
     
-    private static function createLinearTable(size:Int) : FixedArray<Float32>
+    private static function createLinearTable(size:Int) : SampleArray
     {
-        var table = new FixedArray<Float32>(size);
+        var table = new SampleArray(size);
         for(x in 0 ... size)
         {
             table[x] = x / cast((size - 1), Float);
@@ -138,10 +139,10 @@ class Tables
         return table;
     }
     
-    private static function createExponentialTable(size:Int, coeff:Float) : FixedArray<Float32>
+    private static function createExponentialTable(size:Int, coeff:Float) : SampleArray
     {
         coeff = SynthHelper.clampF(coeff, .001, .9);
-        var graph:FixedArray<Float32> = new FixedArray<Float32>(size);
+        var graph:SampleArray = new SampleArray(size);
         var val:Float = 0;
         for (x in 0 ... size)
         {
@@ -155,9 +156,9 @@ class Tables
         return graph;
     }
     
-    private static function createSineTable(size:Int) : FixedArray<Float32>
+    private static function createSineTable(size:Int) : SampleArray
     {
-        var graph:FixedArray<Float32> = new FixedArray<Float32>(size);
+        var graph:SampleArray = new SampleArray(size);
         var inc:Float = (3.0 * Math.PI / 2.0) / (size - 1);
         var phase:Float = 0;
         for (x in 0 ... size)
@@ -168,7 +169,7 @@ class Tables
         return graph;
     }
     
-    private static function removeDenormals(data: FixedArray<Float32>) : FixedArray<Float32>
+    private static function removeDenormals(data: SampleArray) : SampleArray
     {
         for (x in 0 ... data.length)
         {
@@ -193,10 +194,10 @@ class Tables
         return 0.42659 - 0.49656 * Math.cos(SynthConstants.TwoPi * i / size) + 0.076849 * Math.cos(4.0 * Math.PI * i / size);
     }    
     
-    private static function createSincTable(windowSize:Int, resolution:Int, cornerRatio:Float, windowFunction:Float->Int->Float) : FixedArray<Float32>
+    private static function createSincTable(windowSize:Int, resolution:Int, cornerRatio:Float, windowFunction:Float->Int->Float) : SampleArray
     {
         var subWindow:Int = Std.int((windowSize / 2) + 1); 
-        var table:FixedArray<Float32> = new FixedArray<Float32>((subWindow * resolution));
+        var table:SampleArray = new SampleArray((subWindow * resolution));
         var gain:Float = 2.0 * cornerRatio;
         for (x in 0 ... subWindow)
         {

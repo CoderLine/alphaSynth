@@ -15,8 +15,11 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-package as;
+package as.main;
 import as.log.LevelPrinter;
+import as.main.flash.AlphaSynthFlashApi;
+import as.main.webworker.flash.AlphaSynthFlashPlayerApi;
+import as.main.webworker.webaudio.AlphaSynthJsPlayerApi;
 import js.JQuery;
 
 /**
@@ -30,12 +33,10 @@ import js.JQuery;
  * 
  * - IE6-9   - A pure flash alphaSynth is initialized (Requires Flash 11.4)
  * - IE10-11 - Flash is used for playback, Synthesizing is done in a WebWorker
- * - Firefox - Flash is used for playback, Synthesizing is done in a WebWorker [1]
- * - Chrome  - Flash is used for playback, Synthesizing is done in a WebWorker [1]
- * - Safari  - Flash is used for playback, Synthesizing is done in a WebWorker [1]
- * - Opera   - Flash is used for playback, Synthesizing is done in a WebWorker [1]
- * 
- 
+ * - Firefox - Web Audio API is used for playback, Synthesizing is done in a WebWorker 
+ * - Chrome  - Web Audio API is used for playback, Synthesizing is done in a WebWorker 
+ * - Safari  - Web Audio API is used for playback, Synthesizing is done in a WebWorker 
+ * - Opera   - Web Audio API is used for playback, Synthesizing is done in a WebWorker
  * 
  * [1] - In Future Versions they will use the Web Audio API for playback
  */
@@ -70,11 +71,19 @@ class AlphaSynthJs implements IAlphaSynthAsync
     }
     
     public var realInstance:IAlphaSynthAsync;
+    public var ready:Bool;
     
     public function new()
     {
     }
     
+    public function startup()
+    {
+        realInstance.on('ready', function() {
+            ready = true;
+        });
+        realInstance.startup();
+    }
        
     public function isReadyForPlay() : Void
     {
@@ -157,31 +166,49 @@ class AlphaSynthJs implements IAlphaSynthAsync
     {
         if (realInstance == null) return;
         realInstance.on(events, fn);
+        if (events.indexOf("ready") >= 0 && ready)
+        {
+            fn();
+        }
     }
     
     public static function init(asRoot:String, swfObjectRoot:String = '') : Bool
     {
         var swf = untyped __js__("swfobject");
+        var supportsWebAudio:Bool = untyped __js__('!!window.ScriptProcessorNode');
         var supportsWebWorkers:Bool = untyped __js__('!!window.Worker');
         var supportsFlashWorkers:Bool = swf.hasFlashPlayerVersion('11.4');
         
-        if (supportsWebWorkers)
+        if (supportsWebAudio)
         {
-            Console.debug("Will use webworkers for synthesizing");
+            Console.debug("Will use webworkers for synthesizing and web audio api for playback");
+            var result = AlphaSynthJsPlayerApi.init(asRoot);
+            if (result)
+            {
+                instance.realInstance = new AlphaSynthJsPlayerApi();
+                instance.startup();
+            }
+            return result;
+        }
+        else if (supportsWebWorkers)
+        {
+            Console.debug("Will use webworkers for synthesizing and flash for playback");
             var result = AlphaSynthFlashPlayerApi.init(asRoot, swfObjectRoot);
             if (result)
             {
                 instance.realInstance = new AlphaSynthFlashPlayerApi();
+                instance.startup();
             }
             return result;
         }
         else if (supportsFlashWorkers)
         {
-            Console.debug("Will use flash for synthesizing");
+            Console.debug("Will use flash for synthesizing and playback");
             var result = AlphaSynthFlashApi.init(asRoot, swfObjectRoot);
             if (result)
             {
                 instance.realInstance = new AlphaSynthFlashApi();
+                instance.startup();
             }
             return result;
         }

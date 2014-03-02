@@ -18,6 +18,7 @@
 package as.player;
 
 import as.ds.FixedArray.FixedArray;
+import as.ds.SampleArray;
 import as.platform.Types.Float32;
 
 /**
@@ -65,7 +66,7 @@ interface ISynthOutput
     /**
      * Adds new audio samples to the output buffer 
      */
-    function addSamples(samples:FixedArray<Float32>):Void;
+    function addSamples(samples:SampleArray):Void;
         
     /**
      * Adds a new listener method which gets called

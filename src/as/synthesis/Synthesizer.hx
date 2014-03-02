@@ -23,6 +23,7 @@ import as.bank.patch.Patch;
 import as.bank.PatchBank;
 import as.ds.FixedArray.FixedArray;
 import as.ds.LinkedList.LinkedList;
+import as.ds.SampleArray;
 import as.midi.event.MidiEvent;
 import as.platform.Types.Float32;
 import as.platform.Types.TypeUtils;
@@ -52,7 +53,7 @@ class Synthesizer
     private var _midiMessageProcessed:Array < MidiEvent->Void > ;
     
     private var _bankSelect:FixedArray<Int>;
-    private var _channelPressure:FixedArray<Float32>;
+    private var _channelPressure:SampleArray;
     private var _pan:FixedArray<Short>;
     private var _volume:FixedArray<Short>;
     private var _expression:FixedArray<Short>;
@@ -64,13 +65,13 @@ class Synthesizer
     private var _holdPedal:FixedArray<Bool>;
     private var _rpn:FixedArray<Short>;
     
-    public var sampleBuffer:FixedArray<Float32>;
+    public var sampleBuffer:SampleArray;
     
     public var littleEndian:Bool;
-    public var modWheel:FixedArray<Float32>;
+    public var modWheel:SampleArray;
     public var panPositions:FixedArray<PanComponent>;
     public var totalPitch:FixedArray<Int>;
-    public var totalVolume:FixedArray<Float32>;
+    public var totalVolume:SampleArray;
     
     public var programs:FixedArray<Int>;
     
@@ -128,8 +129,8 @@ class Synthesizer
         this.microBufferSize = SynthHelper.clampI(bufferSize, Std.int(SynthConstants.MinBufferSize * sampleRate), Std.int(SynthConstants.MaxBufferSize * sampleRate));
         this.microBufferSize = Std.int(Math.ceil(this.microBufferSize /  SynthConstants.DefaultBlockSize) * SynthConstants.DefaultBlockSize); //ensure multiple of block size
         this.microBufferCount = Std.int(Math.max(1, bufferCount));
-        sampleBuffer = new FixedArray<Float32>((microBufferSize * microBufferCount * audioChannels));
-        TypeUtils.clearFloat32Array(sampleBuffer);
+        sampleBuffer = new SampleArray((microBufferSize * microBufferCount * audioChannels));
+        TypeUtils.clearSampleArray(sampleBuffer);
         littleEndian = true;
         
         //
@@ -138,8 +139,8 @@ class Synthesizer
         TypeUtils.clearIntArray(_bankSelect);
         programs = new FixedArray<Int>(SynthConstants.DefaultChannelCount);
         TypeUtils.clearIntArray(programs);
-        _channelPressure = new FixedArray<Float32>(SynthConstants.DefaultChannelCount);
-        TypeUtils.clearFloat32Array(_channelPressure);
+        _channelPressure = new SampleArray(SynthConstants.DefaultChannelCount);
+        TypeUtils.clearSampleArray(_channelPressure);
         _pan = new FixedArray<Short>(SynthConstants.DefaultChannelCount);
         TypeUtils.clearShortArray(_pan);
         _volume = new FixedArray<Short>(SynthConstants.DefaultChannelCount);
@@ -159,13 +160,13 @@ class Synthesizer
         _holdPedal = new FixedArray<Bool>(SynthConstants.DefaultChannelCount);
         _rpn = new FixedArray<Short>(SynthConstants.DefaultChannelCount);
         TypeUtils.clearShortArray(_rpn);
-        modWheel = new FixedArray<Float32>(SynthConstants.DefaultChannelCount);
-        TypeUtils.clearFloat32Array(modWheel);
+        modWheel = new SampleArray(SynthConstants.DefaultChannelCount);
+        TypeUtils.clearSampleArray(modWheel);
         panPositions = new FixedArray<PanComponent>(SynthConstants.DefaultChannelCount);
         totalPitch = new FixedArray<Int>(SynthConstants.DefaultChannelCount);
         TypeUtils.clearIntArray(totalPitch);
-        totalVolume = new FixedArray<Float32>(SynthConstants.DefaultChannelCount);
-        TypeUtils.clearFloat32Array(totalVolume);
+        totalVolume = new SampleArray(SynthConstants.DefaultChannelCount);
+        TypeUtils.clearSampleArray(totalVolume);
         
         for (i in 0 ... SynthConstants.DefaultChannelCount)
         {
@@ -259,14 +260,14 @@ class Synthesizer
         if (audioChannels != channels)
         {
             audioChannels = channels;
-            sampleBuffer = new FixedArray<Float32>((microBufferSize * microBufferCount * audioChannels));
-            TypeUtils.clearFloat32Array(sampleBuffer);
+            sampleBuffer = new SampleArray((microBufferSize * microBufferCount * audioChannels));
+            TypeUtils.clearSampleArray(sampleBuffer);
         }
     }
     
     public function synthesize()
     {
-        TypeUtils.clearFloat32Array(sampleBuffer);
+        TypeUtils.clearSampleArray(sampleBuffer);
         fillWorkingBuffer();
     }
     
@@ -319,7 +320,7 @@ class Synthesizer
         TypeUtils.clearIntArray(midiEventCounts);
     }
     
-    private function convertWorkingBuffer(to:Bytes, from:FixedArray<Float32>)
+    private function convertWorkingBuffer(to:Bytes, from:SampleArray)
     {
         var i:Int = 0;
         if (littleEndian)

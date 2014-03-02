@@ -22,18 +22,18 @@ import as.platform.Types.TypeUtils;
 
 class CircularSampleBuffer
 {
-    private var _buffer:FixedArray<Float32>;
+    private var _buffer:SampleArray;
     private var _writePosition:Int;
     private var _readPosition:Int;
     private var _sampleCount:Int;
     
     public function new(size:Int) 
     {
-        _buffer = new FixedArray<Float32>(size);
+        _buffer = new SampleArray(size);
         _writePosition = 0;
         _readPosition = 0;
         _sampleCount = 0;
-        TypeUtils.clearFloat32Array(_buffer);
+        TypeUtils.clearSampleArray(_buffer);
     }
     
     public var count(get, null):Int;
@@ -47,11 +47,11 @@ class CircularSampleBuffer
         _readPosition = 0;
         _writePosition = 0;
         _sampleCount = 0;
-        _buffer = new FixedArray<Float32>(_buffer.length);
-        TypeUtils.clearFloat32Array(_buffer);
+        _buffer = new SampleArray(_buffer.length);
+        TypeUtils.clearSampleArray(_buffer);
     }
     
-    public function write(data:FixedArray<Float32>, offset:Int, count:Int)
+    public function write(data:SampleArray, offset:Int, count:Int)
     {
         var samplesWritten = 0;
         if (count > _buffer.length - _sampleCount)
@@ -60,13 +60,13 @@ class CircularSampleBuffer
         }
         
         var writeToEnd:Int = Std.int(Math.min(_buffer.length - _writePosition, count));
-        FixedArray.blit(data, offset, _buffer, _writePosition, writeToEnd);
+        SampleArray.blit(data, offset, _buffer, _writePosition, writeToEnd);
         _writePosition += writeToEnd;
         _writePosition %= _buffer.length;
         samplesWritten += writeToEnd;
         if (samplesWritten < count)
         {
-            FixedArray.blit(data, offset + samplesWritten, _buffer, _writePosition,  count - samplesWritten);
+            SampleArray.blit(data, offset + samplesWritten, _buffer, _writePosition,  count - samplesWritten);
             _writePosition += (count - samplesWritten);
             samplesWritten = count;
         }
@@ -74,7 +74,7 @@ class CircularSampleBuffer
         return samplesWritten;
     }
     
-    public function read(data:FixedArray<Float32>, offset:Int, count:Int)
+    public function read(data:SampleArray, offset:Int, count:Int)
     {
         if (count > _sampleCount)
         {
@@ -82,14 +82,14 @@ class CircularSampleBuffer
         }
         var samplesRead = 0;
         var readToEnd = Std.int(Math.min(_buffer.length - _readPosition, count));
-        FixedArray.blit(_buffer, _readPosition, data, offset, readToEnd);
+        SampleArray.blit(_buffer, _readPosition, data, offset, readToEnd);
         samplesRead += readToEnd;
         _readPosition += readToEnd;
         _readPosition %= _buffer.length;
         
         if (samplesRead < count)
         {
-            FixedArray.blit(_buffer, _readPosition, data, offset + samplesRead, count - samplesRead);
+            SampleArray.blit(_buffer, _readPosition, data, offset + samplesRead, count - samplesRead);
             _readPosition += (count - samplesRead);
             samplesRead = count;
         }

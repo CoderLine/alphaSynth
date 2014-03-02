@@ -24,6 +24,7 @@ import as.bank.components.generators.GeneratorParameters;
 import as.bank.components.generators.TriangleGenerator;
 import as.bank.components.Lfo;
 import as.ds.FixedArray.FixedArray;
+import as.ds.SampleArray;
 import as.platform.Types.Float32;
 import as.platform.Types.TypeUtils;
 import as.synthesis.SynthHelper.VoiceStateEnum;
@@ -39,9 +40,9 @@ class VoiceParameters
     public var synth:Synthesizer;
     public var pitchOffset:Int;
     public var volOffset:Float32;
-    public var blockBuffer:FixedArray<Float32>;
-    public var mixing:FixedArray<Float32>;
-    public var counters:FixedArray<Float32>;    
+    public var blockBuffer:SampleArray;
+    public var mixing:SampleArray;
+    public var counters:SampleArray;    
     public var generatorParams:FixedArray<GeneratorParameters>;
     public var generators:FixedArray<Generator>;  
     public var envelopes:FixedArray<Envelope>;
@@ -57,13 +58,13 @@ class VoiceParameters
         state = VoiceStateEnum.Stopped;
         pitchOffset = 0;
         volOffset = 0;
-        blockBuffer = new FixedArray<Float32>(SynthConstants.DefaultBlockSize);
-        TypeUtils.clearFloat32Array(blockBuffer);
+        blockBuffer = new SampleArray(SynthConstants.DefaultBlockSize);
+        TypeUtils.clearSampleArray(blockBuffer);
         //create default number of each component
-        mixing = new FixedArray<Float32>(SynthConstants.MaxVoiceComponents);
-        TypeUtils.clearFloat32Array(mixing);
-        counters = new FixedArray<Float32>(SynthConstants.MaxVoiceComponents);
-        TypeUtils.clearFloat32Array(counters);
+        mixing = new SampleArray(SynthConstants.MaxVoiceComponents);
+        TypeUtils.clearSampleArray(mixing);
+        counters = new SampleArray(SynthConstants.MaxVoiceComponents);
+        TypeUtils.clearSampleArray(counters);
         generatorParams = new FixedArray<GeneratorParameters>(SynthConstants.MaxVoiceComponents);
         generators = null; //since this is set directly there is no need to initialize
         envelopes = new FixedArray<Envelope>(SynthConstants.MaxVoiceComponents);

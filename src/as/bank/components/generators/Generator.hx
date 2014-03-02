@@ -23,6 +23,7 @@ import as.bank.components.Enum.LoopModeEnum;
 import as.bank.components.Enum.WaveformEnum;
 import as.bank.descriptors.GeneratorDescriptor;
 import as.ds.FixedArray.FixedArray;
+import as.ds.SampleArray;
 import as.platform.Types.Float32;
 import as.platform.Types.Short;
 
@@ -73,7 +74,7 @@ class Generator
         return 0;
     }
     
-    public function getValues(generatorParams:GeneratorParameters, blockBuffer:FixedArray<Float32>, increment:Float32):Void 
+    public function getValues(generatorParams:GeneratorParameters, blockBuffer:SampleArray, increment:Float32):Void 
     {
         var proccessed = 0;
         do

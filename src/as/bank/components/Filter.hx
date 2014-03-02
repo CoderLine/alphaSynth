@@ -20,6 +20,7 @@ package as.bank.components;
 import as.bank.components.Enum;
 import as.bank.descriptors.FilterDescriptor;
 import as.ds.FixedArray.FixedArray;
+import as.ds.SampleArray;
 import as.platform.Types.Float32;
 import as.synthesis.Synthesizer;
 import as.synthesis.SynthHelper;
@@ -121,7 +122,7 @@ class Filter
         }
     }
     
-    public function applyFilterMulti(data:FixedArray<Float32>) : Void
+    public function applyFilterMulti(data:SampleArray) : Void
     {
         for (x in 0 ... data.length)
         {

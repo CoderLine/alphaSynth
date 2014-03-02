@@ -22,13 +22,14 @@ import as.bank.components.Enum.InterpolationEnum;
 import as.bank.components.generators.GeneratorParameters;
 import as.bank.descriptors.GeneratorDescriptor;
 import as.ds.FixedArray.FixedArray;
+import as.ds.SampleArray;
 import as.platform.Types.Float32;
 import as.synthesis.Synthesizer;
 import as.util.SynthConstants;
 
 class SampleGenerator extends Generator
 {
-    public var samples:FixedArray<Float32>;
+    public var samples:SampleArray;
 
     public function new() 
     {
@@ -40,7 +41,7 @@ class SampleGenerator extends Generator
         return samples[Std.int(phase)];
     }
     
-    public override function getValues(generatorParams:GeneratorParameters, blockBuffer:FixedArray<Float32>, increment:Float32):Void 
+    public override function getValues(generatorParams:GeneratorParameters, blockBuffer:SampleArray, increment:Float32):Void 
     {
         var proccessed:Int = 0;
         do
@@ -74,7 +75,7 @@ class SampleGenerator extends Generator
     }
     
 
-    private function interpolate(generatorParams:GeneratorParameters, blockBuffer:FixedArray<Float32>, increment:Float32, start:Int, end:Int)
+    private function interpolate(generatorParams:GeneratorParameters, blockBuffer:SampleArray, increment:Float32, start:Int, end:Int)
     {
         var _end:Float32 = generatorParams.currentState == GeneratorStateEnum.Loop ? this.loopEndPhase - 1 : this.endPhase -1 ;
         var index:Int;

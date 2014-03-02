@@ -15,23 +15,29 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-package as;
+package as.main.webworker;
+
 import as.log.LevelPrinter;
+import as.main.IAlphaSynthSync;
 import as.player.ISynthPlayerListener;
 import as.player.SynthPlayer;
 import as.player.SynthPlayerState;
 
+/**
+ * This class implements a HTML5 WebWorker based version of alphaSynth
+ * which can be controlled via WebWorker messages.
+ */
 class AlphaSynthJsWorker implements IAlphaSynthSync implements ISynthPlayerListener
 {
+    private var _player:SynthPlayer;
+    private var _main:Dynamic;
+    private var _printer:LevelPrinter;
+    
     public static var instance:AlphaSynthJsWorker;
     public static function main()
     {
         instance = new AlphaSynthJsWorker();
     }
-    
-    private var _player:SynthPlayer;
-    private var _main:Dynamic;
-    private var _printer:LevelPrinter;
     
     public function new()
     {
