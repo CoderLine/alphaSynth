@@ -1048,8 +1048,7 @@ as.main.webworker.webaudio.AlphaSynthJsPlayer.prototype = {
 			if(this._finished) {
 				if(this.finished != null) this.finished();
 				this.stop();
-			} else {
-			}
+			} else this._pauseTime += 4096000 / 88200 | 0;
 		} else {
 			var buffer = new Float32Array(samples);
 			this._circularBuffer.read(buffer,0,buffer.length);

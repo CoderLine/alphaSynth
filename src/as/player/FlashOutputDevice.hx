@@ -39,11 +39,12 @@ class FlashOutputDevice
     
     private var _position:Int;
     private var _finished:Bool;
+    private var _bufferTime:Int;
     
     public function new()
     {
         _finished = false;
-        
+        _bufferTime = 0;
         _circularBuffer = new CircularSampleBuffer(BufferSize*BufferCount);
         _sound = new Sound();
         _sound.addEventListener(SampleDataEvent.SAMPLE_DATA, generateSound);
@@ -53,6 +54,8 @@ class FlashOutputDevice
     {
         requestBuffers();
         _finished = false;
+        if (_position == 0)
+            _bufferTime = 0;
         _soundChannel = _sound.play(_position);
     }
     
@@ -119,6 +122,7 @@ class FlashOutputDevice
                 {
                     e.data.writeFloat(0);
                 }
+                _bufferTime += Std.int((BufferSize * 1000) / (2 * SynthConstants.SampleRate));
             }
         }
         else

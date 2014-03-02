@@ -157,7 +157,8 @@ class AlphaSynthJsPlayer
             }
             else
             {
-                // buffering
+                // when buffering we count it as pause time
+                _pauseTime += Std.int((BufferSize * 1000) / (2 * SynthConstants.SampleRate));
             }
         }
         else
