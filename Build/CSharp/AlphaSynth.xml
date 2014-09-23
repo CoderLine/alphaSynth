@@ -1,0 +1,276 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>AlphaSynth</name>
+    </assembly>
+    <members>
+        <member name="T:AlphaSynth.Main.IAlphaSynthSync">
+            <summary>
+            Adds some getters to the IAlphaSynth interface. 
+            The return values are provided directly as return value
+            </summary>
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynth.Play">
+             <summary>
+            Starts the playback if possible
+             </summary>    
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynth.Pause">
+             <summary>
+            Pauses the playback if was running
+             </summary>
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynth.PlayPause">
+            <summary>
+            Starts the playback if possible, pauses the playback if was running
+            </summary>
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynth.Stop">
+            <summary>
+            Stopps the playback
+            </summary>
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynth.SetPositionTick(System.Int32)">
+            <summary>
+            Moves to the given tick position within the song
+            </summary>
+            <param name="tick">the midi tick position to jump at</param>
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynth.SetPositionTime(System.Int32)">
+            <summary>
+            Moves to the given millisecond position within the song
+            </summary>
+            <param name="millis">the millisecond position to jump at</param>
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynth.LoadSoundFontUrl(System.String)">
+            <summary>
+            Loads a soundfont from the given url
+            </summary>
+            <param name="url">the url to load the soundfont from</param>
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynth.LoadSoundFontBytes(AlphaSynth.IO.ByteArray)">
+             <summary>
+            Loads a soundfont from the given data
+             </summary>
+             <param name="data">a byte array to load the data from </param>
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynth.LoadMidiUrl(System.String)">
+            <summary>
+            Loads a midi from the given url
+            </summary>
+            <param name="url">the url to load the midi from</param>
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynth.LoadMidiBytes(AlphaSynth.IO.ByteArray)">
+             <summary>
+            Loads a midi from the given data
+             </summary>
+             <param name="data">a byte array to load the data from </param>
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynth.SetLogLevel(System.Int32)">
+            <summary>
+            Sets the logging level which alphaTab should use.
+            </summary>
+            <param name="level">the logging level (0 - log, 1 - debug, 2 - info, 3 - warn, 4 - error, 5 - off)</param>
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynthSync.IsReadyForPlay">
+            <summary>
+             Is ready for play
+            </summary>
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynthSync.GetState">
+            <summary>
+            Returns the current player state
+            </summary>
+            <returns>the current player state</returns>
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynthSync.IsSoundFontLoaded">
+            <summary>
+             Returns whether the soundfont was loaded and parsed
+            </summary>
+            <returns>true if the soundfont was loaded and parsed</returns>
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynthSync.IsMidiLoaded">
+            <summary>
+             Returns whether the midi data was loaded and parsed
+            </summary>
+            <returns>true if the midi data was loaded and parsed</returns>
+        </member>
+        <member name="T:AlphaSynth.Main.IAlphaSynthAsync">
+            <summary>
+            Adds some getters to the IAlphaSynth interface. 
+            The return values are reported asynchronously via event.
+            </summary>
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynthAsync.IsReadyForPlay">
+            <summary>
+             Is ready for play
+            </summary>
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynthAsync.GetState">
+            <summary>
+             Returns the current player state
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:AlphaSynth.Main.IAlphaSynthAsync.IsSoundFontLoaded" -->
+        <member name="M:AlphaSynth.Main.IAlphaSynthAsync.IsMidiLoaded">
+            <summary>
+             Returns whether the midi data was loaded and parsed
+            </summary>
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynthAsync.On(System.String,System.Action{System.Object})">
+            <summary>
+             Adds a new event listener to events
+            </summary>
+        </member>
+        <member name="T:AlphaSynth.Synthesis.SynthParameters">
+            <summary>
+            Parameters for a single synth channel including its program, bank, and cc list.
+            </summary>
+        </member>
+        <member name="M:AlphaSynth.Synthesis.SynthParameters.ResetControllers">
+            <summary>
+            Resets all of the channel's controllers to initial first power on values. Not the same as CC-121.
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.SynthParameters.Program">
+            <summary>
+            program number
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.SynthParameters.BankSelect">
+            <summary>
+            bank number
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.SynthParameters.ChannelAfterTouch">
+            <summary>
+            channel pressure event
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.SynthParameters.Pan">
+            <summary>
+            (vol) pan positions controlling both right and left output levels
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.SynthParameters.Volume">
+            <summary>
+            (vol) channel volume controller
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.SynthParameters.Expression">
+            <summary>
+            (vol) expression controller
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.SynthParameters.ModRange">
+            <summary>
+            (pitch) mod wheel pitch modifier in partial cents ie. 22.3
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.SynthParameters.PitchBend">
+            <summary>
+            (pitch) pitch bend including both semitones and cents
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.SynthParameters.PitchBendRangeCoarse">
+            <summary>
+            controls max and min pitch bend range semitones
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.SynthParameters.PitchBendRangeFine">
+            <summary>
+            controls max and min pitch bend range cents
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.SynthParameters.MasterCoarseTune">
+            <summary>
+            (pitch) transposition in semitones
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.SynthParameters.MasterFineTune">
+            <summary>
+            (pitch) transposition in cents
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.SynthParameters.HoldPedal">
+            <summary>
+            hold pedal status (true) for active
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.SynthParameters.LegatoPedal">
+            <summary>
+            legato pedal status (true) for active
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.SynthParameters.Rpn">
+            <summary>
+            registered parameter number
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.Synthesizer.AudioChannels">
+            <summary>
+            The number of audio channels
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.Synthesizer.SoundBank">
+            <summary>
+            The patch bank that holds all of the currently loaded instrument patches
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.Synthesizer.SampleRate">
+            <summary>
+            The number of samples per second produced per channel
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.Synthesizer.MasterVolume">
+            <summary>
+            Global volume control
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.Synthesizer.MixGain">
+            <summary>
+            The mix volume for each voice
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.Synthesizer.MicroBufferSize">
+            <summary>
+            The size of the individual sub buffers in samples
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.Synthesizer.MicroBufferCount">
+            <summary>
+            The number of sub buffers
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.Synthesizer.VoiceStealMethod">
+            <summary>
+            Controls the method used when stealing voices.
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.Synthesizer.ActiveVoices">
+            <summary>
+            The number of voices in use.
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.Synthesizer.FreeVoices">
+            <summary>
+            The number of voices that are not being used.
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.Synthesizer.RawBufferSize">
+            <summary>
+            The size of the entire buffer in bytes
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.Synthesizer.WorkingBufferSize">
+            <summary>
+            The size of the entire buffer in samples
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.Synthesizer.Polyphony">
+            <summary>
+            The number of voices
+            </summary>
+        </member>
+    </members>
+</doc>

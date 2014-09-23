@@ -1,0 +1,95 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <SharedGUID>238beacd-e8a7-4f87-82d3-314e667409eb</SharedGUID>
+  </PropertyGroup>
+  <PropertyGroup Label="Configuration">
+    <Import_RootNamespace>AlphaSynth</Import_RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Bank\AssetManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bank\Components\Generators\WhiteNoiseGenerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bank\Components\Generators\TriangleGenerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bank\Components\Generators\SquareGenerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bank\Components\Generators\SineGenerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bank\Components\Generators\SawGenerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bank\Components\Generators\SampleGenerator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bank\Components\Generators\GeneratorParameters.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bank\Components\Generators\Generator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bank\Components\Generators\DefaultGenerators.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bank\Components\Lfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bank\Components\Filter.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bank\Components\Envelope.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bank\Components\PanComponent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bank\Descriptors\LfoDescriptor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bank\Descriptors\GeneratorDescriptor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bank\Descriptors\FilterDescriptor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bank\Descriptors\EnvelopeDescriptor.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bank\Patch\Sf2Patch.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bank\Patch\Patch.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bank\Patch\MultiPatch.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bank\SampleDataAsset.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bank\PatchBank.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Bank\PatchAsset.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ds\LinkedList.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Ds\CircularSampleBuffer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IO\ByteBuffer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IO\IReadable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IO\IWriteable.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main\IAlphaSynthSync.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main\IAlphaSynthAsync.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Main\IAlphaSynth.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Midi\Event\SystemExclusiveEvent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Midi\Event\SystemCommonEvent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Midi\Event\RealTimeEvent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Midi\Event\MidiEvent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Midi\Event\MetaTextEvent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Midi\Event\MetaNumberEvent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Midi\Event\MetaEvent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Midi\Event\MetaDataEvent.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Midi\MidiTrack.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Midi\MidiHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Midi\MidiFile.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Player\SynthPlayerState.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Player\SynthPlayerEventDispatcher.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Player\SynthPlayer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Player\ISynthPlayerListener.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Player\ISynthOutput.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sequencer\MidiFileSequencer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sf2\Chunks\ZoneChunk.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sf2\Chunks\SampleHeaderChunk.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sf2\Chunks\PresetHeaderChunk.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sf2\Chunks\ModulatorChunk.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sf2\Chunks\InstrumentChunk.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sf2\Chunks\GeneratorChunk.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sf2\Chunks\Chunk.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sf2\Modulator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sf2\Zone.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sf2\SoundFontSampleData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sf2\SoundFontPresets.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sf2\SoundFontInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sf2\SoundFont.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sf2\Sf2Region.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sf2\SampleHeader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sf2\PresetHeader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sf2\ModulatorType.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sf2\Instrument.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sf2\Generator.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Sf2\Enum.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Synthesis\CCValue.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Synthesis\SynthParameters.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Synthesis\VoiceParameters.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Synthesis\VoiceManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Synthesis\Voice.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Synthesis\SynthHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Synthesis\Synthesizer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\PcmData.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\Tables.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\SynthConstants.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\IOHelper.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\UrlLoader.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\WaveHelper.cs" />
+  </ItemGroup>
+</Project>

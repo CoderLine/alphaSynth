@@ -24,6 +24,9 @@
 *.sdf
 *.opensdf
 *.unsuccessfulbuild
+*.psess
+*.etl
+*.vspx
 ipch/
 obj/
 [Dd]ebug*/
@@ -34,15 +37,16 @@ Ankh.NoLoad
 _ReSharper*/
 *.resharper
 [Tt]est[Rr]esult*
-bin/cs/packages/*
 
 
 # Project Dirs
-/bin/cs/AlphaSynth.Core/src/*
-/bin/cs/AlphaSynth.Core/hxcs_build.txt
 
 # temps
 .DS_Store 
 *.bak
 ~*
 *.lock
+
+#NuGet
+packages/*
+!packages/repositories.config

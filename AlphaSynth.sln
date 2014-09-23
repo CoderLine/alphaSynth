@@ -1,0 +1,46 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30501.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "AlphaSynth", "Source\AlphaSynth\AlphaSynth.shproj", "{238BEACD-E8A7-4F87-82D3-314E667409EB}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlphaSynth.CSharp", "Source\AlphaSynth.CSharp\AlphaSynth.CSharp.csproj", "{E033C810-3DB4-4079-8388-2BF238D1FEDF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlphaSynth.JavaScript", "Source\AlphaSynth.JavaScript\AlphaSynth.JavaScript.csproj", "{81FC00D3-1684-4463-ADED-14786DB41ADA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{67235B31-9D41-487B-92BC-4C66CD209D96}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AlphaSynth.NAudio", "Samples\CSharp\AlphaSynth.NAudio\AlphaSynth.NAudio.csproj", "{EC4EFD27-EF03-48B8-AEDE-EF243759F0BD}"
+EndProject
+Global
+	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		Source\AlphaSynth\AlphaSynth.projitems*{81fc00d3-1684-4463-aded-14786db41ada}*SharedItemsImports = 4
+		Source\AlphaSynth\AlphaSynth.projitems*{e033c810-3db4-4079-8388-2bf238d1fedf}*SharedItemsImports = 4
+		Source\AlphaSynth\AlphaSynth.projitems*{238beacd-e8a7-4f87-82d3-314e667409eb}*SharedItemsImports = 13
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E033C810-3DB4-4079-8388-2BF238D1FEDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E033C810-3DB4-4079-8388-2BF238D1FEDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E033C810-3DB4-4079-8388-2BF238D1FEDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E033C810-3DB4-4079-8388-2BF238D1FEDF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81FC00D3-1684-4463-ADED-14786DB41ADA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81FC00D3-1684-4463-ADED-14786DB41ADA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81FC00D3-1684-4463-ADED-14786DB41ADA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81FC00D3-1684-4463-ADED-14786DB41ADA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EC4EFD27-EF03-48B8-AEDE-EF243759F0BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EC4EFD27-EF03-48B8-AEDE-EF243759F0BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EC4EFD27-EF03-48B8-AEDE-EF243759F0BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EC4EFD27-EF03-48B8-AEDE-EF243759F0BD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{EC4EFD27-EF03-48B8-AEDE-EF243759F0BD} = {67235B31-9D41-487B-92BC-4C66CD209D96}
+	EndGlobalSection
+EndGlobal
