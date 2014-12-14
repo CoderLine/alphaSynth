@@ -24,25 +24,15 @@ namespace AlphaSynth.Sf2
 {
     public class SampleHeader
     {
-        [IntrinsicProperty]
         public string Name { get; set; }
-        [IntrinsicProperty]
         public int Start { get; private set; }
-        [IntrinsicProperty]
         public int End { get; private set; }
-        [IntrinsicProperty]
         public int StartLoop { get; private set; }
-        [IntrinsicProperty]
         public int EndLoop { get; private set; }
-        [IntrinsicProperty]
         public int SampleRate { get; private set; }
-        [IntrinsicProperty]
         public byte RootKey { get; private set; }
-        [IntrinsicProperty]
         public short Tune { get; private set; }
-        [IntrinsicProperty]
         public ushort SampleLink { get; private set; }
-        [IntrinsicProperty]
         public SFSampleLink SoundFontSampleLink { get; private set; }
 
         public SampleHeader(IReadable input)
