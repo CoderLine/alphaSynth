@@ -122,9 +122,9 @@ namespace AlphaSynth.Midi
                 }
             }
 
-            var track = new MidiTrack(new ByteArray(programsUsed.ToArray()),
-                                                new ByteArray(drumProgramsUsed.ToArray()),
-                                                new ByteArray(channelsUsed.ToArray()),
+            var track = new MidiTrack(programsUsed.ToArray(),
+                                                drumProgramsUsed.ToArray(),
+                                                channelsUsed.ToArray(),
                                                 new MidiEvent[eventCount]);
             track.NoteOnCount = notesPlayed;
             return track;
@@ -148,16 +148,16 @@ namespace AlphaSynth.Midi
             {
                 switch (input.ReadByte())
                 {
-                    case 'M':
+                    case (int)'M':
                         match = 1;
                         break;
-                    case 'T':
+                    case (int)'T':
                         match = match == 1 ? 2 : 0;
                         break;
-                    case 'h':
+                    case (int)'h':
                         match = match == 2 ? 3 : 0;
                         break;
-                    case 'd':
+                    case (int)'d':
                         if (match == 3) return true;
                         match = 0;
                         break;
@@ -261,9 +261,9 @@ namespace AlphaSynth.Midi
                 if (instList.IndexOf(0) == -1)
                     instList.Add(0);
             }
-            var track = new MidiTrack(new ByteArray(instList.ToArray()),
-                new ByteArray(drumList.ToArray()),
-                new ByteArray(channelList.ToArray()),
+            var track = new MidiTrack(instList.ToArray(),
+                drumList.ToArray(),
+                channelList.ToArray(),
                 eventList.ToArray());
             track.NoteOnCount = noteOnCount;
             track.EndTime = totalTime;
@@ -383,7 +383,7 @@ namespace AlphaSynth.Midi
                             data.Add((byte)b);
                             b = input.ReadByte();
                         }
-                        return new SystemExclusiveEvent(delta, status, maker, new ByteArray(data.ToArray()));
+                        return new SystemExclusiveEvent(delta, status, maker, data.ToArray());
                     }
                 case SystemCommonTypeEnum.MtcQuarterFrame:
                     return new SystemCommonEvent(delta, status, (byte)input.ReadByte(), 0);

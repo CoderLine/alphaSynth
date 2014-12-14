@@ -21,7 +21,6 @@ namespace AlphaSynth.Sf2
 {
     public class Sf2Region
     {
-        [IntrinsicProperty]
         public short[] Generators { get; set; }
 
         public Sf2Region()

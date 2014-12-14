@@ -66,11 +66,8 @@ namespace AlphaSynth.Sf2.Chunks
 
     public class RawInstrument
     {
-        [IntrinsicProperty]
         public string Name { get; set; }
-        [IntrinsicProperty]
         public int StartInstrumentZoneIndex { get; set; }
-        [IntrinsicProperty]
         public int EndInstrumentZoneIndex { get; set; }
     }
 }

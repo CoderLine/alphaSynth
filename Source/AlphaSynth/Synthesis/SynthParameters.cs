@@ -30,90 +30,70 @@ namespace AlphaSynth.Synthesis
         /// <summary>
         /// program number
         /// </summary>
-        [IntrinsicProperty]
         public byte Program { get; set; }
         /// <summary>
         /// bank number
         /// </summary>
-        [IntrinsicProperty]
         public byte BankSelect { get; set; }
         /// <summary>
         /// channel pressure event
         /// </summary>
-        [IntrinsicProperty]
         public byte ChannelAfterTouch { get; set; }
         /// <summary>
         /// (vol) pan positions controlling both right and left output levels
         /// </summary>
-        [IntrinsicProperty]
         public CCValue Pan { get; set; }
         /// <summary>
         /// (vol) channel volume controller
         /// </summary>
-        [IntrinsicProperty]
         public CCValue Volume { get; set; }
         /// <summary>
         /// (vol) expression controller
         /// </summary>
-        [IntrinsicProperty]
         public CCValue Expression { get; set; }
         /// <summary>
         /// (pitch) mod wheel pitch modifier in partial cents ie. 22.3
         /// </summary>
-        [IntrinsicProperty]
         public CCValue ModRange { get; set; }
         /// <summary>
         /// (pitch) pitch bend including both semitones and cents
         /// </summary>
-        [IntrinsicProperty]
         public CCValue PitchBend { get; set; }
         /// <summary>
         /// controls max and min pitch bend range semitones
         /// </summary>
-        [IntrinsicProperty]
         public byte PitchBendRangeCoarse { get; set; }
         /// <summary>
         /// controls max and min pitch bend range cents
         /// </summary>
-        [IntrinsicProperty]
         public byte PitchBendRangeFine { get; set; }
         /// <summary>
         /// (pitch) transposition in semitones
         /// </summary>
-        [IntrinsicProperty]
         public short MasterCoarseTune { get; set; }
         /// <summary>
         /// (pitch) transposition in cents
         /// </summary>
-        [IntrinsicProperty]
         public CCValue MasterFineTune { get; set; }
         /// <summary>
         /// hold pedal status (true) for active
         /// </summary>
-        [IntrinsicProperty]
         public bool HoldPedal { get; set; }
         /// <summary>
         /// legato pedal status (true) for active
         /// </summary>
-        [IntrinsicProperty]
         public bool LegatoPedal { get; set; }
         /// <summary>
         /// registered parameter number
         /// </summary>
-        [IntrinsicProperty]
         public CCValue Rpn { get; set; }
-        [IntrinsicProperty]
         public Synthesizer Synth { get; set; }
 
         //These are updated whenever a midi event that affects them is recieved. 
 
-        [IntrinsicProperty]
         public float CurrentVolume { get; set; }
-        [IntrinsicProperty]
         public int CurrentPitch { get; set; }    //in cents
-        [IntrinsicProperty]
         public int CurrentMod { get; set; }      //in cents
-        [IntrinsicProperty]
         public PanComponent CurrentPan { get; set; }
 
         public SynthParameters(Synthesizer synth)

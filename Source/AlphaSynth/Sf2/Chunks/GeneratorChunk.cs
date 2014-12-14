@@ -23,7 +23,6 @@ namespace AlphaSynth.Sf2.Chunks
 {
     public class GeneratorChunk : Chunk
     {
-        [IntrinsicProperty]
         public Generator[] Generators { get; set; }
 
         public GeneratorChunk(string id, int size, IReadable input) : base(id, size)

@@ -22,10 +22,10 @@ namespace AlphaSynth.Util
 {
     public class WaveHelper
     {
-        public static void SwapEndianess(ByteArray data, int bits)
+        public static void SwapEndianess(byte[] data, int bits)
         {
             bits /= 8; //get bytes per sample
-            var swapArray = new ByteArray(bits);
+            var swapArray = new byte[bits];
             for (int x = 0; x < data.Length; x += bits)
             {
                 Std.BlockCopy(data, x, swapArray, 0, bits);

@@ -21,45 +21,25 @@ namespace AlphaSynth.Bank.Descriptors
 {
     public class EnvelopeDescriptor
     {
-        [IntrinsicProperty]
         public float DelayTime { get; set; }
-        [IntrinsicProperty]
         public float AttackTime { get; set; }
-        [IntrinsicProperty]
         public short AttackGraph { get; set; }
-        [IntrinsicProperty]
         public float HoldTime { get; set; }
-        [IntrinsicProperty]
         public float DecayTime { get; set; }
-        [IntrinsicProperty]
         public short DecayGraph { get; set; }
-        [IntrinsicProperty]
         public float SustainTime { get; set; }
-        [IntrinsicProperty]
         public float ReleaseTime { get; set; }
-        [IntrinsicProperty]
         public short ReleaseGraph { get; set; }
-        [IntrinsicProperty]
         public float SustainLevel { get; set; }
-        [IntrinsicProperty]
         public float PeakLevel { get; set; }
-        [IntrinsicProperty]
         public float StartLevel { get; set; }
-        [IntrinsicProperty]
         public float Depth { get; set; }
-        [IntrinsicProperty]
         public float Vel2Delay { get; set; }
-        [IntrinsicProperty]
         public float Vel2Attack { get; set; }
-        [IntrinsicProperty]
         public float Vel2Hold { get; set; }
-        [IntrinsicProperty]
         public float Vel2Decay { get; set; }
-        [IntrinsicProperty]
         public float Vel2Sustain { get; set; }
-        [IntrinsicProperty]
         public float Vel2Release { get; set; }
-        [IntrinsicProperty]
         public float Vel2Depth { get; set; }
 
         public EnvelopeDescriptor()

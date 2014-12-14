@@ -48,9 +48,9 @@ namespace AlphaSynth.Platform
             return Seed.NextDouble();
         }
 
-        public static void BlockCopy(ByteArray src, int srcOffset, ByteArray dst, int dstOffset, int count)
+        public static void BlockCopy(byte[] src, int srcOffset, byte[] dst, int dstOffset, int count)
         {
-            Buffer.BlockCopy(src.Data, srcOffset, dst.Data, dstOffset, count);
+            Buffer.BlockCopy(src, srcOffset, dst, dstOffset, count);
         }
 
         public static void ArrayCopy<T>(T[] src, int srcOffset, T[] dst, int dstOffset, int count)
@@ -58,9 +58,9 @@ namespace AlphaSynth.Platform
             Array.Copy(src, srcOffset, dst, dstOffset, count);
         }
 
-        public static void Reverse(ByteArray array)
+        public static void Reverse(byte[] array)
         {
-            Array.Reverse(array.Data);
+            Array.Reverse(array);
         }
     }
 }

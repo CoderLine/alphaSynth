@@ -77,21 +77,13 @@ namespace AlphaSynth.Sf2.Chunks
 
     public class RawPreset
     {
-        [IntrinsicProperty]
         public string Name { get; set; }
-        [IntrinsicProperty]
         public int PatchNumber { get; set; }
-        [IntrinsicProperty]
         public int BankNumber { get; set; }
-        [IntrinsicProperty]
         public int StartPresetZoneIndex { get; set; }
-        [IntrinsicProperty]
         public int EndPresetZoneIndex { get; set; }
-        [IntrinsicProperty]
         public int Library { get; set; }
-        [IntrinsicProperty]
         public int Genre { get; set; }
-        [IntrinsicProperty]
         public int Morphology { get; set; }
     }
 }

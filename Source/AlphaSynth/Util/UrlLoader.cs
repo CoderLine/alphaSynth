@@ -23,9 +23,7 @@ namespace AlphaSynth.Util
 {
     public partial class UrlLoader
     {
-        [IntrinsicProperty]
         public string Url { get; set; }
-        [IntrinsicProperty]
         public string Method { get; set; }
 
         public Action<int, int> Progress;
@@ -34,8 +32,8 @@ namespace AlphaSynth.Util
             if (Progress != null) Progress(loaded, full);
         }
 
-        public Action<ByteArray> Complete;
-        private void FireComplete(ByteArray data)
+        public Action<byte[]> Complete;
+        private void FireComplete(byte[] data)
         {
             if (Complete != null) Complete(data);
         }

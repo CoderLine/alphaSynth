@@ -31,9 +31,7 @@ namespace AlphaSynth.Bank.Components
 
     public class PanComponent
     {
-        [IntrinsicProperty]
         public float Left { get; set; }
-        [IntrinsicProperty]
         public float Right { get; set; }
 
         public void SetValue(float value, PanFormulaEnum formula)

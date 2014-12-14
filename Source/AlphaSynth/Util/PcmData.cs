@@ -23,13 +23,13 @@ namespace AlphaSynth.Util
 {
     public abstract class PcmData
     {
-        protected ByteArray Data;
+        protected byte[] Data;
 
         public int Length { get; protected set; }
         public int BytesPerSample { get; protected set; }
         public int BitsPerSample { get { return BytesPerSample * 8; } }
 
-        protected PcmData(int bits, ByteArray pcmData, bool isDataInLittleEndianFormat)
+        protected PcmData(int bits, byte[] pcmData, bool isDataInLittleEndianFormat)
         {
             BytesPerSample = (byte)(bits / 8);
             if (pcmData.Length % BytesPerSample != 0)
@@ -44,7 +44,7 @@ namespace AlphaSynth.Util
 
         public abstract float this[int index] { get; }
 
-        public static PcmData Create(int bits, ByteArray pcmData, bool isDataInLittleEndianFormat)
+        public static PcmData Create(int bits, byte[] pcmData, bool isDataInLittleEndianFormat)
         {
             switch (bits)
             {
@@ -64,7 +64,7 @@ namespace AlphaSynth.Util
 
     public class PcmData8Bit : PcmData
     {
-        public PcmData8Bit(int bits, ByteArray pcmData, bool isDataInLittleEndianFormat) : base(bits, pcmData, isDataInLittleEndianFormat) { }
+        public PcmData8Bit(int bits, byte[] pcmData, bool isDataInLittleEndianFormat) : base(bits, pcmData, isDataInLittleEndianFormat) { }
         public override float this[int index]
         {
             get { return ((Data[index] / 255f) * 2f) - 1f; }
@@ -73,7 +73,7 @@ namespace AlphaSynth.Util
 
     public class PcmData16Bit : PcmData
     {
-        public PcmData16Bit(int bits, ByteArray pcmData, bool isDataInLittleEndianFormat) : base(bits, pcmData, isDataInLittleEndianFormat) { }
+        public PcmData16Bit(int bits, byte[] pcmData, bool isDataInLittleEndianFormat) : base(bits, pcmData, isDataInLittleEndianFormat) { }
         public override float this[int index]
         {
             get { index *= 2; return (((Data[index] | (Data[index + 1] << 8)) << 16) >> 16) / 32768f; }
@@ -82,7 +82,7 @@ namespace AlphaSynth.Util
 
     public class PcmData24Bit : PcmData
     {
-        public PcmData24Bit(int bits, ByteArray pcmData, bool isDataInLittleEndianFormat) : base(bits, pcmData, isDataInLittleEndianFormat) { }
+        public PcmData24Bit(int bits, byte[] pcmData, bool isDataInLittleEndianFormat) : base(bits, pcmData, isDataInLittleEndianFormat) { }
         public override float this[int index]
         {
             get { index *= 3; return (((Data[index] | (Data[index + 1] << 8) | (Data[index + 2] << 16)) << 12) >> 12) / 8388608f; }
@@ -91,7 +91,7 @@ namespace AlphaSynth.Util
 
     public class PcmData32Bit : PcmData
     {
-        public PcmData32Bit(int bits, ByteArray pcmData, bool isDataInLittleEndianFormat) : base(bits, pcmData, isDataInLittleEndianFormat) { }
+        public PcmData32Bit(int bits, byte[] pcmData, bool isDataInLittleEndianFormat) : base(bits, pcmData, isDataInLittleEndianFormat) { }
         public override float this[int index]
         {
             get { index *= 4; return (Data[index] | (Data[index + 1] << 8) | (Data[index + 2] << 16) | (Data[index + 3] << 24)) / 2147483648f; }

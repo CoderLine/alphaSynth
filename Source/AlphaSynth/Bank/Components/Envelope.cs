@@ -185,15 +185,10 @@ namespace AlphaSynth.Bank.Components
 
     public class EnvelopeStage
     {
-        [IntrinsicProperty]
         public int Time { get; set; }
-        [IntrinsicProperty]
         public SampleArray Graph { get; set; }
-        [IntrinsicProperty]
         public float Scale { get; set; }
-        [IntrinsicProperty]
         public float Offset { get; set; }
-        [IntrinsicProperty]
         public bool Reverse { get; set; }
 
         public EnvelopeStage()

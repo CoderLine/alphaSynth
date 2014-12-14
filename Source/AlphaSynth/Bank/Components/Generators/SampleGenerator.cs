@@ -19,6 +19,7 @@ using System;
 using System.Runtime.CompilerServices;
 using AlphaSynth.Bank.Descriptors;
 using AlphaSynth.Ds;
+using AlphaSynth.Platform;
 using AlphaSynth.Util;
 
 namespace AlphaSynth.Bank.Components.Generators
@@ -34,7 +35,6 @@ namespace AlphaSynth.Bank.Components.Generators
 
     public class SampleGenerator : Generator
     {
-        [IntrinsicProperty]
         public PcmData Samples { get; set; }
 
         public SampleGenerator()
@@ -44,7 +44,7 @@ namespace AlphaSynth.Bank.Components.Generators
 
         public override float GetValue(double phase)
         {
-            return Samples[(int)phase];
+            return Samples[(int)(phase)];
         }
 
         public override void GetValues(GeneratorParameters generatorParams, SampleArray blockBuffer, double increment)

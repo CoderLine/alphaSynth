@@ -46,7 +46,6 @@ namespace AlphaSynth.Bank.Components
         private double _cutOff;
         private double _resonance;
 
-        [IntrinsicProperty]
         public FilterType FilterMethod { get; private set; }
 
         public double CutOff

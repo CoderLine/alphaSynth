@@ -21,7 +21,6 @@ namespace AlphaSynth.Midi.Event
 {
     public class MetaNumberEvent : MetaEvent
     {
-        [IntrinsicProperty]
         public int Value { get; private set; }
 
         public MetaNumberEvent(int delta, byte status, byte metaId, int number)

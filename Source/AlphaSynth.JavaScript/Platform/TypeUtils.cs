@@ -15,7 +15,8 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-using System.Runtime.CompilerServices;
+
+using SharpKit.JavaScript;
 
 namespace AlphaSynth.Platform
 {
@@ -23,25 +24,25 @@ namespace AlphaSynth.Platform
     {
         public static readonly bool IsLittleEndian = true;
 
-        [InlineCode("{i}")]
+        [JsMethod(InlineCodeExpression = "i")]
         public static uint ToUInt32(int i)
         {
             return (uint) i;
         }
 
-        [InlineCode("(((({i} & 65535) >> 15) * ( -65536)) + ({i} & 65535))")]
+        [JsMethod(InlineCodeExpression = "((((i & 65535) >> 15) * ( -65536)) + (i & 65535))")]
         public static short ToInt16(int i)
         {
             return (short) i;
         }
 
-        [InlineCode("({i} & 65535)")]
+        [JsMethod(InlineCodeExpression = "(i & 65535)")]
         public static ushort ToUInt16(int i)
         {
             return (ushort)i;
         }
 
-        [InlineCode("({i} & 255)")]
+        [JsMethod(InlineCodeExpression = "(i & 255)")]
         public static byte ToUInt8(int i)
         {
             return (byte)i;

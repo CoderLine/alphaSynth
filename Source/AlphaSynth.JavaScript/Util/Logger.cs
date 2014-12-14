@@ -16,17 +16,21 @@
  * License along with this library.
  */
 using System;
-using System.Runtime.CompilerServices;
+using SharpKit.Html;
+using SharpKit.JavaScript;
+using Console = System.Console;
 
 namespace AlphaSynth.Util
 {
-    public class Logger
+    public class Logger : HtmlContext
     {
         public static LogLevel LogLevel { get; set; }
+        public static Action<string> LogHandler { get; set; }
 
         static Logger()
         {
             LogLevel = LogLevel.Info;
+            LogHandler = s => console.log(s);
         }
 
         public static void Debug(string msg)
@@ -55,16 +59,15 @@ namespace AlphaSynth.Util
 
             var caller = GetCaller();
 
-            Console.WriteLine(caller + "-" + msg);
+            LogHandler(caller + "-" + msg);
         }
 
-        [InlineCode("arguments.callee.caller.caller.toString()")]
+
+        [JsMethod(InlineCode = "arguments.callee.caller.caller.name")]
         private static string GetCaller()
         {
             return "";
         }
-
-
     }
 
     public enum LogLevel

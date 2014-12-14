@@ -23,13 +23,14 @@ namespace AlphaSynth.Player
     public interface ISynthOutput
     {
         void SequencerFinished();
-        void AddPositionChangedListener(Action<int> listener);
-        void AddFinishedListener(Action listener);
         void Play();
         void Pause();
         void Stop();
         void AddSamples(SampleArray samples);
-        void AddSampleRequestListener(Action listener);
         void Seek(int position);
+
+        event Action<int> PositionChanged;
+        event Action Finished;
+        event Action SampleRequest;
     }
 }

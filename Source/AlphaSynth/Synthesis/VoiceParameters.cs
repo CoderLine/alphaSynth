@@ -28,34 +28,20 @@ namespace AlphaSynth.Synthesis
         private float mix1;
         private float mix2;
 
-        [IntrinsicProperty]
         public int Channel { get; set; }
-        [IntrinsicProperty]
         public int Note { get; set; }
-        [IntrinsicProperty]
         public int Velocity { get; set; }
-        [IntrinsicProperty]
         public bool NoteOffPending { get; set; }
-        [IntrinsicProperty]
         public VoiceStateEnum State { get; set; }
-        [IntrinsicProperty]
         public int PitchOffset { get; set; }
-        [IntrinsicProperty]
         public float VolOffset { get; set; }
-        [IntrinsicProperty]
         public SampleArray BlockBuffer { get; set; }
 
-        [IntrinsicProperty]
         public UnionData[] PData { get; set; }
-        [IntrinsicProperty]
         public SynthParameters SynthParams { get; set; }
-        [IntrinsicProperty]
         public GeneratorParameters[] GeneratorParams { get; set; }
-        [IntrinsicProperty]
         public Envelope[] Envelopes { get; set; }
-        [IntrinsicProperty]
         public Filter[] Filters { get; set; }
-        [IntrinsicProperty]
         public Lfo[] Lfos { get; set; }
 
         public float CombinedVolume

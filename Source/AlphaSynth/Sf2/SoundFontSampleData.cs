@@ -24,10 +24,8 @@ namespace AlphaSynth.Sf2
 {
     public class SoundFontSampleData
     {
-        [IntrinsicProperty]
         public int BitsPerSample { get; set; }
-        [IntrinsicProperty]
-        public ByteArray SampleData { get; set; }
+        public byte[] SampleData { get; set; }
 
         public SoundFontSampleData(IReadable input)
         {
@@ -41,7 +39,7 @@ namespace AlphaSynth.Sf2
                 throw new Exception("Invalid soundfont. The LIST chunk is not of type sdta.");
 
             BitsPerSample = 0;
-            ByteArray rawSampleData = null;
+            byte[] rawSampleData = null;
             while (input.Position < readTo)
             {
                 var subID = input.Read8BitChars(4);
@@ -62,7 +60,7 @@ namespace AlphaSynth.Sf2
                             BitsPerSample = 24;
                             for (var x = 0; x < SampleData.Length; x++)
                             {
-                                var b = new ByteArray(3);
+                                var b = new byte[3];
                                 b[0] = (byte)input.ReadByte();
                                 b[1] = rawSampleData[2 * x];
                                 b[2] = rawSampleData[2 * x + 1];
@@ -70,7 +68,10 @@ namespace AlphaSynth.Sf2
                         }
                         if (size % 2 == 1)
                         {
-                            if (input.ReadByte() != 0) input.Position--;
+                            if (input.ReadByte() != 0)
+                            {
+                                input.Position--;
+                            }
                         }
                         break;
                     default:

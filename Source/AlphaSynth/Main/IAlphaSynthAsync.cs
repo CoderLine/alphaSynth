@@ -49,7 +49,7 @@ namespace AlphaSynth.Main
         /// <summary>
         ///  Adds a new event listener to events
         /// </summary>
-        void On(string events, Action<object> fn);
+        void On(string events, Action fn);
 
         void Startup();
     }

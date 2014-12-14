@@ -22,10 +22,9 @@ namespace AlphaSynth.Midi.Event
 {
     public class MetaDataEvent : MetaEvent
     {
-        [IntrinsicProperty]
-        public ByteArray Data { get; private set; }
+        public byte[] Data { get; private set; }
 
-        public MetaDataEvent(int delta, byte status, byte metaId, ByteArray data)
+        public MetaDataEvent(int delta, byte status, byte metaId, byte[] data)
             : base(delta, status, metaId, 0)
         {
             Data = data;

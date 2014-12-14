@@ -40,12 +40,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Attributes.cs" />
     <Compile Include="Ds\SampleArray.cs" />
     <Compile Include="Ds\StringBuilder.cs" />
     <Compile Include="Ds\FastDictionary.cs" />
     <Compile Include="Ds\FastList.cs" />
-    <Compile Include="IO\ByteArray.cs" />
     <Compile Include="Platform\Platform.cs" />
     <Compile Include="Platform\TypeUtils.cs" />
     <Compile Include="Platform\Std.cs" />

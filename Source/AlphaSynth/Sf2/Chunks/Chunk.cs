@@ -21,9 +21,7 @@ namespace AlphaSynth.Sf2.Chunks
 {
     public class Chunk
     {
-        [IntrinsicProperty]
         public string Id { get; private set; }
-        [IntrinsicProperty]
         public int Size { get; private set; }
 
         public Chunk(string id, int size)

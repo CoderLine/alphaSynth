@@ -15,32 +15,39 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-using System.Net;
-using AlphaSynth.IO;
+
+using SharpKit.Html;
+using SharpKit.JavaScript;
 
 namespace AlphaSynth.Util
 {
     public partial class UrlLoader
     {
+        [JsMethod(InlineCodeExpression = "new Uint8Array(arrayBuffer)", Export = false)]
+        private byte[] NewUint8Array(object arrayBuffer)
+        {
+            return null;
+        }
+
         public void Load()
         {
-            var request = new XmlHttpRequest();
-            request.Open(Method, Url, true);
-            request.ResponseType = XmlHttpRequestResponseType.Arraybuffer;
-            request.OnLoad = e =>
+            var request = new XMLHttpRequest();
+            request.open(Method, Url, true);
+            request.responseType = "arraybuffer";
+            request.onload = e =>
             {
-                var buffer = (ByteArray)request.Response;
+                var buffer = NewUint8Array(request.response);
                 if (buffer != null)
                 {
                     FireComplete(buffer);
                 }
             };
-            request.OnProgress = e =>
+            request.onprogress = e =>
             {
-                var progressE = (ProgressEvent)e;
-                FireProgress((int)progressE.Loaded, (int)progressE.Total);
+                var progressE = e;
+                FireProgress(progressE.loaded, progressE.total);
             };
-            request.Send();
+            request.send();
         }
     }
 }

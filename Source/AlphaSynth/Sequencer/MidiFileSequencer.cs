@@ -35,16 +35,11 @@ namespace AlphaSynth.Sequencer
         private int _eventIndex;
         private int _division;
 
-        [IntrinsicProperty]
         public Synthesizer Synth { get; set; }
-        [IntrinsicProperty]
         public bool IsPlaying { get; private set; }
         public bool IsMidiLoaded { get { return _synthData != null; } }
-        [IntrinsicProperty]
         public int CurrentTempo { get; private set; }
-        [IntrinsicProperty]
         public int CurrentTime { get; private set; }
-        [IntrinsicProperty]
         public int EndTime { get; private set; }
 
         public float PlaySpeed

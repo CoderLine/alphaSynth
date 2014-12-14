@@ -22,11 +22,8 @@ namespace AlphaSynth.Bank.Patch
 {
     public abstract class Patch
     {
-        [IntrinsicProperty]
         public int ExclusiveGroupTarget { get; set; }
-        [IntrinsicProperty]
         public int ExclusiveGroup { get; set; }
-        [IntrinsicProperty]
         public string Name { get; private set; }
 
         protected Patch(string name)

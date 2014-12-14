@@ -23,21 +23,15 @@ namespace AlphaSynth.Midi
 {
     public class MidiTrack
     {
-        [IntrinsicProperty]
-        public ByteArray Instruments { get; private set; }
-        [IntrinsicProperty]
-        public ByteArray DrumInstruments { get; private set; }
-        [IntrinsicProperty]
-        public ByteArray ActiveChannels { get; private set; }
-        [IntrinsicProperty]
+        public byte[] Instruments { get; private set; }
+        public byte[] DrumInstruments { get; private set; }
+        public byte[] ActiveChannels { get; private set; }
         public MidiEvent[] MidiEvents { get; private set; }
 
-        [IntrinsicProperty]
         public int NoteOnCount { get; set; }
-        [IntrinsicProperty]
         public int EndTime { get; set; }
 
-        public MidiTrack(ByteArray instPrograms, ByteArray drumPrograms, ByteArray activeChannels, MidiEvent[] midiEvents)
+        public MidiTrack(byte[] instPrograms, byte[] drumPrograms, byte[] activeChannels, MidiEvent[] midiEvents)
         {
             Instruments = instPrograms;
             DrumInstruments = drumPrograms;

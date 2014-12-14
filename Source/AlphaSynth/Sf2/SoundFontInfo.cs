@@ -24,31 +24,18 @@ namespace AlphaSynth.Sf2
 {
     public class SoundFontInfo
     {
-        [IntrinsicProperty]
         public short RomVersionMajor { get; set; }
-        [IntrinsicProperty]
         public short RomVersionMinor { get; set; }
-        [IntrinsicProperty]
         public short SfVersionMajor { get; set; }
-        [IntrinsicProperty]
         public short SfVersionMinor { get; set; }
-        [IntrinsicProperty]
         public string SoundEngine { get; set; }
-        [IntrinsicProperty]
         public string BankName { get; set; }
-        [IntrinsicProperty]
         public string DataRom { get; set; }
-        [IntrinsicProperty]
         public string CreationDate { get; set; }
-        [IntrinsicProperty]
         public string Author { get; set; }
-        [IntrinsicProperty]
         public string TargetProduct { get; set; }
-        [IntrinsicProperty]
         public string Copyright { get; set; }
-        [IntrinsicProperty]
         public string Comments { get; set; }
-        [IntrinsicProperty]
         public string Tools { get; set; }
 
         public SoundFontInfo(IReadable input)

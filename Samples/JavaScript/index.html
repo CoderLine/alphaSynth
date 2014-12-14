@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8"/>
+	<title>alphaSynth</title>
+	<style type="text/css">
+		body { font-family: Arial, sans-serif; }
+	</style>    
+</head>
+<body>
+    <div id="controls">
+        <button disabled="disabled" id="play">Play</button>
+        <button disabled="disabled" id="pause">Pause</button>
+        <button disabled="disabled" id="stop">Stop</button>
+    </div>
+    <br />
+    <div id="sfLoad"></div>
+    <br/>
+    
+    <!-- Initialize JavaScript -->    
+    <script type="text/javascript" src="../../Build/JavaScript/AlphaSynth.js"></script>
+    <script>
+    var as = null;
+    try {
+        AlphaSynth.Util.Logger.LogLevel = 0;
+        as = new AlphaSynth.Main.AlphaSynthApi('/Build/JavaScript/');
+        // load data
+        as.On('ready', function() {
+            as.SetLogLevel(0);
+            // load default data
+            as.LoadSoundFontUrl('../data/default.sf2');
+            as.LoadMidiUrl('../data/Test2.mid');
+        });
+        as.On('soundFontLoad', function(loaded, full) {
+            document.querySelector('#sfLoad').innerText = 'Loading SF (' + (((loaded/full)*100)|0) + '%)';
+        });
+        
+        // init ui
+        document.querySelector('#play').onclick = function() {
+            as.Play();
+        };
+        document.querySelector('#pause').onclick = function() {
+            as.Pause();
+        };
+        document.querySelector('#stop').onclick = function() {
+            as.Stop();
+        };
+        
+        // enable/disable ui
+        as.On('readyForPlay', function(ready) {
+            var buttons = document.querySelectorAll('#controls button');
+            for(var i = 0; i < buttons.length; i++) {
+                if(ready) {
+                    buttons[i].removeAttribute('disabled');
+                }
+                else {
+                    buttons[i].setAttribute('disabled', 'disabled');
+                }
+            }
+        }); 
+    }
+    catch(e) {
+        alert('Error initializing AlphaSynth');
+        console.error(e);
+    }
+    </script>
+</body>
+</html>

@@ -66,13 +66,9 @@ namespace AlphaSynth.Sf2.Chunks
 
     public class RawZoneData
     {
-        [IntrinsicProperty]
         public int GeneratorIndex { get; set; }
-        [IntrinsicProperty]
         public int ModulatorIndex { get; set; }
-        [IntrinsicProperty]
         public int GeneratorCount { get; set; }
-        [IntrinsicProperty]
         public int ModulatorCount { get; set; }
     }
 }

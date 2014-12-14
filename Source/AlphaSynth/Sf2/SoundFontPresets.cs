@@ -25,11 +25,8 @@ namespace AlphaSynth.Sf2
 {
     public class SoundFontPresets
     {
-        [IntrinsicProperty]
         public SampleHeader[] SampleHeaders { get; private set; }
-        [IntrinsicProperty]
         public PresetHeader[] PresetHeaders { get; private set; }
-        [IntrinsicProperty]
         public Instrument[] Instruments { get; private set; }
 
         public SoundFontPresets(IReadable input)

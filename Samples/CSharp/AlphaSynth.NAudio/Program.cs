@@ -34,7 +34,7 @@ namespace AlphaSynth.NAudio
             try
             {
                 var data = File.ReadAllBytes(dlg.FileName);
-                var input = new ByteBuffer(new ByteArray(data));
+                var input = ByteBuffer.FromBuffer(data);
                 file = new MidiFile();
                 file.Load(input);
             }
@@ -57,7 +57,7 @@ namespace AlphaSynth.NAudio
             try
             {
                 var data = File.ReadAllBytes(dlg.FileName);
-                var input = new ByteBuffer(new ByteArray(data));
+                var input = ByteBuffer.FromBuffer(data);
 
                 bank = new PatchBank();
                 bank.LoadSf2(input);

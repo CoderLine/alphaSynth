@@ -32,31 +32,18 @@ namespace AlphaSynth.Bank.Descriptors
 
     public class GeneratorDescriptor
     {
-        [IntrinsicProperty]
         public LoopMode LoopMethod { get; set; }
-        [IntrinsicProperty]
         public Waveform SamplerType { get; set; }
-        [IntrinsicProperty]
         public string AssetName { get; set; }
-        [IntrinsicProperty]
         public double EndPhase { get; set; }
-        [IntrinsicProperty]
         public double StartPhase { get; set; }
-        [IntrinsicProperty]
         public double LoopEndPhase { get; set; }
-        [IntrinsicProperty]
         public double LoopStartPhase { get; set; }
-        [IntrinsicProperty]
         public double Offset { get; set; }
-        [IntrinsicProperty]
         public double Period { get; set; }
-        [IntrinsicProperty]
         public short RootKey { get; set; }
-        [IntrinsicProperty]
         public short KeyTrack { get; set; }
-        [IntrinsicProperty]
         public short VelTrack { get; set; }
-        [IntrinsicProperty]
         public short Tune { get; set; }
 
         public GeneratorDescriptor()

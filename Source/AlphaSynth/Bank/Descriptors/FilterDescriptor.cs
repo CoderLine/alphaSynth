@@ -22,17 +22,11 @@ namespace AlphaSynth.Bank.Descriptors
 {
     public class FilterDescriptor
     {
-        [IntrinsicProperty]
         public FilterType FilterMethod { get; set; }
-        [IntrinsicProperty]
         public float CutOff { get; set; }
-        [IntrinsicProperty]
         public float Resonance { get; set; }
-        [IntrinsicProperty]
         public short RootKey { get; set; }
-        [IntrinsicProperty]
         public short KeyTrack { get; set; }
-        [IntrinsicProperty]
         public short VelTrack { get; set; }
 
         public FilterDescriptor()

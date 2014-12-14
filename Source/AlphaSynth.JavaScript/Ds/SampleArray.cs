@@ -15,48 +15,48 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-using System.Runtime.CompilerServices;
+using SharpKit.JavaScript;
 
 namespace AlphaSynth.Ds
 {
-    [IncludeGenericArguments(false)]
-    [IgnoreNamespace]
-    [Imported(ObeysTypeSystem = true)]
-    [ScriptName("Float32Array")]
+    [JsType(Mode = JsMode.Prototype, Name = "Float32Array", Export = false, PropertiesAsFields = true)]
     public class SampleArray
     {
-        [InlineCode("new Float32Array({length})")]
+        [JsMethod(InlineCodeExpression = "new Float32Array(length)")]
         public SampleArray(int length)
         {
         }
 
-        [IntrinsicProperty]
+        [JsProperty(NativeIndexer = true)]
         public float this[int index]
         {
+            [JsMethod(Export = false)]
             get
             {
                 return 0;
             }
+            [JsMethod(Export = false)]
             set
             {
             }
         }
 
-        [ScriptName("length")]
+        [JsProperty(Name = "length", Export = false)]
         public int Length
         {
+            [JsMethod(InlineCodeExpression = "this.length", Export = false)]
             get
             {
                 return 0;
             }
         }
 
-        [InlineCode("{this} = new Float32Array()")]
+        [JsMethod(InlineCodeExpression = "this = new Float32Array(this.length)", Export = false)]
         public void Clear()
         {
         }
 
-        [InlineCode("{src}.set({dest}.subarray({srcPos}, {srcPos} + {len}), {destPos})")]
+        [JsMethod(InlineCodeExpression = "dest.set(src.subarray(srcPos, srcPos + len), destPos)", Export = false)]
         public static void Blit(SampleArray src, int srcPos, SampleArray dest, int destPos, int len)
         {
         }

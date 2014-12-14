@@ -21,10 +21,8 @@ namespace AlphaSynth.Ds
 {
     public class LinkedList<T> where T : class
     {
-        [IntrinsicProperty]
         public LinkedListNode<T> First { get; set; }
 
-        [IntrinsicProperty]
         public int Length { get; private set; }
 
         public LinkedList()
@@ -122,7 +120,6 @@ namespace AlphaSynth.Ds
         internal LinkedListNode<T> _next;
         internal LinkedListNode<T> _prev;
 
-        [IntrinsicProperty]
         public T Value { get; set; }
 
         public LinkedListNode<T> Next

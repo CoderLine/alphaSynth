@@ -23,7 +23,6 @@ namespace AlphaSynth.Sf2.Chunks
 {
     public class SampleHeaderChunk : Chunk
     {
-        [IntrinsicProperty]
         public SampleHeader[] SampleHeaders { get; set; }
 
         public SampleHeaderChunk(string id, int size, IReadable input)

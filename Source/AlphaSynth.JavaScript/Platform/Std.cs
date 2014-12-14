@@ -15,9 +15,8 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-using System;
-using System.Runtime.CompilerServices;
-using AlphaSynth.IO;
+
+using SharpKit.JavaScript;
 
 namespace AlphaSynth.Platform
 {
@@ -27,15 +26,15 @@ namespace AlphaSynth.Platform
 
         public static int ParseInt(string s)
         {
-            int f;
-            if (!int.TryParse(s, out f))
+            int f = JsContext.parseInt(s);
+            if (JsContext.isNaN(f))
             {
                 f = 0;
             }
             return f;
         }
 
-        [InlineCode("String.fromCharCode({c})")]
+        [JsMethod(InlineCodeExpression = "String.fromCharCode(c)")]
         public static string StringFromCharCode(int c)
         {
             return "";
@@ -43,11 +42,11 @@ namespace AlphaSynth.Platform
 
         public static double Random()
         {
-            return Math.Random();
+            return JsMath.random();
         }
 
-        [InlineCode("{dst}.set({src}.subarray({srcOffset}, {srcOffset} + {count}), {dstOffset})")]
-        public static void BlockCopy(ByteArray src, int srcOffset, ByteArray dst, int dstOffset, int count)
+        [JsMethod(InlineCodeExpression = "dst.set(src.subarray(srcOffset, srcOffset + count), dstOffset)")]
+        public static void BlockCopy(byte[] src, int srcOffset, byte[] dst, int dstOffset, int count)
         {
         }
 
@@ -59,7 +58,7 @@ namespace AlphaSynth.Platform
             }
         }
 
-        public static void Reverse(ByteArray array)
+        public static void Reverse(byte[] array)
         {
             var i = 0;
             var j = array.Length - 1;

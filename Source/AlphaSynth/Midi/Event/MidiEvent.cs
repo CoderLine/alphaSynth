@@ -106,7 +106,6 @@ namespace AlphaSynth.Midi.Event
     {
         protected readonly int Message;
 
-        [IntrinsicProperty]
         public int DeltaTime { get; set; }
 
         public virtual int Channel

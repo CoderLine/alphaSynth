@@ -21,7 +21,6 @@ namespace AlphaSynth.Midi.Event
 {
     public class MetaTextEvent : MetaEvent
     {
-        [IntrinsicProperty]
         public string Text { get; private set; }
 
         public MetaTextEvent(int delta, byte status, byte metaId, string text)

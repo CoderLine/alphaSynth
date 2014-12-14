@@ -23,7 +23,7 @@ namespace AlphaSynth.Platform
     {
         public static ISynthOutput CreateOutput()
         {
-            return null;
+            return new WebWorkerOutput();
         }
     }
 }

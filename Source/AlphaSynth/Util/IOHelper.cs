@@ -75,9 +75,9 @@ namespace AlphaSynth.Util
             return TypeUtils.ToInt16((ch1 << 8) | (ch2 << 0));
         }
 
-        public static ByteArray ReadByteArray(this IReadable input, int length)
+        public static byte[] ReadByteArray(this IReadable input, int length)
         {
-            var v = new ByteArray(length);
+            var v = new byte[length];
             input.Read(v, 0, length);
             return v;
         }
@@ -137,7 +137,7 @@ namespace AlphaSynth.Util
             return TypeUtils.ToUInt32((ch1 << 24) | (ch2 << 16) | (ch3 << 8) | (ch4 << 0));
         }
 
-        public static int ReadInt24(this ByteArray input, int index)
+        public static int ReadInt24(this byte[] input, int index)
         {
             int i;
             if (TypeUtils.IsLittleEndian)
@@ -156,7 +156,7 @@ namespace AlphaSynth.Util
 
         }
 
-        public static short ReadInt16(this ByteArray input, int index)
+        public static short ReadInt16(this byte[] input, int index)
         {
             if (TypeUtils.IsLittleEndian)
             {

@@ -40,29 +40,17 @@ namespace AlphaSynth.Bank.Components.Generators
 
     public abstract class Generator
     {
-        [IntrinsicProperty]
         public LoopMode LoopMode { get; set; }
-        [IntrinsicProperty]
         public double LoopStartPhase { get; set; }
-        [IntrinsicProperty]
         public double LoopEndPhase { get; set; }
-        [IntrinsicProperty]
         public double StartPhase { get; set; }
-        [IntrinsicProperty]
         public double EndPhase { get; set; }
-        [IntrinsicProperty]
         public double Offset { get; set; }
-        [IntrinsicProperty]
         public double Period { get; set; }
-        [IntrinsicProperty]
         public double Frequency { get; set; }
-        [IntrinsicProperty]
         public short RootKey { get; set; }
-        [IntrinsicProperty]
         public short KeyTrack { get; set; }
-        [IntrinsicProperty]
         public short VelocityTrack { get; set; }
-        [IntrinsicProperty]
         public short Tune { get; set; }
 
 

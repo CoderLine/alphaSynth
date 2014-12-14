@@ -29,9 +29,7 @@ namespace AlphaSynth.Synthesis
 
     public class VoiceNode
     {
-        [IntrinsicProperty]
         public Voice Value { get; set; }
-        [IntrinsicProperty]
         public VoiceNode Next { get; set; }
     }
 
@@ -40,16 +38,11 @@ namespace AlphaSynth.Synthesis
         private Voice[] _voicePool;
         private LinkedList<VoiceNode> _vNodes;
 
-        [IntrinsicProperty]
         public VoiceStealingMethod StealingMethod { get; set; }
-        [IntrinsicProperty]
         public int Polyphony { get; set; }
-        [IntrinsicProperty]
         public LinkedList<Voice> FreeVoices { get; set; }
-        [IntrinsicProperty]
         public LinkedList<Voice> ActiveVoices { get; set; }
-        [IntrinsicProperty]
-        public VoiceNode[,] Registry { get; set; }
+        public VoiceNode[][] Registry { get; set; }
 
         public VoiceManager(int voiceCount)
         {
@@ -69,7 +62,11 @@ namespace AlphaSynth.Synthesis
                 FreeVoices.AddLast(v);
             }
 
-            Registry = new VoiceNode[SynthConstants.DefaultChannelCount, SynthConstants.DefaultKeyCount];
+            Registry = new VoiceNode[SynthConstants.DefaultChannelCount][];
+            for (int i = 0; i < Registry.Length; i++)
+            {
+                Registry[i] = new VoiceNode[SynthConstants.DefaultKeyCount];
+            }
         }
 
         public Voice GetFreeVoice()
@@ -95,29 +92,29 @@ namespace AlphaSynth.Synthesis
         {
             var node = _vNodes.RemoveLast();
             node.Value = voice;
-            node.Next = Registry[voice.VoiceParams.Channel, voice.VoiceParams.Note];
-            Registry[voice.VoiceParams.Channel, voice.VoiceParams.Note] = node;
+            node.Next = Registry[voice.VoiceParams.Channel][voice.VoiceParams.Note];
+            Registry[voice.VoiceParams.Channel][voice.VoiceParams.Note] = node;
         }
 
         public void RemoveFromRegistry(int channel, int note)
         {
-            var node = Registry[channel, note];
+            var node = Registry[channel][note];
             while (node != null)
             {
                 _vNodes.AddLast(node);
                 node = node.Next;
             }
-            Registry[channel, note] = null;
+            Registry[channel][note] = null;
         }
 
         public void RemoveVoiceFromRegistry(Voice voice)
         {
-            var node = Registry[voice.VoiceParams.Channel, voice.VoiceParams.Note];
+            var node = Registry[voice.VoiceParams.Channel][voice.VoiceParams.Note];
             if (node == null)
                 return;
             if (node.Value == voice)
             {
-                Registry[voice.VoiceParams.Channel, voice.VoiceParams.Note] = node.Next;
+                Registry[voice.VoiceParams.Channel][voice.VoiceParams.Note] = node.Next;
                 _vNodes.AddLast(node);
             }
             else
@@ -143,13 +140,13 @@ namespace AlphaSynth.Synthesis
             var node = ActiveVoices.First;
             while (node != null)
             {
-                var vnode = Registry[node.Value.VoiceParams.Channel, node.Value.VoiceParams.Note];
+                var vnode = Registry[node.Value.VoiceParams.Channel][node.Value.VoiceParams.Note];
                 while (vnode != null)
                 {
                     _vNodes.AddLast(vnode);
                     vnode = vnode.Next;
                 }
-                Registry[node.Value.VoiceParams.Channel, node.Value.VoiceParams.Note] = null;
+                Registry[node.Value.VoiceParams.Channel][node.Value.VoiceParams.Note] = null;
                 node = node.Next;
             }
         }

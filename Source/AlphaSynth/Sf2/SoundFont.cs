@@ -24,11 +24,8 @@ namespace AlphaSynth.Sf2
 {
     public class SoundFont
     {
-        [IntrinsicProperty]
         public SoundFontInfo Info { get; set; }
-        [IntrinsicProperty]
         public SoundFontSampleData SampleData { get; set; }
-        [IntrinsicProperty]
         public SoundFontPresets Presets { get; set; }
 
         public void Load(IReadable input)

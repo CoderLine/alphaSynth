@@ -21,9 +21,7 @@ namespace AlphaSynth.Sf2
 {
     public class Instrument
     {
-        [IntrinsicProperty]
         public string Name { get; set; }
-        [IntrinsicProperty]
         public Zone[] Zones { get; set; }
     }
 }

@@ -44,26 +44,26 @@ namespace AlphaSynth.Player
             Logger.Debug("Opening output");
             _output = Platform.Platform.CreateOutput();
 
-            _output.AddFinishedListener(() =>
+            _output.Finished += () =>
             {
                 // stop everything
                 Stop();
                 Logger.Debug("Finished playback");
                 _events.OnFinished();
-            });
-            _output.AddSampleRequestListener(() =>
+            };
+            _output.SampleRequest += () =>
             {
                 // synthesize buffer
                 _sequencer.FillMidiEventQueue();
                 _synth.Synthesize();
                 // send it to output
                 _output.AddSamples(_synth.SampleBuffer);
-            });
-            _output.AddPositionChangedListener(pos =>
+            };
+            _output.PositionChanged += pos =>
             {
                 // log position
                 FirePositionChanged(pos);
-            });
+            };
 
             Logger.Debug("Creating synthesizer");
             _synth = new Synthesizer(SynthConstants.SampleRate, 2, 441, 3, 100);
@@ -71,11 +71,8 @@ namespace AlphaSynth.Player
             _sequencer.AddFinishedListener(_output.SequencerFinished);
         }
 
-        [IntrinsicProperty]
         public SynthPlayerState State { get; private set; }
-        [IntrinsicProperty]
         public bool IsSoundFontLoaded { get; private set; }
-        [IntrinsicProperty]
         public bool IsMidiLoaded { get; private set; }
 
         private int _tickPosition;
@@ -170,10 +167,10 @@ namespace AlphaSynth.Player
             }
         }
 
-        public void LoadSoundFontBytes(ByteArray data)
+        public void LoadSoundFontBytes(byte[] data)
         {
             if (State != SynthPlayerState.Stopped) return;
-            var input = new ByteBuffer(data);
+            var input = ByteBuffer.FromBuffer(data);
             try
             {
                 Logger.Info("Loading soundfont from bytes");
@@ -213,10 +210,10 @@ namespace AlphaSynth.Player
             }
         }
 
-        public void LoadMidiBytes(ByteArray data)
+        public void LoadMidiBytes(byte[] data)
         {
             if (State != SynthPlayerState.Stopped) return;
-            var input = new ByteBuffer(data);
+            var input = ByteBuffer.FromBuffer(data);
             try
             {
                 Logger.Info("Loading midi from bytes");

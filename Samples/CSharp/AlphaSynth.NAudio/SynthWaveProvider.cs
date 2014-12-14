@@ -16,7 +16,6 @@ namespace AlphaSynth.NAudio
 
         private readonly CircularBuffer _circularBuffer;
         private readonly byte[] _synthBuffer;
-        private readonly ByteArray _synthBufferWrapper;
 
         public WaveFormat WaveFormat { get; private set; }
 
@@ -38,8 +37,7 @@ namespace AlphaSynth.NAudio
             int bufferSize = (int)System.Math.Ceiling((2.0 * WaveFormat.AverageBytesPerSecond) / synth.RawBufferSize) * synth.RawBufferSize;
             Console.WriteLine(WaveFormat.AverageBytesPerSecond);
             _circularBuffer = new CircularBuffer(bufferSize);
-            _synthBufferWrapper = new ByteArray(synth.RawBufferSize);
-            _synthBuffer = _synthBufferWrapper.Data;
+            _synthBuffer = new byte[synth.RawBufferSize];
             sequencer.AddFinishedListener(OnFinished);
         }
 
@@ -50,7 +48,7 @@ namespace AlphaSynth.NAudio
                 lock (LockObj)
                 {
                     _sequencer.FillMidiEventQueue();
-                    _synth.GetNext(_synthBufferWrapper);
+                    _synth.GetNext(_synthBuffer);
                     _circularBuffer.Write(_synthBuffer, 0, _synthBuffer.Length);
                 }
             }

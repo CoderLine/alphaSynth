@@ -23,7 +23,6 @@ namespace AlphaSynth.Sf2.Chunks
 {
     public class ModulatorChunk : Chunk
     {
-        [IntrinsicProperty]
         public Modulator[] Modulators { get; set; }
 
         public ModulatorChunk(string id, int size, IReadable input)

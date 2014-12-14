@@ -22,8 +22,7 @@ namespace AlphaSynth.Midi.Event
 {
     public class SystemExclusiveEvent : SystemCommonEvent
     {
-        [IntrinsicProperty]
-        public ByteArray Data { get; private set; }
+        public byte[] Data { get; private set; }
 
 
         public int ManufacturerId
@@ -34,7 +33,7 @@ namespace AlphaSynth.Midi.Event
             }
         }
 
-        public SystemExclusiveEvent(int delta, byte status, short id, ByteArray data)
+        public SystemExclusiveEvent(int delta, byte status, short id, byte[] data)
             : base(delta, status, (byte)(id & 0x00FF), (byte)(id >> 8))
         {
             Data = data;

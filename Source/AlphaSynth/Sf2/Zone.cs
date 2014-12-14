@@ -21,9 +21,7 @@ namespace AlphaSynth.Sf2
 {
     public class Zone
     {
-        [IntrinsicProperty]
         public Modulator[] Modulators { get; set; }
-        [IntrinsicProperty]
         public Generator[] Generators { get; set; }
     }
 }

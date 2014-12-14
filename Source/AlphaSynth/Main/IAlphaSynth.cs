@@ -16,6 +16,7 @@
  * License along with this library.
  */
 using AlphaSynth.IO;
+using AlphaSynth.Util;
 
 namespace AlphaSynth.Main
 {
@@ -63,7 +64,7 @@ namespace AlphaSynth.Main
         ///Loads a soundfont from the given data
         /// </summary>
         /// <param name="data">a byte array to load the data from </param>
-        void LoadSoundFontBytes(ByteArray data);
+        void LoadSoundFontBytes(byte[] data);
 
         /// <summary>
         /// Loads a midi from the given url
@@ -75,12 +76,12 @@ namespace AlphaSynth.Main
         ///Loads a midi from the given data
         /// </summary>
         /// <param name="data">a byte array to load the data from </param>
-        void LoadMidiBytes(ByteArray data);
+        void LoadMidiBytes(byte[] data);
 
         /// <summary>
         /// Sets the logging level which alphaTab should use.
         /// </summary>
-        /// <param name="level">the logging level (0 - log, 1 - debug, 2 - info, 3 - warn, 4 - error, 5 - off)</param>
-        void SetLogLevel(int level);
+        /// <param name="level">the logging level</param>
+        void SetLogLevel(LogLevel level);
     }
 }

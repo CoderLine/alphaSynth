@@ -21,9 +21,7 @@ namespace AlphaSynth.Bank
 {
     public class PatchAsset
     {
-        [IntrinsicProperty]
         public string Name { get; private set; }
-        [IntrinsicProperty]
         public Patch.Patch Patch { get; private set; }
 
         public PatchAsset(string name, Patch.Patch patch)

@@ -21,19 +21,12 @@ namespace AlphaSynth.Sf2
 {
     public class PresetHeader
     {
-        [IntrinsicProperty]
         public string Name { get; set; }
-        [IntrinsicProperty]
         public int PatchNumber { get; set; }
-        [IntrinsicProperty]
         public int BankNumber { get; set; }
-        [IntrinsicProperty]
         public int Library { get; set; }
-        [IntrinsicProperty]
         public int Genre { get; set; }
-        [IntrinsicProperty]
         public int Morphology { get; set; }
-        [IntrinsicProperty]
         public Zone[] Zones { get; set; }
     }
 }

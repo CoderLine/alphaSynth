@@ -16,7 +16,7 @@
  * License along with this library.
  */
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
+using SharpKit.JavaScript;
 
 namespace AlphaSynth.Ds
 {
@@ -25,24 +25,23 @@ namespace AlphaSynth.Ds
     /// </summary>
     /// <typeparam name="TKey"></typeparam>
     /// <typeparam name="TValue"></typeparam>
-    [IncludeGenericArguments(false)]
-    [IgnoreNamespace]
-    [Imported(ObeysTypeSystem = true)]
-    [ScriptName("Object")]
+    [JsType(Mode = JsMode.Prototype, Name = "Object", Export = false, IgnoreGenericTypeArguments = true)]
     public class FastDictionary<TKey, TValue>
     {
-        [InlineCode("{{}}")]
+        [JsMethod(InlineCode = "{}")]
         public FastDictionary()
         {
         }
 
-        [IntrinsicProperty]
+        [JsProperty(NativeIndexer = true)]
         public TValue this[TKey key]
         {
+            [JsMethod(Export = false)]
             get
             {
                 return default(TValue);
             }
+            [JsMethod(Export = false)]
             set
             {
             }
@@ -50,13 +49,13 @@ namespace AlphaSynth.Ds
 
         public string[] Keys
         {
-            [InlineCode("Object.keys({this})")]
+            [JsMethod(InlineCodeExpression = "Object.keys(this)", Export = false)]
             get { return null; }
         }
 
         public IEnumerable<TValue> Values
         {
-            [InlineCode("{this}")]
+            [JsMethod(InlineCodeExpression = "this", Export = false)]
             get
             {
                 return null;
@@ -65,23 +64,22 @@ namespace AlphaSynth.Ds
 
         public int Count
         {
-            [InlineCode("Object.keys({this}).length")]
+            [JsMethod(InlineCodeExpression = "Object.keys(this).length", Export = false)]
             get
             {
                 return 0;
             }
         }
 
-        [InlineCode("delete {this}[{key}]")]
+        [JsMethod(InlineCodeExpression = "delete this[key]", Export = false)]
         public void Remove(TKey key)
         {
         }
 
-        [InlineCode("{this}.hasOwnProperty({key})")]
+        [JsMethod(InlineCodeExpression = "this.hasOwnProperty(key)", Export = false)]
         public bool ContainsKey(TKey key)
         {
             return false;
         }
     }
-
 }

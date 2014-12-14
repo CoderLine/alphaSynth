@@ -30,9 +30,7 @@ namespace AlphaSynth.Synthesis
 {
     public class SynthEvent
     {
-        [IntrinsicProperty]
         public MidiEvent Event { get; set; }
-        [IntrinsicProperty]
         public int Delta { get; set; }
 
         public SynthEvent(MidiEvent e)
@@ -51,34 +49,27 @@ namespace AlphaSynth.Synthesis
 
         private Patch[] _layerList;
 
-        [IntrinsicProperty]
         public LinkedList<SynthEvent> MidiEventQueue { get; private set; }
 
-        [IntrinsicProperty]
         public int[] MidiEventCounts { get; private set; }
 
-        [IntrinsicProperty]
         public SampleArray SampleBuffer { get; set; }
 
         /// <summary>
         /// The number of audio channels
         /// </summary>
-        [IntrinsicProperty]
         public int AudioChannels { get; private set; }
 
-        [IntrinsicProperty]
         public bool LittleEndian { get; set; }
 
         /// <summary>
         /// The patch bank that holds all of the currently loaded instrument patches
         /// </summary>
-        [IntrinsicProperty]
         public PatchBank SoundBank { get; private set; }
 
         /// <summary>
         /// The number of samples per second produced per channel
         /// </summary>
-        [IntrinsicProperty]
         public int SampleRate { get; private set; }
 
         /// <summary>
@@ -288,7 +279,7 @@ namespace AlphaSynth.Synthesis
             FillWorkingBuffer();
         }
 
-        public void GetNext(ByteArray buffer)
+        public void GetNext(byte[] buffer)
         {
             Synthesize();
             ConvertWorkingBuffer(buffer, SampleBuffer);
@@ -358,7 +349,7 @@ namespace AlphaSynth.Synthesis
             TypeUtils.ClearIntArray(MidiEventCounts);
         }
 
-        private void ConvertWorkingBuffer(ByteArray to, SampleArray from)
+        private void ConvertWorkingBuffer(byte[] to, SampleArray from)
         {
             var i = 0;
             if (LittleEndian)
@@ -405,9 +396,9 @@ namespace AlphaSynth.Synthesis
             }
 
             // If a key with the same note value exists, stop it
-            if (_voiceManager.Registry[channel, note] != null)
+            if (_voiceManager.Registry[channel][note] != null)
             {
-                var node = _voiceManager.Registry[channel, note];
+                var node = _voiceManager.Registry[channel][note];
                 while (node != null)
                 {
                     node.Value.Stop();
@@ -462,7 +453,7 @@ namespace AlphaSynth.Synthesis
         {
             if (_synthChannels[channel].HoldPedal)
             {
-                var node = _voiceManager.Registry[channel, note];
+                var node = _voiceManager.Registry[channel][note];
                 while (node != null)
                 {
                     node.Value.VoiceParams.NoteOffPending = true;
@@ -471,7 +462,7 @@ namespace AlphaSynth.Synthesis
             }
             else
             {
-                var node = _voiceManager.Registry[channel, note];
+                var node = _voiceManager.Registry[channel][note];
                 while (node != null)
                 {
                     node.Value.Stop();

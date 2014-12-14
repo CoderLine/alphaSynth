@@ -22,9 +22,7 @@ namespace AlphaSynth.Bank
 {
     public class AssetManager
     {
-        [IntrinsicProperty]
         public FastList<PatchAsset> PatchAssets { get; private set; }
-        [IntrinsicProperty]
         public FastList<SampleDataAsset> SampleAssets { get; private set; }
 
         public AssetManager()

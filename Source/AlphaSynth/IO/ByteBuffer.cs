@@ -21,32 +21,47 @@ namespace AlphaSynth.IO
 {
     public class ByteBuffer : IWriteable, IReadable
     {
-        private ByteArray _buffer;
+        private byte[] _buffer;
         private int _capacity;
+        private int _position;
 
-        public int Position { get; set; }
         public int Length { get; private set; }
 
-        public virtual ByteArray GetBuffer()
+        public int Position
+        {
+            get { return _position; }
+            set { _position = value; }
+        }
+
+        public virtual byte[] GetBuffer()
         {
             return _buffer;
         }
 
-        public ByteBuffer()
-            : this(0)
+
+        public static ByteBuffer Empty()
         {
+            return WithCapactiy(0);
         }
 
-        public ByteBuffer(int capacity)
+        public static ByteBuffer WithCapactiy(int capacity)
         {
-            _buffer = new ByteArray(capacity);
-            _capacity = capacity;
+            ByteBuffer buffer = new ByteBuffer();
+            buffer._buffer = new byte[capacity];
+            buffer._capacity = capacity;
+            return buffer;
         }
 
-        public ByteBuffer(ByteArray buffer)
+        public static ByteBuffer FromBuffer(byte[] data)
         {
-            _buffer = buffer;
-            Length = _capacity = buffer.Length;
+            ByteBuffer buffer = new ByteBuffer();
+            buffer._buffer = data;
+            buffer._capacity = buffer.Length = data.Length;
+            return buffer;
+        }
+
+        private ByteBuffer()
+        {
         }
 
         public void Reset()
@@ -65,7 +80,7 @@ namespace AlphaSynth.IO
             {
                 if (value > 0)
                 {
-                    var newBuffer = new ByteArray(value);
+                    var newBuffer = new byte[value];
                     if (Length > 0) Std.BlockCopy(_buffer, 0, newBuffer, 0, Length);
                     _buffer = newBuffer;
                 }
@@ -83,10 +98,12 @@ namespace AlphaSynth.IO
             if (n <= 0)
                 return -1;
 
-            return _buffer[Position++];
+            var b = _buffer[Position];
+            Position++;
+            return b;
         }
 
-        public int Read(ByteArray buffer, int offset, int count)
+        public int Read(byte[] buffer, int offset, int count)
         {
             int n = Length - Position;
             if (n > count) n = count;
@@ -108,12 +125,12 @@ namespace AlphaSynth.IO
 
         public void WriteByte(byte value)
         {
-            ByteArray buffer = new ByteArray(1);
+            byte[] buffer = new byte[1];
             buffer[0] = value;
             Write(buffer, 0, 1);
         }
 
-        public void Write(ByteArray buffer, int offset, int count)
+        public void Write(byte[] buffer, int offset, int count)
         {
             int i = Position + count;
 
@@ -149,12 +166,11 @@ namespace AlphaSynth.IO
             }
         }
 
-        public virtual ByteArray ToArray()
+        public virtual byte[] ToArray()
         {
-            ByteArray copy = new ByteArray(Length);
+            byte[] copy = new byte[Length];
             Std.BlockCopy(_buffer, 0, copy, 0, Length);
             return copy;
         }
     }
-
 }

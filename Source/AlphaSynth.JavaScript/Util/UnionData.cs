@@ -15,45 +15,44 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-using System.Runtime.CompilerServices;
+
+using SharpKit.JavaScript;
 
 namespace AlphaSynth.Util
 {
-    [IgnoreNamespace]
-    [Imported(ObeysTypeSystem = true)]
-    [ScriptName("DataView")]
+    [JsType(Mode = JsMode.Prototype, Name = "DataView", Export = false)]
     public class UnionData
     {
         //double values
         public double Double1
         {
-            [InlineCode("{this}.getFloat64(0, true)")]
+            [JsMethod(InlineCodeExpression = "this.getFloat64(0, true)")]
             get { return 0; }
         }
         //float values
         public double Float1
         {
-            [InlineCode("{this}.getFloat32(0, true)")]
+            [JsMethod(InlineCodeExpression = "this.getFloat32(0, true)")]
             get { return 0; }
         }
         public double Float2
         {
-            [InlineCode("{this}.getFloat32(4, true)")]
+            [JsMethod(InlineCodeExpression = "this.getFloat32(4, true)")]
             get { return 0; }
         }
         //int values
         public double Int1
         {
-            [InlineCode("{this}.getInt32(0, true)")]
+            [JsMethod(InlineCodeExpression = "this.getInt32(0, true)")]
             get { return 0; }
         }
         public double Int2
         {
-            [InlineCode("{this}.getInt32(4, true)")]
+            [JsMethod(InlineCodeExpression = "this.getInt32(4, true)")]
             get { return 0; }
         }
 
-        [InlineCode("new DataView(new ArrayBuffer(8))")]
+        [JsMethod(InlineCode = "new DataView(new ArrayBuffer(8))")]
         public UnionData()
         {
         }

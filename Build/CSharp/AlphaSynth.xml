@@ -48,7 +48,7 @@
             </summary>
             <param name="url">the url to load the soundfont from</param>
         </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynth.LoadSoundFontBytes(AlphaSynth.IO.ByteArray)">
+        <member name="M:AlphaSynth.Main.IAlphaSynth.LoadSoundFontBytes(System.Byte[])">
              <summary>
             Loads a soundfont from the given data
              </summary>
@@ -60,17 +60,17 @@
             </summary>
             <param name="url">the url to load the midi from</param>
         </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynth.LoadMidiBytes(AlphaSynth.IO.ByteArray)">
+        <member name="M:AlphaSynth.Main.IAlphaSynth.LoadMidiBytes(System.Byte[])">
              <summary>
             Loads a midi from the given data
              </summary>
              <param name="data">a byte array to load the data from </param>
         </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynth.SetLogLevel(System.Int32)">
+        <member name="M:AlphaSynth.Main.IAlphaSynth.SetLogLevel(AlphaSynth.Util.LogLevel)">
             <summary>
             Sets the logging level which alphaTab should use.
             </summary>
-            <param name="level">the logging level (0 - log, 1 - debug, 2 - info, 3 - warn, 4 - error, 5 - off)</param>
+            <param name="level">the logging level</param>
         </member>
         <member name="M:AlphaSynth.Main.IAlphaSynthSync.IsReadyForPlay">
             <summary>
@@ -117,7 +117,7 @@
              Returns whether the midi data was loaded and parsed
             </summary>
         </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynthAsync.On(System.String,System.Action{System.Object})">
+        <member name="M:AlphaSynth.Main.IAlphaSynthAsync.On(System.String,System.Action)">
             <summary>
              Adds a new event listener to events
             </summary>

@@ -23,25 +23,15 @@ namespace AlphaSynth.Bank
 {
     public class SampleDataAsset
     {
-        [IntrinsicProperty]
         public string Name { get; set; }
-        [IntrinsicProperty]
         public int Channels { get; set; }
-        [IntrinsicProperty]
         public int SampleRate { get; set; }
-        [IntrinsicProperty]
         public short RootKey { get; set; }
-        [IntrinsicProperty]
         public short Tune { get; set; }
-        [IntrinsicProperty]
         public float Start { get; set; }
-        [IntrinsicProperty]
         public float End { get; set; }
-        [IntrinsicProperty]
         public float LoopStart { get; set; }
-        [IntrinsicProperty]
         public float LoopEnd { get; set; }
-        [IntrinsicProperty]
         public PcmData SampleData { get; set; }
 
         public SampleDataAsset(SampleHeader sample, SoundFontSampleData sampleData)

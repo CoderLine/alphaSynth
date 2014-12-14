@@ -21,13 +21,9 @@ namespace AlphaSynth.Bank.Components.Generators
 {
     public class GeneratorParameters
     {
-        [IntrinsicProperty]
         public double Phase { get; set; }
-        [IntrinsicProperty]
         public double CurrentStart { get; set; }
-        [IntrinsicProperty]
         public double CurrentEnd { get; set; }
-        [IntrinsicProperty]
         public GeneratorState CurrentState { get; set; }
 
         public GeneratorParameters()

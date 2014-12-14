@@ -26,7 +26,6 @@ namespace AlphaSynth.Sf2
     {
         private ushort _rawAmount;
 
-        [IntrinsicProperty]
         public GeneratorEnum GeneratorType { get; set; }
 
         public short AmountInt16

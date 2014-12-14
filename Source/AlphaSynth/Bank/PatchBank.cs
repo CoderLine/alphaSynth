@@ -34,9 +34,7 @@ namespace AlphaSynth.Bank
         private FastDictionary<int, Patch.Patch[]> _bank;
         private AssetManager _assets;
 
-        [IntrinsicProperty]
         public string Name { get; set; }
-        [IntrinsicProperty]
         public string Comments { get; set; }
 
         public PatchBank()

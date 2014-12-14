@@ -42,7 +42,7 @@ namespace AlphaSynth.Util
                 }
 
                 FireProgress((int)result.Length, (int)result.Length);
-                FireComplete(new ByteArray(result.ToArray()));
+                FireComplete(result.ToArray());
             }, null);
         }
     }
