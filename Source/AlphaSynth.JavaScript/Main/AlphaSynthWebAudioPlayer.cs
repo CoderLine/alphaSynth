@@ -72,7 +72,10 @@ namespace AlphaSynth.Main
 
         public void Pause()
         {
-            _source.stop(0);
+            if (_source != null)
+            {
+                _source.stop(0);
+            }
             _source = null;
             _paused = true;
             _pauseStart = (int)(_context.currentTime * 1000);
@@ -83,7 +86,10 @@ namespace AlphaSynth.Main
         {
             _finished = true;
             _paused = false;
-            _source.stop(0);
+            if (_source != null)
+            {
+                _source.stop(0);
+            }
             _source = null;
             _circularBuffer.Clear();
             _audioNode.disconnect(0);

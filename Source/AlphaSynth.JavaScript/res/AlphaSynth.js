@@ -91,8 +91,8 @@ if (typeof ($CreateAnonymousDelegate) == 'undefined') {
     }
 }
 
-var Uint8Array = Uint8Array || Array;
 var Int16Array = Int16Array || Array;
+var Uint8Array = Uint8Array || Array;
 var Int32Array = Int32Array || Array;
 function $CombineDelegates(del1,del2)
 {
@@ -344,7 +344,9 @@ AlphaSynth.Main.AlphaSynthWebAudioPlayer.prototype = {
         this._audioNode.connect(this._context.destination, 0, 0);
     },
     Pause: function (){
-        this._source.stop(0);
+        if (this._source != null){
+            this._source.stop(0);
+        }
         this._source = null;
         this._paused = true;
         this._pauseStart = ((this._context.currentTime * 1000)) | 0;
@@ -353,7 +355,9 @@ AlphaSynth.Main.AlphaSynthWebAudioPlayer.prototype = {
     Stop: function (){
         this._finished = true;
         this._paused = false;
-        this._source.stop(0);
+        if (this._source != null){
+            this._source.stop(0);
+        }
         this._source = null;
         this._circularBuffer.Clear();
         this._audioNode.disconnect(0);
@@ -941,12 +945,14 @@ AlphaSynth.Platform.TypeUtils = function (){
 };
 $StaticConstructor(function (){
     AlphaSynth.Platform.TypeUtils.IsLittleEndian = true;
+    AlphaSynth.Platform.TypeUtils.Int16 = new Int16Array(1);
 });
 AlphaSynth.Platform.TypeUtils.ToUInt32 = function (i){
     return i | 0;
 };
 AlphaSynth.Platform.TypeUtils.ToInt16 = function (i){
-    return i | 0;
+    AlphaSynth.Platform.TypeUtils.Int16[0] = i | 0;
+    return AlphaSynth.Platform.TypeUtils.Int16[0];
 };
 AlphaSynth.Platform.TypeUtils.ToUInt16 = function (i){
     return i | 0;
@@ -2771,14 +2777,14 @@ AlphaSynth.Bank.PatchBank.prototype = {
                         throw $CreateException(new System.Exception.ctor$$String("Invalid sf2 region. The range generators do not intersect."), new Error());
                     }
                     if (AlphaSynth.Platform.TypeUtils.IsLittleEndian){
-                        region.Generators[value] = (((((lo_a | (hi_a << 8))&65535)>>15)*(-65536))+((lo_a | (hi_a << 8))&65535));
+                        region.Generators[value] = AlphaSynth.Platform.TypeUtils.ToInt16((lo_a | (hi_a << 8)));
                     }
                     else {
-                        region.Generators[value] = (((((lo_a << 8) | hi_a&65535)>>15)*(-65536))+((lo_a << 8) | hi_a&65535));
+                        region.Generators[value] = AlphaSynth.Platform.TypeUtils.ToInt16((lo_a << 8) | hi_a);
                     }
                 }
                 else {
-                    region.Generators[value] = ((((region.Generators[value] + genList[x].get_AmountInt16()&65535)>>15)*(-65536))+(region.Generators[value] + genList[x].get_AmountInt16()&65535));
+                    region.Generators[value] = AlphaSynth.Platform.TypeUtils.ToInt16(region.Generators[value] + genList[x].get_AmountInt16());
                 }
             }
         }
@@ -4659,7 +4665,7 @@ AlphaSynth.Sf2.SampleHeader = function (input){
     this.EndLoop = AlphaSynth.Util.IOHelper.ReadInt32LE(input);
     this.SampleRate = AlphaSynth.Util.IOHelper.ReadInt32LE(input);
     this.RootKey = input.ReadByte();
-    this.Tune = ((((input.ReadByte()&65535)>>15)*(-65536))+(input.ReadByte()&65535));
+    this.Tune = AlphaSynth.Platform.TypeUtils.ToInt16(input.ReadByte());
     this.SampleLink = AlphaSynth.Util.IOHelper.ReadUInt16LE(input);
     this.SoundFontSampleLink = AlphaSynth.Util.IOHelper.ReadUInt16LE(input);
 };
@@ -4697,7 +4703,7 @@ AlphaSynth.Sf2.Generator = function (input){
 };
 AlphaSynth.Sf2.Generator.prototype = {
     get_AmountInt16: function (){
-        return ((((this._rawAmount&65535)>>15)*(-65536))+(this._rawAmount&65535));
+        return AlphaSynth.Platform.TypeUtils.ToInt16(this._rawAmount);
     },
     set_AmountInt16: function (value){
         this._rawAmount = (value&65535);
@@ -5489,7 +5495,7 @@ AlphaSynth.Synthesis.Synthesizer.prototype = {
         var i = 0;
         if (this.LittleEndian){
             for (var x = 0; x < from.length; x++){
-                var s = ((((((AlphaSynth.Synthesis.SynthHelper.ClampF(from[x] * this._masterVolume, -1, 1) * 32767)) | 0&65535)>>15)*(-65536))+(((AlphaSynth.Synthesis.SynthHelper.ClampF(from[x] * this._masterVolume, -1, 1) * 32767)) | 0&65535));
+                var s = AlphaSynth.Platform.TypeUtils.ToInt16(((AlphaSynth.Synthesis.SynthHelper.ClampF(from[x] * this._masterVolume, -1, 1) * 32767)) | 0);
                 to[i] = (s & 255);
                 to[i + 1] = ((s >> 8) & 255);
                 i += 2;
@@ -5497,7 +5503,7 @@ AlphaSynth.Synthesis.Synthesizer.prototype = {
         }
         else {
             for (var x = 0; x < from.length; x++){
-                var s = ((((((AlphaSynth.Synthesis.SynthHelper.ClampF(from[x] * this._masterVolume, -1, 1) * 32767)) | 0&65535)>>15)*(-65536))+(((AlphaSynth.Synthesis.SynthHelper.ClampF(from[x] * this._masterVolume, -1, 1) * 32767)) | 0&65535));
+                var s = AlphaSynth.Platform.TypeUtils.ToInt16(((AlphaSynth.Synthesis.SynthHelper.ClampF(from[x] * this._masterVolume, -1, 1) * 32767)) | 0);
                 to[i] = ((s >> 8) & 255);
                 to[i + 1] = (s & 255);
                 i += 2;
@@ -6058,7 +6064,7 @@ AlphaSynth.Util.IOHelper.ReadUInt16LE = function (input){
 AlphaSynth.Util.IOHelper.ReadInt16LE = function (input){
     var ch1 = input.ReadByte();
     var ch2 = input.ReadByte();
-    return (((((ch2 << 8) | (ch1 << 0)&65535)>>15)*(-65536))+((ch2 << 8) | (ch1 << 0)&65535));
+    return AlphaSynth.Platform.TypeUtils.ToInt16((ch2 << 8) | (ch1 << 0));
 };
 AlphaSynth.Util.IOHelper.ReadInt32BE = function (input){
     var ch1 = input.ReadByte();
@@ -6075,7 +6081,7 @@ AlphaSynth.Util.IOHelper.ReadUInt16BE = function (input){
 AlphaSynth.Util.IOHelper.ReadInt16BE = function (input){
     var ch1 = input.ReadByte();
     var ch2 = input.ReadByte();
-    return (((((ch1 << 8) | (ch2 << 0)&65535)>>15)*(-65536))+((ch1 << 8) | (ch2 << 0)&65535));
+    return AlphaSynth.Platform.TypeUtils.ToInt16((ch1 << 8) | (ch2 << 0));
 };
 AlphaSynth.Util.IOHelper.ReadByteArray = function (input, length){
     var v = new Uint8Array(length);
@@ -6139,10 +6145,10 @@ AlphaSynth.Util.IOHelper.ReadInt24 = function (input, index){
 };
 AlphaSynth.Util.IOHelper.ReadInt16 = function (input, index){
     if (AlphaSynth.Platform.TypeUtils.IsLittleEndian){
-        return ((((input[index] | (input[index + 1] << 8)&65535)>>15)*(-65536))+(input[index] | (input[index + 1] << 8)&65535));
+        return AlphaSynth.Platform.TypeUtils.ToInt16(input[index] | (input[index + 1] << 8));
     }
     else {
-        return (((((input[index] << 8) | input[index + 1]&65535)>>15)*(-65536))+((input[index] << 8) | input[index + 1]&65535));
+        return AlphaSynth.Platform.TypeUtils.ToInt16((input[index] << 8) | input[index + 1]);
     }
 };
 AlphaSynth.Util.WaveHelper = function (){

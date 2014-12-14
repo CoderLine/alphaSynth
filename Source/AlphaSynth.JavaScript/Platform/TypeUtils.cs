@@ -16,6 +16,8 @@
  * License along with this library.
  */
 
+using System;
+using SharpKit.Html;
 using SharpKit.JavaScript;
 
 namespace AlphaSynth.Platform
@@ -24,16 +26,18 @@ namespace AlphaSynth.Platform
     {
         public static readonly bool IsLittleEndian = true;
 
+        private static readonly Int16Array Int16 = new Int16Array(1);
+
         [JsMethod(InlineCodeExpression = "i")]
         public static uint ToUInt32(int i)
         {
             return (uint) i;
         }
 
-        [JsMethod(InlineCodeExpression = "((((i & 65535) >> 15) * ( -65536)) + (i & 65535))")]
         public static short ToInt16(int i)
         {
-            return (short) i;
+            Int16[0] = (short) i;
+            return Int16[0];
         }
 
         [JsMethod(InlineCodeExpression = "(i & 65535)")]
