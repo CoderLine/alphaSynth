@@ -4,7 +4,24 @@ alphaSynth is web based Midi Synthesizer written in C#. This library can load So
 
 For .net target platforms you can use your prefered audio library to play the samples. A sample for NAudio playback is included.
 
-For web platforms alphaSynth uses Web Workers and Web Audio API for playback. For Internet Explorer support alphaSynth uses a flash fallback for playing the audio. 
+For web platforms alphaSynth uses Web Workers and Web Audio API for playback. For Internet Explorer support, alphaSynth uses a flash fallback as audio output.
+
+**Online Demo** http://demo.alphatab.net/alphaSynth
+
+## Supported Browsers
+
+| Browser                       | Supported  | Used Technology 
+| ----------------------------- | ---------- | ---------------------------
+| Chrome  (v10+)                | Yes        | Web Workers + Web Audio Api
+| Firefox (v25+)                | Yes        | Web Workers + Web Audio Api
+| Opera   (v15+)                | Yes        | Web Workers + Web Audio Api
+| Safari  (v6+)                 | Yes        | Web Workers + Web Audio Api
+| Internet Explorer (v10+)      | Yes        | Web Workers + Flash Playback
+| Apple Mobile Safari (iOS6.0)  | Yes        | Web Workers + Web Audio Api
+| Chrome for Android  (v39+)    | Yes        | Web Workers + Web Audio Api
+| Opera Mobile (v24+)           | Yes        | Web Workers + Web Audio Api
+| Android Browser               | No         | No Web Audio Api and no Flash
+| IE Mobile                     | No         | No Web Audio Api and no Flash
 
 
 ## License
