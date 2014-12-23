@@ -190,9 +190,6 @@ namespace AlphaSynth.Main
             {
                 // responses
                 case "isReadyForPlay":
-                    _isWorkerReady = true;
-                    CheckForReadyState();
-                    break;
                 case "getState":
                 case "getMasterVolume":
                 case "isSoundFontLoaded":
@@ -202,7 +199,8 @@ namespace AlphaSynth.Main
 
                     // events
                 case "ready":
-                    TriggerEvent(cmd);
+                    _isWorkerReady = true;
+                    CheckForReadyState();
                     break;
                 case "positionChanged":
                     TriggerEvent(cmd, new[] { data.Member("currentTime"), data.Member("endTime"), data.Member("currentTick"), data.Member("endTick") });

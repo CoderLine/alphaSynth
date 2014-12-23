@@ -28,49 +28,47 @@ namespace AlphaSynth.Player
 {
     public class SynthPlayer
     {
-        private ISynthOutput _output;
-        private Synthesizer _synth;
-        private MidiFileSequencer _sequencer;
-        private SynthPlayerEventDispatcher _events;
+        public ISynthOutput Output { get; private set; }
+        public Synthesizer Synth { get; private set; }
+        public MidiFileSequencer Sequencer { get; private set; }
 
         public SynthPlayer()
         {
             Logger.Debug("Initializing player");
-            _events = new SynthPlayerEventDispatcher();
 
             State = SynthPlayerState.Stopped;
-            FirePlayerStateChanged();
+            OnPlayerStateChanged(new PlayerStateChangedEventArgs(State));
+
+            Logger.Debug("Creating synthesizer");
+            Synth = new Synthesizer(SynthConstants.SampleRate, 2, 441, 3, 100);
+            Sequencer = new MidiFileSequencer(Synth);
 
             Logger.Debug("Opening output");
-            _output = Platform.Platform.CreateOutput();
+            Output = Platform.Platform.CreateOutput(Synth);
+            Sequencer.AddFinishedListener(Output.SequencerFinished);
 
-            _output.Finished += () =>
+            Output.Finished += () =>
             {
                 // stop everything
                 Stop();
                 Logger.Debug("Finished playback");
-                _events.OnFinished();
+                OnFinished();
             };
-            _output.SampleRequest += () =>
+            Output.SampleRequest += () =>
             {
                 // synthesize buffer
-                _sequencer.FillMidiEventQueue();
-                _synth.Synthesize();
+                Sequencer.FillMidiEventQueue();
+                Synth.Synthesize();
                 // send it to output
-                _output.AddSamples(_synth.SampleBuffer);
+                Output.AddSamples(Synth.SampleBuffer);
             };
-            _output.PositionChanged += pos =>
+            Output.PositionChanged += pos =>
             {
                 // log position
                 FirePositionChanged(pos);
             };
 
-            Logger.Debug("Creating synthesizer");
-            _synth = new Synthesizer(SynthConstants.SampleRate, 2, 441, 3, 100);
-            _sequencer = new MidiFileSequencer(_synth);
-            _sequencer.AddFinishedListener(_output.SequencerFinished);
-
-            _output.Open();
+            Output.Open();
         }
 
         public SynthPlayerState State { get; private set; }
@@ -83,13 +81,13 @@ namespace AlphaSynth.Player
         public int TickPosition
         {
             get { return _tickPosition; }
-            set { TimePosition = _sequencer.TicksToMillis(value); }
+            set { TimePosition = Sequencer.TicksToMillis(value); }
         }
 
         public float MasterVolume
         {
-            get { return _synth.MasterVolume; }
-            set { _synth.MasterVolume = value; }
+            get { return Synth.MasterVolume; }
+            set { Synth.MasterVolume = value; }
         }
 
         public int TimePosition
@@ -100,15 +98,15 @@ namespace AlphaSynth.Player
                 Logger.Debug("Seeking to position " + value + "ms");
                 if (State == SynthPlayerState.Playing)
                 {
-                    _sequencer.Pause();
-                    _output.Pause();
+                    Sequencer.Pause();
+                    Output.Pause();
                 }
-                _sequencer.Seek(value);
-                _output.Seek(value);
+                Sequencer.Seek(value);
+                Output.Seek(value);
                 if (State == SynthPlayerState.Playing)
                 {
-                    _sequencer.Play();
-                    _output.Play();
+                    Sequencer.Play();
+                    Output.Play();
                 }
             }
         }
@@ -122,20 +120,20 @@ namespace AlphaSynth.Player
         {
             if (State == SynthPlayerState.Playing || !IsReady) return;
             Logger.Debug("Starting playback");
-            _sequencer.Play();
-            _output.Play();
+            Sequencer.Play();
+            Output.Play();
             State = SynthPlayerState.Playing;
-            FirePlayerStateChanged();
+            OnPlayerStateChanged(new PlayerStateChangedEventArgs(State));
         }
 
         public void Pause()
         {
             if (State != SynthPlayerState.Playing || !IsReady) return;
             Logger.Debug("Pausing playback");
-            _sequencer.Pause();
-            _output.Pause();
+            Sequencer.Pause();
+            Output.Pause();
             State = SynthPlayerState.Paused;
-            FirePlayerStateChanged();
+            OnPlayerStateChanged(new PlayerStateChangedEventArgs(State));
         }
 
         public void PlayPause()
@@ -148,11 +146,11 @@ namespace AlphaSynth.Player
         {
             if (State == SynthPlayerState.Stopped || !IsReady) return;
             Logger.Debug("Stopping playback");
-            _sequencer.Stop();
-            _synth.Stop();
-            _output.Stop();
+            Sequencer.Stop();
+            Synth.Stop();
+            Output.Stop();
             State = SynthPlayerState.Stopped;
-            FirePlayerStateChanged();
+            OnPlayerStateChanged(new PlayerStateChangedEventArgs(State));
             FirePositionChanged(0);
         }
 
@@ -184,18 +182,18 @@ namespace AlphaSynth.Player
                 Logger.Info("Loading soundfont from bytes");
                 var bank = new PatchBank();
                 bank.LoadSf2(input);
-                _synth.LoadBank(bank);
+                Synth.LoadBank(bank);
                 IsSoundFontLoaded = true;
-                _events.OnSoundFontLoaded();
+                OnSoundFontLoaded();
                 Logger.Info("soundFont successfully loaded");
-                if (IsReady) _events.OnReadyForPlay();
+                if (IsReady) OnReadyForPlay();
             }
             catch (Exception e)
             {
                 Logger.Error("Could not load soundfont from bytes " + e);
                 IsSoundFontLoaded = false;
-                _synth.UnloadBank();
-                _events.OnSoundFontLoadFailed();
+                Synth.UnloadBank();
+                OnSoundFontLoadFailed();
             }
         }
 
@@ -227,55 +225,155 @@ namespace AlphaSynth.Player
                 Logger.Info("Loading midi from bytes");
                 var midi = new MidiFile();
                 midi.Load(input);
-                _sequencer.LoadMidi(midi);
+                Sequencer.LoadMidi(midi);
                 IsMidiLoaded = true;
-                _events.OnMidiLoaded();
+                OnMidiLoaded();
                 Logger.Info("Midi successfully loaded");
-                if (IsReady) _events.OnReadyForPlay();
+                if (IsReady) OnReadyForPlay();
                 FirePositionChanged(0);
             }
             catch (Exception e)
             {
                 Logger.Error("Could not load midi from bytes " + e);
                 IsMidiLoaded = false;
-                _sequencer.UnloadMidi();
-                _events.OnMidiLoadFailed();
+                Sequencer.UnloadMidi();
+                OnMidiLoadFailed();
             }
         }
 
         private void OnSoundFontLoad(int loaded, int total)
         {
             Logger.Debug("Soundfont downloading: " + loaded + "/" + total + " bytes");
-            _events.OnSoundFontLoad(loaded, total);
+            OnSoundFontLoad(new ProgressEventArgs(loaded, total));
         }
 
         private void OnMidiLoad(int loaded, int total)
         {
             Logger.Debug("Midi downloading: " + loaded + "/" + total + " bytes");
-            _events.OnMidiLoad(loaded, total);
+            OnMidiLoad(new ProgressEventArgs(loaded, total));
         }
 
         private void FirePositionChanged(int pos)
         {
-            var endTime = (int)((_sequencer.EndTime / _synth.SampleRate) * 1000);
+            var endTime = (int)((Sequencer.EndTime / Synth.SampleRate) * 1000);
             var currentTime = pos;
-            var endTick = _sequencer.MillisToTicks(endTime);
-            var currentTick = _sequencer.MillisToTicks(currentTime);
+            var endTick = Sequencer.MillisToTicks(endTime);
+            var currentTick = Sequencer.MillisToTicks(currentTime);
 
             _tickPosition = currentTick;
             _timePosition = currentTime;
             Logger.Debug("Position changed: (time: " + currentTime + "/" + endTime + ", tick: " + currentTick + "/" + endTime + ")");
-            _events.OnPositionChanged(currentTime, endTime, currentTick, endTick);
+            OnPositionChanged(new PositionChangedEventArgs(currentTime, endTime, currentTick, endTick));
         }
 
-        private void FirePlayerStateChanged()
+
+        // int currentTime, int endTime, int currentTick, int endTick
+        public event EventHandler<PositionChangedEventArgs> PositionChanged;
+        protected virtual void OnPositionChanged(PositionChangedEventArgs e)
         {
-            _events.OnPlayerStateChanged(State);
+            EventHandler<PositionChangedEventArgs> handler = PositionChanged;
+            if (handler != null) handler(this, e);
         }
 
-        public void AddEventListener(ISynthPlayerListener listener)
+        public event EventHandler<PlayerStateChangedEventArgs> PlayerStateChanged;
+        protected virtual void OnPlayerStateChanged(PlayerStateChangedEventArgs e)
         {
-            _events.Add(listener);
+            EventHandler<PlayerStateChangedEventArgs> handler = PlayerStateChanged;
+            if (handler != null) handler(this, e);
+        }
+
+        public event EventHandler Finished;
+        protected virtual void OnFinished()
+        {
+            EventHandler handler = Finished;
+            if (handler != null) handler(this, EventArgs.Empty);
+        }
+
+        public event EventHandler<ProgressEventArgs> SoundFontLoad;
+        protected virtual void OnSoundFontLoad(ProgressEventArgs e)
+        {
+            EventHandler<ProgressEventArgs> handler = SoundFontLoad;
+            if (handler != null) handler(this, e);
+        }
+
+        public event EventHandler SoundFontLoaded;
+        protected virtual void OnSoundFontLoaded()
+        {
+            EventHandler handler = SoundFontLoaded;
+            if (handler != null) handler(this, EventArgs.Empty);
+        }
+
+        public event EventHandler SoundFontLoadFailed;
+        protected virtual void OnSoundFontLoadFailed()
+        {
+            EventHandler handler = SoundFontLoadFailed;
+            if (handler != null) handler(this, EventArgs.Empty);
+        }
+
+        public event EventHandler<ProgressEventArgs> MidiLoad;
+        protected virtual void OnMidiLoad(ProgressEventArgs e)
+        {
+            EventHandler<ProgressEventArgs> handler = MidiLoad;
+            if (handler != null) handler(this, e);
+        }
+
+        public event EventHandler MidiLoaded;
+        protected virtual void OnMidiLoaded()
+        {
+            EventHandler handler = MidiLoaded;
+            if (handler != null) handler(this, EventArgs.Empty);
+        }
+
+        public event EventHandler MidiLoadFailed;
+        protected virtual void OnMidiLoadFailed()
+        {
+            EventHandler handler = MidiLoadFailed;
+            if (handler != null) handler(this, EventArgs.Empty);
+        }
+
+        public event EventHandler ReadyForPlay;
+        protected virtual void OnReadyForPlay()
+        {
+            EventHandler handler = ReadyForPlay;
+            if (handler != null) handler(this, EventArgs.Empty);
+        }
+    }
+
+    public class ProgressEventArgs : EventArgs
+    {
+        public int Loaded { get; private set; }
+        public int Total { get; private set; }
+
+        public ProgressEventArgs(int loaded, int total)
+        {
+            Loaded = loaded;
+            Total = total;
+        }
+    }
+
+    public class PlayerStateChangedEventArgs : EventArgs
+    {
+        public SynthPlayerState State { get; private set; }
+
+        public PlayerStateChangedEventArgs(SynthPlayerState state)
+        {
+            State = state;
+        }
+    }
+
+    public class PositionChangedEventArgs : EventArgs
+    {
+        public int CurrentTime { get; private set; }
+        public int EndTime { get; private set; }
+        public int CurrentTick { get; private set; }
+        public int EndTick { get; private set; }
+
+        public PositionChangedEventArgs(int currentTime, int endTime, int currentTick, int endTick)
+        {
+            CurrentTime = currentTime;
+            EndTime = endTime;
+            CurrentTick = currentTick;
+            EndTick = endTick;
         }
     }
 }

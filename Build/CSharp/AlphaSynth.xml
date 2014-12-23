@@ -42,6 +42,12 @@
             </summary>
             <param name="millis">the millisecond position to jump at</param>
         </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynth.SetMasterVolume(System.Single)">
+            <summary>
+            Sets the master volume of the generated audio
+            </summary>
+            <param name="volume">the master volume from 0.0-3.0 (default 1.0)</param>
+        </member>
         <member name="M:AlphaSynth.Main.IAlphaSynth.LoadSoundFontUrl(System.String)">
             <summary>
             Loads a soundfont from the given url
@@ -83,6 +89,12 @@
             </summary>
             <returns>the current player state</returns>
         </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynthSync.GetMasterVolume">
+            <summary>
+            Returns the current master volume
+            </summary>
+            <returns>the current master volume</returns>
+        </member>
         <member name="M:AlphaSynth.Main.IAlphaSynthSync.IsSoundFontLoaded">
             <summary>
              Returns whether the soundfont was loaded and parsed
@@ -115,6 +127,11 @@
         <member name="M:AlphaSynth.Main.IAlphaSynthAsync.IsMidiLoaded">
             <summary>
              Returns whether the midi data was loaded and parsed
+            </summary>
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynthAsync.GetMasterVolume">
+            <summary>
+            Returns the current master volume
             </summary>
         </member>
         <member name="M:AlphaSynth.Main.IAlphaSynthAsync.On(System.String,System.Action)">
@@ -224,7 +241,7 @@
         </member>
         <member name="P:AlphaSynth.Synthesis.Synthesizer.MasterVolume">
             <summary>
-            Global volume control
+            The master volume 
             </summary>
         </member>
         <member name="P:AlphaSynth.Synthesis.Synthesizer.MixGain">

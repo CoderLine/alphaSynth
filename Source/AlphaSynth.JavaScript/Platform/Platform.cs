@@ -16,12 +16,13 @@
  * License along with this library.
  */
 using AlphaSynth.Player;
+using AlphaSynth.Synthesis;
 
 namespace AlphaSynth.Platform
 {
     public class Platform
     {
-        public static ISynthOutput CreateOutput()
+        public static ISynthOutput CreateOutput(Synthesizer synth)
         {
             return new WebWorkerOutput();
         }

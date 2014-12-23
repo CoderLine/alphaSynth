@@ -53,9 +53,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Midi\MidiHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Midi\MidiFile.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Player\SynthPlayerState.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Player\SynthPlayerEventDispatcher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Player\SynthPlayer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Player\ISynthPlayerListener.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Player\ISynthOutput.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Sequencer\MidiFileSequencer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Sf2\Chunks\ZoneChunk.cs" />

@@ -15,15 +15,19 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
+
+using System;
 using AlphaSynth.Player;
+using AlphaSynth.Synthesis;
 
 namespace AlphaSynth.Platform
 {
     public class Platform
     {
-        public static ISynthOutput CreateOutput()
+        public static Func<Synthesizer, ISynthOutput> OutputFactory { get; set; }
+        public static ISynthOutput CreateOutput(Synthesizer synth)
         {
-            return null;
+            return OutputFactory != null ? OutputFactory(synth) : null;
         }
     }
 }

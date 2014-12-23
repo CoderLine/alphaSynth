@@ -49,7 +49,7 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Reader.cs" />
-    <Compile Include="SynthWaveProvider.cs" />
+    <Compile Include="NAudioSynthOutput.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

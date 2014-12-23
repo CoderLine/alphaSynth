@@ -942,9 +942,6 @@ AlphaSynth.Main.AlphaSynthWebWorkerApiBase.prototype = {
         var cmd = data["cmd"];
         switch (cmd){
             case "isReadyForPlay":
-                this._isWorkerReady = true;
-                this.CheckForReadyState();
-                break;
             case "getState":
             case "getMasterVolume":
             case "isSoundFontLoaded":
@@ -952,7 +949,8 @@ AlphaSynth.Main.AlphaSynthWebWorkerApiBase.prototype = {
                 this.TriggerEvent(cmd, [data["value"]]);
                 break;
             case "ready":
-                this.TriggerEvent(cmd, null);
+                this._isWorkerReady = true;
+                this.CheckForReadyState();
                 break;
             case "positionChanged":
                 this.TriggerEvent(cmd, [data["currentTime"], data["endTime"], data["currentTick"], data["endTick"]]);

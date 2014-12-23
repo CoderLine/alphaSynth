@@ -21,22 +21,26 @@ namespace AlphaSynth.Ds
 {
     public class SampleArray
     {
-        private readonly float[] _samples;
+        public float[] Samples
+        {
+            get;
+            private set;
+        }
 
         public SampleArray(int length)
         {
-            _samples = new float[length];
+            Samples = new float[length];
         }
 
         public float this[int index]
         {
             get
             {
-                return _samples[index];
+                return Samples[index];
             }
             set
             {
-                _samples[index] = value;
+                Samples[index] = value;
             }
         }
 
@@ -44,18 +48,18 @@ namespace AlphaSynth.Ds
         {
             get
             {
-                return _samples.Length;
+                return Samples.Length;
             }
         }
 
         public void Clear()
         {
-            Array.Clear(_samples, 0, _samples.Length);
+            Array.Clear(Samples, 0, Samples.Length);
         }
 
         public static void Blit(SampleArray src, int srcPos, SampleArray dest, int destPos, int len)
         {
-            Array.Copy(src._samples, srcPos, dest._samples, destPos, len);
+            Array.Copy(src.Samples, srcPos, dest.Samples, destPos, len);
         }
     }
 }

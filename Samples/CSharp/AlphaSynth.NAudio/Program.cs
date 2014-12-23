@@ -1,12 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Forms;
-using AlphaSynth.Bank;
-using AlphaSynth.IO;
-using AlphaSynth.Midi;
-using AlphaSynth.Sequencer;
-using AlphaSynth.Synthesis;
-using NAudio.Wave;
+using AlphaSynth.Player;
 
 namespace AlphaSynth.NAudio
 {
@@ -24,19 +19,17 @@ namespace AlphaSynth.NAudio
             //
             // Midi
             Console.WriteLine("Opening Midi");
+            string midiFile;
             var dlg = new OpenFileDialog { Filter = "Midi Files (*.mid)|*.mid;*.midi" };
             if (dlg.ShowDialog() != DialogResult.OK)
             {
                 return;
             }
 
-            MidiFile file;
+            byte[] midiData;
             try
             {
-                var data = File.ReadAllBytes(dlg.FileName);
-                var input = ByteBuffer.FromBuffer(data);
-                file = new MidiFile();
-                file.Load(input);
+                midiData = File.ReadAllBytes(dlg.FileName);
             }
             catch (Exception e)
             {
@@ -53,14 +46,10 @@ namespace AlphaSynth.NAudio
                 return;
             }
 
-            PatchBank bank;
+            byte[] sf2Data;
             try
             {
-                var data = File.ReadAllBytes(dlg.FileName);
-                var input = ByteBuffer.FromBuffer(data);
-
-                bank = new PatchBank();
-                bank.LoadSf2(input);
+                sf2Data = File.ReadAllBytes(dlg.FileName);
             }
             catch (Exception e)
             {
@@ -70,33 +59,27 @@ namespace AlphaSynth.NAudio
 
             //
             // Creating Synth
-            Synthesizer synth;
-            MidiFileSequencer seq;
-            DirectSoundOut directSoundOut;
+            Platform.Platform.OutputFactory = synth => new NAudioSynthOutput(synth);
+            SynthPlayer player;
             try
             {
                 Console.WriteLine("Setup audio");
-                synth = new Synthesizer(44100, 2, 441, 3, 100);
-                seq = new MidiFileSequencer(synth);
-                directSoundOut = new DirectSoundOut(100);
-                SynthWaveProvider provider = new SynthWaveProvider(synth, seq);
-                provider.TimeUpdated += (s, e) =>
+                player = new SynthPlayer();
+                player.LoadMidiBytes(midiData);
+                player.LoadSoundFontBytes(sf2Data);
+                player.PositionChanged += (sender, args) =>
                 {
+                    TimeSpan currentTime = TimeSpan.FromMilliseconds(args.CurrentTime);
+                    TimeSpan endTime = TimeSpan.FromMilliseconds(args.EndTime);
+
                     Console.CursorTop--;
                     Console.Write("".PadLeft(Console.BufferWidth - 1, ' '));
                     Console.CursorLeft = 0;
                     Console.WriteLine("{0:mm\\:ss\\:fff} of {1:mm\\:ss\\:fff} (Tempo {2})",
-                        TimeSpan.FromSeconds(SynthHelper.TimeFromSamples(provider.Synth.SampleRate,
-                            provider.Sequencer.CurrentTime)),
-                        TimeSpan.FromSeconds(SynthHelper.TimeFromSamples(provider.Synth.SampleRate,
-                            provider.Sequencer.EndTime)),
-                        provider.Sequencer.CurrentTempo);
+                        currentTime, endTime, 
+                        player.Sequencer.CurrentTempo);
                 };
-                provider.Finished += (s, e) => directSoundOut.Stop();
-                directSoundOut.Init(provider);
-
-                seq.LoadMidi(file);
-                synth.LoadBank(bank);
+                player.Finished += (sender, args) => ((NAudioSynthOutput) player.Output).Close();
             }
             catch (Exception e)
             {
@@ -107,15 +90,15 @@ namespace AlphaSynth.NAudio
             //
             // Play
             Console.WriteLine("Start playing");
-            seq.Play();
-            directSoundOut.Play();
+            player.Play();
 
             Console.WriteLine("Press enter to exit");
-            while (directSoundOut.PlaybackState == PlaybackState.Playing)
+            while (player.State == SynthPlayerState.Playing)
             {
                 try
                 {
                     Reader.ReadLine(5000);
+                    player.Stop();
                 }
                 catch (Exception)
                 {
@@ -125,14 +108,7 @@ namespace AlphaSynth.NAudio
 
             // 
             // Cleanup
-            seq.Stop();
-            synth.NoteOffAll(true);
-            synth.ResetSynthControls();
-            synth.ResetPrograms();
-            directSoundOut.Stop();
-            directSoundOut.Dispose();
-            synth.UnloadBank();
-            seq.UnloadMidi();
+            player.Stop();
         }
     }
 }
