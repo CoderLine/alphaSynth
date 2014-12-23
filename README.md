@@ -1,10 +1,11 @@
 # alphaSynth
 
-alphaSynth is a Midi Synthesizer written in Haxe. Currently is alphaSynth a Flash Based synthesizer and requires at least Flash v11.4 installed on the client side. Future versions of alphaTab will try to use HTML5 WebWorkers and Web Audio API for generating and playing the audio. 
+alphaSynth is web based Midi Synthesizer written in C#. This library can load SoundFont2 and Midi Files and generate the raw audio samples needed for playback. 
 
-This library can load SoundFont2 and Midi Files and generate the raw audio samples needed for playback. 
+For .net target platforms you can use your prefered audio library to play the samples. A sample for NAudio playback is included.
 
-[![Build Status](https://travis-ci.org/CoderLine/alphaSynth.png?branch=master)](https://travis-ci.org/CoderLine/alphaSynth)
+For web platforms alphaSynth uses Web Workers and Web Audio API for playback. For Internet Explorer support alphaSynth uses a flash fallback for playing the audio. 
+
 
 ## License
 
@@ -23,4 +24,4 @@ This library can load SoundFont2 and Midi Files and generate the raw audio sampl
     You should have received a copy of the GNU Lesser General Public
     License along with this library.
 
-alphaSynth is a cleaned up port of the C# Synth Project (https://csharpsynthproject.codeplex.com/). 
+alphaSynth is a cleaned up port of the C# Synth Project (https://csharpsynthproject.codeplex.com/) which got optimized for targeting HTML5. 
