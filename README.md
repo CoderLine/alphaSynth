@@ -20,6 +20,7 @@ For web platforms alphaSynth uses Web Workers and Web Audio API for playback. Fo
 | Apple Mobile Safari (iOS6.0)  | Yes        | Web Workers + Web Audio Api
 | Chrome for Android  (v39+)    | Yes        | Web Workers + Web Audio Api
 | Opera Mobile (v24+)           | Yes        | Web Workers + Web Audio Api
+| Internet Explorer (<v10)      | No         | No Web Workers
 | Android Browser               | No         | No Web Audio Api and no Flash
 | IE Mobile                     | No         | No Web Audio Api and no Flash
 
