@@ -50,7 +50,18 @@ namespace AlphaSynth.Main
             _player.Open();
             // start worker
             _synth.addEventListener("message", HandleWorkerMessage, false);
-            _synth.postMessage(new { cmd = "playerReady", root = window.location.origin + _asRoot });
+
+            var root = new StringBuilder();
+            root.Append(window.location.protocol);
+            root.Append("//");
+            root.Append(window.location.hostname);
+            if (window.location.port.As<bool>())
+            {
+                root.Append(":");
+                root.Append(window.location.port);
+            }
+            root.Append(_asRoot);
+            _synth.postMessage(new { cmd = "playerReady", root = root.ToString() });
         }
 
         //

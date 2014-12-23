@@ -837,9 +837,18 @@ AlphaSynth.Main.AlphaSynthWebWorkerApiBase.prototype = {
         this._player.Open();
         // start worker
         this._synth.addEventListener("message", $CreateDelegate(this, this.HandleWorkerMessage), false);
+        var root = new Array();
+        root.push(window.location.protocol);
+        root.push("//");
+        root.push(window.location.hostname);
+        if (window.location.port){
+            root.push(":");
+            root.push(window.location.port);
+        }
+        root.push(this._asRoot);
         this._synth.postMessage({
             cmd: "playerReady",
-            root: window.location.origin + this._asRoot
+            root: root.join('')
         });
     },
     IsReadyForPlay: function (){
