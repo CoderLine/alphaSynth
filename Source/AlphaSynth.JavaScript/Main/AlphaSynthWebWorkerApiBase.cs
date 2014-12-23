@@ -41,38 +41,7 @@ namespace AlphaSynth.Main
             _asRoot = asRoot;
 
             // create web worker
-            string webWorkerSource =
-#if DEBUG
-                "debugger;\r\n" +
-#endif
-                    @"self.onmessage = function(e) {
-              if(e.data.cmd == ""playerReady"") {
-                importScripts(e.data.root + ""AlphaSynth.js"");
-            " +
-#if DEBUG
-                    "debugger;\r\n" +
-#endif
-                    @"    new AlphaSynth.Main.AlphaSynthWebWorker(self);
-              }
-            }";
-
-            string workerUrl;
-            try
-            {
-                workerUrl = JsCode(@"URL.createObjectURL(new Blob([webWorkerSource], { type: 'application/javascript' }))").As<string>();
-            }
-            catch
-            {
-                // Backwards-compatibility
-                workerUrl = JsCode(@"
-                window.BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder;
-                var builder = new BlobBuilder();
-                builder.append(webWorkerSource);
-                workerUrl = URL.createObjectURL(blob.getBlob());
-                ").As<string>();
-            }
-
-            _synth = new Worker(workerUrl);
+            _synth = new Worker(asRoot + "AlphaSynth.worker.js");
         }
 
         public void Startup()

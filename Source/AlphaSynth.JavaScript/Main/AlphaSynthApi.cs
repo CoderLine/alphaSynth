@@ -180,6 +180,11 @@ namespace AlphaSynth.Main
                 swfObjectRoot = window["SwfObjectRoot"].toString();
             }
 
+            if (string.IsNullOrEmpty(swfObjectRoot))
+            {
+                swfObjectRoot = asRoot;
+            }
+
             if (supportsWebAudio && !forceFlash)
             {
                 Logger.Info("Will use webworkers for synthesizing and web audio api for playback");

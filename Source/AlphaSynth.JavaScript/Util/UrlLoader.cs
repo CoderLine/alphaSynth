@@ -42,10 +42,13 @@ namespace AlphaSynth.Util
                     FireComplete(buffer);
                 }
             };
+            request.onerror = e =>
+            {
+                Logger.Error("Loading failed: " + e.message);
+            };
             request.onprogress = e =>
             {
-                var progressE = e;
-                FireProgress(progressE.loaded, progressE.total);
+                FireProgress(e.loaded, e.total);
             };
             request.send();
         }

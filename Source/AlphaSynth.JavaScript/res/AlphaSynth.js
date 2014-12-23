@@ -195,6 +195,9 @@ AlphaSynth.Main.AlphaSynthApi = function (asRoot, swfObjectRoot){
     if (swfObjectRoot == ""){
         swfObjectRoot = window["SwfObjectRoot"].toString();
     }
+    if (((swfObjectRoot==null)||(swfObjectRoot.length==0))){
+        swfObjectRoot = asRoot;
+    }
     if (supportsWebAudio && !forceFlash){
         AlphaSynth.Util.Logger.Info("Will use webworkers for synthesizing and web audio api for playback");
         this.RealInstance = new AlphaSynth.Main.AlphaSynthWebWorkerApi(asRoot);
@@ -826,21 +829,7 @@ AlphaSynth.Main.AlphaSynthWebWorkerApiBase = function (player, asRoot){
     }
     this._asRoot = asRoot;
     // create web worker
-    var webWorkerSource = "debugger;\r\nself.onmessage = function(e) {\r\n              if(e.data.cmd == \"playerReady\") {\r\n                importScripts(e.data.root + \"AlphaSynth.js\");\r\n            debugger;\r\n    new AlphaSynth.Main.AlphaSynthWebWorker(self);\r\n              }\r\n            }";
-    var workerUrl;
-    try{
-        workerUrl =  URL.createObjectURL(new Blob([webWorkerSource], { type: 'application/javascript' }));
-    }
-    catch($$e1){
-        // Backwards-compatibility
-        workerUrl =  
-                window.BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder;
-                var builder = new BlobBuilder();
-                builder.append(webWorkerSource);
-                workerUrl = URL.createObjectURL(blob.getBlob());
-                ;
-    }
-    this._synth = new Worker(workerUrl);
+    this._synth = new Worker(asRoot + "AlphaSynth.worker.js");
 };
 AlphaSynth.Main.AlphaSynthWebWorkerApiBase.prototype = {
     Startup: function (){
@@ -1335,9 +1324,11 @@ AlphaSynth.Util.UrlLoader.prototype = {
                 this.FireComplete(buffer);
             }
         });
+        request.onerror = $CreateAnonymousDelegate(this, function (e){
+            AlphaSynth.Util.Logger.Error("Loading failed: " + e.message);
+        });
         request.onprogress = $CreateAnonymousDelegate(this, function (e){
-            var progressE = e;
-            this.FireProgress(progressE.loaded, progressE.total);
+            this.FireProgress(e.loaded, e.total);
         });
         request.send();
     },
@@ -2580,11 +2571,11 @@ AlphaSynth.Bank.Patch.Sf2Patch.CalculateModulator = function (s, t, d, p, value,
             break;
         case AlphaSynth.Sf2.SourceTypeEnum.Concave:
             i = 127 - value;
-            output = -0.208333333333333 * Math.log10((i * i) / (max * max));
+            output = -0.208333333333333 * (Math.log((i * i) / (max * max))/Math.LN10);
             break;
         case AlphaSynth.Sf2.SourceTypeEnum.Convex:
             i = value;
-            output = 1 + (0.208333333333333) * Math.log10((i * i) / (max * max));
+            output = 1 + (0.208333333333333) * (Math.log((i * i) / (max * max))/Math.LN10);
             break;
         case AlphaSynth.Sf2.SourceTypeEnum.Switch:
             if (value <= ((max / 2) | 0))
@@ -5562,7 +5553,7 @@ AlphaSynth.Synthesis.SynthHelper.DBtoLinear = function (dBvalue){
     return Math.pow(10, (dBvalue / 20));
 };
 AlphaSynth.Synthesis.SynthHelper.LineartoDB = function (linearvalue){
-    return 20 * Math.log10(linearvalue);
+    return 20 * (Math.log(linearvalue)/Math.LN10);
 };
 AlphaSynth.Synthesis.SynthHelper.FrequencyToKey = function (frequency, rootkey){
     return 12 * Math.Log(frequency / 440, 2) + rootkey;

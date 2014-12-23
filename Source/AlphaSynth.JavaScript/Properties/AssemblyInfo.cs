@@ -79,7 +79,7 @@ using SharpKit.JavaScript;
 [assembly: JsMethod(TargetType = typeof(Math), TargetMethod = "Cos", Name = "cos")]
 [assembly: JsMethod(TargetType = typeof(Math), TargetMethod = "Tan", Name = "tan")]
 [assembly: JsMethod(TargetType = typeof(Math), TargetMethod = "Ceiling", Name = "ceil")]
-[assembly: JsMethod(TargetType = typeof(Math), TargetMethod = "Log10", Name = "log10")]
+[assembly: JsMethod(TargetType = typeof(Math), TargetMethod = "Log10", InlineCodeExpression = "(Math.log(d) / Math.LN10)")]
 
 [assembly: JsMethod(TargetType = typeof(string), TargetMethod = "IsNullOrEmpty", InlineCodeExpression = "((value == null) || (value.length == 0))")]
 [assembly: JsMethod(TargetType = typeof(string), TargetMethod = "StartsWith", InlineCodeExpression = "this.indexOf(value) == 0")]
