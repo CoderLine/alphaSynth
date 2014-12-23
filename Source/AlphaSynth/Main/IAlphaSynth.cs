@@ -55,6 +55,12 @@ namespace AlphaSynth.Main
         void SetPositionTime(int millis);
 
         /// <summary>
+        /// Sets the master volume of the generated audio
+        /// </summary>
+        /// <param name="volume">the master volume from 0.0-3.0 (default 1.0)</param>
+        void SetMasterVolume(float volume);
+
+        /// <summary>
         /// Loads a soundfont from the given url
         /// </summary>
         /// <param name="url">the url to load the soundfont from</param>

@@ -73,12 +73,12 @@ namespace AlphaSynth.Synthesis
         public int SampleRate { get; private set; }
 
         /// <summary>
-        /// Global volume control
+        /// The master volume 
         /// </summary>
         public float MasterVolume
         {
             get { return _masterVolume; }
-            set { _masterVolume = SynthHelper.ClampF(value, 0, 3); }
+            set { _masterVolume = SynthHelper.ClampF(value, 0, 10); }
         }
 
         /// <summary>
@@ -158,7 +158,6 @@ namespace AlphaSynth.Synthesis
         }
 
 
-
         public Synthesizer(int sampleRate, int audioChannels, int bufferSize, int bufferCount, int polyphony)
         {
             var MinSampleRate = 8000;
@@ -173,8 +172,8 @@ namespace AlphaSynth.Synthesis
             _midiMessageProcessed = new FastList<Action<MidiEvent>>();
             //
             // Setup synth parameters
-            _masterVolume = 1;
             _synthGain = 0.35f;
+            _masterVolume = 1;
 
             SampleRate = sampleRate;
             AudioChannels = audioChannels;
@@ -279,12 +278,6 @@ namespace AlphaSynth.Synthesis
             FillWorkingBuffer();
         }
 
-        public void GetNext(byte[] buffer)
-        {
-            Synthesize();
-            ConvertWorkingBuffer(buffer, SampleBuffer);
-        }
-
         public float GetChannelVolume(int channel)
         {
             return _synthChannels[channel].Volume.Combined / 16383f;
@@ -347,31 +340,6 @@ namespace AlphaSynth.Synthesis
                 sampleIndex += MicroBufferSize * AudioChannels;
             }
             TypeUtils.ClearIntArray(MidiEventCounts);
-        }
-
-        private void ConvertWorkingBuffer(byte[] to, SampleArray from)
-        {
-            var i = 0;
-            if (LittleEndian)
-            {
-                for (int x = 0; x < from.Length; x++)
-                {
-                    var s = TypeUtils.ToInt16((int)(SynthHelper.ClampF(from[x] * _masterVolume, -1.0f, 1.0f) * 32767));
-                    to[i] = (byte)(s & 0xFF);
-                    to[i + 1] = (byte)((s >> 8) & 0xFF);
-                    i += 2;
-                }
-            }
-            else
-            {
-                for (int x = 0; x < from.Length; x++)
-                {
-                    var s = TypeUtils.ToInt16((int)(SynthHelper.ClampF(from[x] * _masterVolume, -1.0f, 1.0f) * 32767));
-                    to[i] = (byte)((s >> 8) & 0xFF);
-                    to[i + 1] = (byte)(s & 0xFF);
-                    i += 2;
-                }
-            }
         }
 
         #region Midi Handling

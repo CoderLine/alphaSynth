@@ -35,9 +35,12 @@
     <Compile Include="Ds\FastDictionary.cs" />
     <Compile Include="Ds\FastList.cs" />
     <Compile Include="Main\AlphaSynthApi.cs" />
-    <Compile Include="Main\AlphaSynthWebAudioPlayer.cs" />
+    <Compile Include="Main\AlphaSynthFlashOutput.cs" />
+    <Compile Include="Main\AlphaSynthWebAudioOutput.cs" />
     <Compile Include="Main\AlphaSynthWebWorker.cs" />
+    <Compile Include="Main\AlphaSynthFlashPlayerApi.cs" />
     <Compile Include="Main\AlphaSynthWebWorkerApi.cs" />
+    <Compile Include="Main\AlphaSynthWebWorkerApiBase.cs" />
     <Compile Include="Platform\Platform.cs" />
     <Compile Include="Platform\Std.cs" />
     <Compile Include="Platform\TypeUtils.cs" />

@@ -43,12 +43,18 @@ namespace AlphaSynth.Main
             get { return false; }
         }
 
+        private static bool ForceFlash
+        {
+            [JsMethod(InlineCode = "!!window.ForceFlash", Export = false)]
+            get { return false; }
+        }
+
         public IAlphaSynthAsync RealInstance { get; set; }
         public bool Ready { get; set; }
 
         public void Startup()
         {
-            RealInstance.On("ready", () =>
+            RealInstance.On("readyForPlay", () =>
             {
                 Ready = true;
             });
@@ -59,6 +65,18 @@ namespace AlphaSynth.Main
         {
             if (RealInstance == null) return;
             RealInstance.IsReadyForPlay();
+        }
+
+        public void GetMasterVolume()
+        {
+            if (RealInstance == null) return;
+            RealInstance.GetMasterVolume();
+        }
+
+        public void SetMasterVolume(float volume)
+        {
+            if (RealInstance == null) return;
+            RealInstance.SetMasterVolume(volume);
         }
 
         public void GetState()
@@ -139,7 +157,7 @@ namespace AlphaSynth.Main
         {
             if (RealInstance == null) return;
             RealInstance.On(events, fn);
-            if (events == "ready" && Ready)
+            if (events == "readyForPlay" && Ready)
             {
                 fn();
             }
@@ -149,8 +167,8 @@ namespace AlphaSynth.Main
         {
             // var swf = SwfObject;
             var supportsWebAudio = SupportsWebAudio;
-            // var supportsWebWorkers = SupportsWebWorkers;
-            // var supportsFlashWorkers = ((Func<String, bool>)swf["hasFlashPlayerVersion"])("11.4");
+            var supportsWebWorkers = SupportsWebWorkers;
+            var forceFlash = ForceFlash;
 
             if (asRoot == "")
             {
@@ -159,19 +177,19 @@ namespace AlphaSynth.Main
 
             if (swfObjectRoot == "")
             {
-                asRoot = window["SwfObjectRoot"].toString();
+                swfObjectRoot = window["SwfObjectRoot"].toString();
             }
 
-            if (supportsWebAudio)
+            if (supportsWebAudio && !forceFlash)
             {
-                Logger.Debug("Will use webworkers for synthesizing and web audio api for playback");
+                Logger.Info("Will use webworkers for synthesizing and web audio api for playback");
                 RealInstance = new AlphaSynthWebWorkerApi(asRoot);
             }
-            //else if (supportsWebWorkers)
-            //{
-            //    Logger.Debug("Will use webworkers for synthesizing and flash for playback");
-            //    RealInstance = new AlphaSynthFlashPlayerApi(asRoot, swfObjectRoot);
-            //}
+            else if (supportsWebWorkers)
+            {
+                Logger.Info("Will use webworkers for synthesizing and flash for playback");
+                RealInstance = new AlphaSynthFlashPlayerApi(asRoot, swfObjectRoot);
+            }
             else
             {
                 Logger.Error("Incompatible browser");

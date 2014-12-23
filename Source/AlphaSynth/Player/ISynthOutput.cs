@@ -22,6 +22,8 @@ namespace AlphaSynth.Player
 {
     public interface ISynthOutput
     {
+        void Open();
+
         void SequencerFinished();
         void Play();
         void Pause();
@@ -29,6 +31,7 @@ namespace AlphaSynth.Player
         void AddSamples(SampleArray samples);
         void Seek(int position);
 
+        event Action<bool> ReadyChanged;
         event Action<int> PositionChanged;
         event Action Finished;
         event Action SampleRequest;

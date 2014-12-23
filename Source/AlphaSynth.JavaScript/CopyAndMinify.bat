@@ -1,4 +1,4 @@
-﻿@ECHO OFF
+@ECHO OFF
 set ProjectDir=%~1
 set SolutionDir=%~2
 

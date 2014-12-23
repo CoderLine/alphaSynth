@@ -61,6 +61,7 @@ using SharpKit.JavaScript;
 
 // Exclude Interfaces from exporting
 [assembly: JsType(Export = false, TargetType = typeof(IAlphaSynth))]
+[assembly: JsType(Export = false, TargetType = typeof(IFlashSynthOutput))]
 [assembly: JsType(Export = false, TargetType = typeof(IAlphaSynthAsync))]
 [assembly: JsType(Export = false, TargetType = typeof(IAlphaSynthSync))]
 [assembly: JsType(Export = false, TargetType = typeof(ISynthPlayerListener))]

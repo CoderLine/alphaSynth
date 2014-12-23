@@ -39,6 +39,12 @@ namespace AlphaSynth.Main
                 case "isReadyForPlay":
                     PostMessage(new { cmd = "isReadyForPlay", value = IsReadyForPlay() });
                     break;
+                case "getMasterVolume":
+                    PostMessage(new { cmd = "getMasterVolume", value = _player.MasterVolume });
+                    break;
+                case "setMasterVolume":
+                    _player.MasterVolume = data.Member("value").As<float>();
+                    break;
                 case "playPause":
                     PlayPause();
                     break;
@@ -154,6 +160,15 @@ namespace AlphaSynth.Main
             return _player.IsMidiLoaded;
         }
 
+        public float GetMasterVolume()
+        {
+            return _player.MasterVolume;
+        }
+
+        public void SetMasterVolume(float volume)
+        {
+            _player.MasterVolume = volume;
+        }
         //
         // Events
 

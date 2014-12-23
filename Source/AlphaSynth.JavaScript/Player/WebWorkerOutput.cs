@@ -15,11 +15,13 @@ namespace AlphaSynth.Player
 
         private WorkerContext _workerSelf;
 
-        public WebWorkerOutput()
+        public void Open()
         {
             Logger.Debug("Initializing webworker worker");
             _workerSelf = JsContext.JsCode("self").As<WorkerContext>();
             _workerSelf.addEventListener("message", HandleMessage, false);
+
+            OnReadyChanged(true);
         }
 
         private void HandleMessage(DOMEvent e)
@@ -64,6 +66,13 @@ namespace AlphaSynth.Player
         {
             Action handler = SampleRequest;
             if (handler != null) handler();
+        }
+
+        public event Action<bool> ReadyChanged;
+        protected virtual void OnReadyChanged(bool isReady)
+        {
+            Action<bool> handler = ReadyChanged;
+            if (handler != null) handler(isReady);
         }
 
         public void SequencerFinished()

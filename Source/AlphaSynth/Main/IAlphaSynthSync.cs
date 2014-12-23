@@ -37,6 +37,12 @@ namespace AlphaSynth.Main
         SynthPlayerState GetState();
 
         /// <summary>
+        /// Returns the current master volume
+        /// </summary>
+        /// <returns>the current master volume</returns>
+        float GetMasterVolume();
+
+        /// <summary>
         ///  Returns whether the soundfont was loaded and parsed
         /// </summary>
         /// <returns>true if the soundfont was loaded and parsed</returns>

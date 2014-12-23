@@ -69,6 +69,8 @@ namespace AlphaSynth.Player
             _synth = new Synthesizer(SynthConstants.SampleRate, 2, 441, 3, 100);
             _sequencer = new MidiFileSequencer(_synth);
             _sequencer.AddFinishedListener(_output.SequencerFinished);
+
+            _output.Open();
         }
 
         public SynthPlayerState State { get; private set; }
@@ -82,6 +84,12 @@ namespace AlphaSynth.Player
         {
             get { return _tickPosition; }
             set { TimePosition = _sequencer.TicksToMillis(value); }
+        }
+
+        public float MasterVolume
+        {
+            get { return _synth.MasterVolume; }
+            set { _synth.MasterVolume = value; }
         }
 
         public int TimePosition
@@ -224,6 +232,7 @@ namespace AlphaSynth.Player
                 _events.OnMidiLoaded();
                 Logger.Info("Midi successfully loaded");
                 if (IsReady) _events.OnReadyForPlay();
+                FirePositionChanged(0);
             }
             catch (Exception e)
             {

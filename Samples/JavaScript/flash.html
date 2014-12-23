@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>alphaSynth</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="lib/bootstrap-slider/css/bootstrap-slider.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">AlphaSynth</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li><a href="index.html">Simple Demo</a></li>
+            <li><a href="highQuality.html">High Quality</a></li>
+            <li class="active"><a href="flash.html">Flash Demo</a></li>
+          </ul>
+        </div><!--/.nav-collapse -->
+      </div>
+    </nav>
+
+    
+   <div class="container">
+        <h1>AlphaSynth Demo</h1>
+        <p class="lead">This demo forces the usage of flash for playback.</p>
+      
+        <label>Loading song</label>
+        <div class="progress">
+          <div id="midiLoad" class="progress-bar" role="progressbar" style="width: 0%;">
+            0%
+          </div>
+        </div>  
+      
+        <label>Loading audio data</label>
+        <div class="progress">
+          <div id="sfLoad" class="progress-bar" role="progressbar" style="width: 0%;">
+            0%
+          </div>
+        </div>  
+          
+        <div id="controls">
+            <button disabled="disabled" class="btn btn-lg btn-default glyphicon glyphicon-play" id="play"></button>
+            <button disabled="disabled" class="btn btn-lg btn-default glyphicon glyphicon-pause" id="pause"></button>
+            <button disabled="disabled" class="btn btn-lg btn-default glyphicon glyphicon-stop" id="stop"></button>
+            <input id="volumeSlider" data-slider-id='volumeSlider' type="text" data-slider-min="0" data-slider-max="5" data-slider-step="0.1" data-slider-value="1"/>
+        </div>
+        
+        <div id="positionContainer">
+            <strong id="positionLabel">00:00/03:00</strong>            
+        
+            <div class="progress">
+              <div id="position" class="progress-bar progress-bar-success" role="progressbar" style="width: 30%">
+              </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Initialize JavaScript -->   
+    <script>
+    window.ForceFlash = true;
+    </script>
+    <script type="text/javascript" src="../../Build/JavaScript/swfobject.js"></script>
+    <script type="text/javascript" src="../../Build/JavaScript/AlphaSynth.js"></script>
+    <script type="text/javascript" src="lib/bootstrap-slider/bootstrap-slider.min.js"></script>
+    <script>
+    var as = null;
+    try {
+        as = new AlphaSynth.Main.AlphaSynthApi('/Build/JavaScript/', '/Build/JavaScript/');
+        // load data
+        as.On('ready', function() {
+            // load default data
+            as.LoadSoundFontUrl('../data/default.sf2');
+            as.LoadMidiUrl('../data/Test2.mid');
+        });
+        as.On('soundFontLoad', function(loaded, full) {
+            var percent = (((loaded/full)*100)|0);
+            document.querySelector('#sfLoad').innerText = percent + '%';
+            document.querySelector('#sfLoad').style.width = percent + '%';
+        });
+        as.On('midiLoad', function(loaded, full) {
+            var percent = (((loaded/full)*100)|0);
+            document.querySelector('#midiLoad').innerText = percent + '%';
+            document.querySelector('#midiLoad').style.width = percent + '%';
+        });
+        
+        // init ui
+        document.querySelector('#play').onclick = function() {
+            as.Play();
+        };
+        document.querySelector('#pause').onclick = function() {
+            as.Pause();
+        };
+        document.querySelector('#stop').onclick = function() {
+            as.Stop();
+        };
+         
+        var slider = new Slider('#volumeSlider', {
+            formatter: function(value) {
+                return 'Volume: ' + value;
+            }
+        });
+        slider.on('slide', function(e) {
+            as.SetMasterVolume(e);
+        });
+                
+        as.On('readyForPlay', function(r) {
+            isReady = r;
+            updateControls();            
+        }); 
+        as.On('playerStateChanged', function(s) {
+            state = s;
+            updateControls();            
+        }); 
+        as.On('positionChanged', function(currentTime, endTime) {
+            updatePosition(currentTime, endTime);            
+        }); 
+        
+        var isReady = false;
+        var state = 0;
+        function updateControls() {
+            var play = document.querySelector('#play');
+            var pause = document.querySelector('#pause');
+            var stop = document.querySelector('#stop');
+            
+            play.setAttribute('disabled', 'disabled');
+            pause.setAttribute('disabled', 'disabled');
+            stop.setAttribute('disabled', 'disabled');
+            slider.disable();
+            if(isReady) {
+                slider.enable();
+                switch(state) {
+                    case 0:
+                    play.removeAttribute('disabled');
+                    break;
+                    case 1:
+                    pause.removeAttribute('disabled');
+                    stop.removeAttribute('disabled');
+                    break;
+                    case 2:
+                    play.removeAttribute('disabled');
+                    stop.removeAttribute('disabled');
+                    break;
+                }
+            }
+        }
+        updateControls();
+        
+        function pad(num, size) {
+            var s = "000000000" + num;
+            return s.substr(s.length-size);
+        }
+
+        function updatePosition(currentTime, endTime) {
+            var percent = (((currentTime/endTime)*100));
+
+            currentTime = (currentTime / 1000) | 0;
+            endTime = (endTime / 1000) | 0;
+            
+            var currentTimeMinutes = Math.floor(currentTime/60);
+            var currentTimeSeconds = currentTime - (currentTimeMinutes * 60);
+            
+            var endTimeMinutes = Math.floor(endTime/60);
+            var endTimeSeconds = endTime - (endTimeMinutes * 60);
+            
+            document.querySelector('#positionLabel').innerText = 
+                pad(currentTimeMinutes, 2) + ':' + pad(currentTimeSeconds, 2) + '/' +
+                pad(endTimeMinutes, 2) + ':' + pad(endTimeSeconds, 2)
+            ;
+                
+            document.querySelector('#position').style.width = percent.toFixed(2) + '%';
+        }
+        
+      
+    }
+    catch(e) {
+        alert('Error initializing AlphaSynth');
+        console.error(e);
+    }
+    </script>
+</body>
+</html>

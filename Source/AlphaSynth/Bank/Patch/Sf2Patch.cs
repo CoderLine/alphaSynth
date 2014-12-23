@@ -100,7 +100,7 @@ namespace AlphaSynth.Bank.Patch
             //--Base pitch calculation
             double basePitch = SynthHelper.CentsToPitch(voiceparams.PitchOffset + voiceparams.SynthParams.CurrentPitch)
                 * gen.Frequency / voiceparams.SynthParams.Synth.SampleRate;
-            float baseVolume = voiceparams.SynthParams.CurrentVolume * voiceparams.SynthParams.Synth.MixGain;
+            float baseVolume = voiceparams.SynthParams.Synth.MasterVolume * voiceparams.SynthParams.CurrentVolume * voiceparams.SynthParams.Synth.MixGain;
             //--Main Loop
             for (int x = startIndex; x < endIndex; x += SynthConstants.DefaultBlockSize * voiceparams.SynthParams.Synth.AudioChannels)
             {

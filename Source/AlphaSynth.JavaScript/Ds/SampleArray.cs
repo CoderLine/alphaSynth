@@ -15,6 +15,8 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
+
+using SharpKit.Html;
 using SharpKit.JavaScript;
 
 namespace AlphaSynth.Ds
@@ -41,6 +43,9 @@ namespace AlphaSynth.Ds
             }
         }
 
+        [JsProperty(Name = "buffer", NativeField = true)]
+        public extern ArrayBuffer Buffer { get; }
+        
         [JsProperty(Name = "length", Export = false)]
         public int Length
         {

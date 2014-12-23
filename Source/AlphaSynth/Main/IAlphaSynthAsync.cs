@@ -47,6 +47,11 @@ namespace AlphaSynth.Main
         void IsMidiLoaded();
 
         /// <summary>
+        /// Returns the current master volume
+        /// </summary>
+        void GetMasterVolume();
+
+        /// <summary>
         ///  Adds a new event listener to events
         /// </summary>
         void On(string events, Action fn);

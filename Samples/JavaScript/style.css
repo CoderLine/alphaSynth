@@ -1,0 +1,11 @@
+body {
+    padding-top:50px;
+}
+#positionContainer {
+    margin-top:1em;
+}
+
+#positionLabel {
+    float:right;
+    padding:0 10px;
+}
