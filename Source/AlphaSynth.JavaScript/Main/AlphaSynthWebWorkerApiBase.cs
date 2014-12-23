@@ -212,7 +212,7 @@ namespace AlphaSynth.Main
                     TriggerEvent(cmd);
                     break;
                 case "soundFontLoad":
-                    TriggerEvent(cmd, new[] { data.Member("loaded"), data.Member("full") });
+                    TriggerEvent(cmd, new[] { data.Member("loaded"), data.Member("total") });
                     break;
                 case "soundFontLoaded":
                     TriggerEvent(cmd);
@@ -221,7 +221,7 @@ namespace AlphaSynth.Main
                     TriggerEvent(cmd);
                     break;
                 case "midiLoad":
-                    TriggerEvent(cmd, new[] { data.Member("loaded"), data.Member("full") });
+                    TriggerEvent(cmd, new[] { data.Member("loaded"), data.Member("total") });
                     break;
                 case "midiFileLoaded":
                     TriggerEvent(cmd);
@@ -259,7 +259,7 @@ namespace AlphaSynth.Main
 
         private void CheckForReadyState()
         {
-            TriggerEvent("isReadyForPlay", new object[] { (_isWorkerReady && _isPlayerReady) });
+            TriggerEvent("ready", new object[] { (_isWorkerReady && _isPlayerReady) });
         }
 
         private void PlayerReadyChanged(bool isReady)

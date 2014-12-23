@@ -64,7 +64,6 @@ using SharpKit.JavaScript;
 [assembly: JsType(Export = false, TargetType = typeof(IFlashSynthOutput))]
 [assembly: JsType(Export = false, TargetType = typeof(IAlphaSynthAsync))]
 [assembly: JsType(Export = false, TargetType = typeof(IAlphaSynthSync))]
-[assembly: JsType(Export = false, TargetType = typeof(ISynthPlayerListener))]
 [assembly: JsType(Export = false, TargetType = typeof(ISynthOutput))]
 [assembly: JsType(Export = false, TargetType = typeof(IReadable))]
 [assembly: JsType(Export = false, TargetType = typeof(IWriteable))]

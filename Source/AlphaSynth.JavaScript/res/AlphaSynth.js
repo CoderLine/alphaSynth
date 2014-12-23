@@ -581,7 +581,16 @@ AlphaSynth.Main.AlphaSynthWebWorker = function (main){
     this._main = main;
     this._main.addEventListener("message", $CreateDelegate(this, this.HandleMessage), false);
     this._player = new AlphaSynth.Player.SynthPlayer();
-    this._player.AddEventListener(this);
+    this._player.add_PositionChanged($CreateDelegate(this, this.OnPositionChanged));
+    this._player.add_PlayerStateChanged($CreateDelegate(this, this.OnPlayerStateChanged));
+    this._player.add_Finished($CreateDelegate(this, this.OnFinished));
+    this._player.add_SoundFontLoad($CreateDelegate(this, this.OnSoundFontLoad));
+    this._player.add_SoundFontLoaded($CreateDelegate(this, this.OnSoundFontLoaded));
+    this._player.add_SoundFontLoadFailed($CreateDelegate(this, this.OnSoundFontLoadFailed));
+    this._player.add_MidiLoad($CreateDelegate(this, this.OnMidiLoad));
+    this._player.add_MidiLoaded($CreateDelegate(this, this.OnMidiLoaded));
+    this._player.add_MidiLoadFailed($CreateDelegate(this, this.OnMidiLoadFailed));
+    this._player.add_ReadyForPlay($CreateDelegate(this, this.OnReadyForPlay));
     this.OnReady();
 };
 AlphaSynth.Main.AlphaSynthWebWorker.prototype = {
@@ -716,70 +725,70 @@ AlphaSynth.Main.AlphaSynthWebWorker.prototype = {
 }
 );
     },
-    OnPositionChanged: function (currentTime, endTime, currentTick, endTick){
+    OnPositionChanged: function (sender, e){
         this._main.postMessage({
     cmd: "positionChanged",
-    currentTime: currentTime,
-    endTime: endTime,
-    currentTick: currentTick,
-    endTick: endTick
+    currentTime: e.CurrentTime,
+    endTime: e.EndTime,
+    currentTick: e.CurrentTick,
+    endTick: e.EndTick
 }
 );
     },
-    OnPlayerStateChanged: function (state){
+    OnPlayerStateChanged: function (sender, e){
         this._main.postMessage({
     cmd: "playerStateChanged",
-    state: state
+    state: e.State
 }
 );
     },
-    OnFinished: function (){
+    OnFinished: function (sender, e){
         this._main.postMessage({
     cmd: "finished"
 }
 );
     },
-    OnSoundFontLoad: function (loaded, full){
+    OnSoundFontLoad: function (sender, e){
         this._main.postMessage({
     cmd: "soundFontLoad",
-    loaded: loaded,
-    full: full
+    loaded: e.Loaded,
+    total: e.Total
 }
 );
     },
-    OnSoundFontLoaded: function (){
+    OnSoundFontLoaded: function (sender, e){
         this._main.postMessage({
     cmd: "soundFontLoaded"
 }
 );
     },
-    OnSoundFontLoadFailed: function (){
+    OnSoundFontLoadFailed: function (sender, e){
         this._main.postMessage({
     cmd: "soundFontLoadFailed"
 }
 );
     },
-    OnMidiLoad: function (loaded, full){
+    OnMidiLoad: function (sender, e){
         this._main.postMessage({
     cmd: "midiLoad",
-    loaded: loaded,
-    full: full
+    loaded: e.Loaded,
+    total: e.Total
 }
 );
     },
-    OnMidiLoaded: function (){
+    OnMidiLoaded: function (sender, e){
         this._main.postMessage({
     cmd: "midiFileLoaded"
 }
 );
     },
-    OnMidiLoadFailed: function (){
+    OnMidiLoadFailed: function (sender, e){
         this._main.postMessage({
     cmd: "midiFileLoadFailed"
 }
 );
     },
-    OnReadyForPlay: function (){
+    OnReadyForPlay: function (sender, e){
         this._main.postMessage({
     cmd: "readyForPlay",
     value: this.IsReadyForPlay()
@@ -962,7 +971,7 @@ AlphaSynth.Main.AlphaSynthWebWorkerApiBase.prototype = {
                 this.TriggerEvent(cmd, null);
                 break;
             case "soundFontLoad":
-                this.TriggerEvent(cmd, [data["loaded"], data["full"]]);
+                this.TriggerEvent(cmd, [data["loaded"], data["total"]]);
                 break;
             case "soundFontLoaded":
                 this.TriggerEvent(cmd, null);
@@ -971,7 +980,7 @@ AlphaSynth.Main.AlphaSynthWebWorkerApiBase.prototype = {
                 this.TriggerEvent(cmd, null);
                 break;
             case "midiLoad":
-                this.TriggerEvent(cmd, [data["loaded"], data["full"]]);
+                this.TriggerEvent(cmd, [data["loaded"], data["total"]]);
                 break;
             case "midiFileLoaded":
                 this.TriggerEvent(cmd, null);
@@ -1006,7 +1015,7 @@ AlphaSynth.Main.AlphaSynthWebWorkerApiBase.prototype = {
         }
     },
     CheckForReadyState: function (){
-        this.TriggerEvent("isReadyForPlay", [(this._isWorkerReady && this._isPlayerReady)]);
+        this.TriggerEvent("ready", [(this._isWorkerReady && this._isPlayerReady)]);
     },
     PlayerReadyChanged: function (isReady){
         this._isPlayerReady = isReady;
@@ -1082,7 +1091,7 @@ $Inherit(AlphaSynth.Main.AlphaSynthWebWorkerApi, AlphaSynth.Main.AlphaSynthWebWo
 AlphaSynth.Platform = AlphaSynth.Platform || {};
 AlphaSynth.Platform.Platform = function (){
 };
-AlphaSynth.Platform.Platform.CreateOutput = function (){
+AlphaSynth.Platform.Platform.CreateOutput = function (synth){
     return new AlphaSynth.Player.WebWorkerOutput();
 };
 AlphaSynth.Platform.Std = function (){
@@ -3898,116 +3907,65 @@ AlphaSynth.Player.SynthPlayerState = {
     Playing: 1,
     Paused: 2
 };
-AlphaSynth.Player.SynthPlayerEventDispatcher = function (){
-    this._listeners = null;
-    this._listeners = [];
-};
-AlphaSynth.Player.SynthPlayerEventDispatcher.prototype = {
-    OnPositionChanged: function (currentTime, endTime, currentTick, endTick){
-        for (var i = 0; i < this._listeners.length; i++){
-            this._listeners[i].OnPositionChanged(currentTime, endTime, currentTick, endTick);
-        }
-    },
-    OnPlayerStateChanged: function (state){
-        for (var i = 0; i < this._listeners.length; i++){
-            this._listeners[i].OnPlayerStateChanged(state);
-        }
-    },
-    OnFinished: function (){
-        for (var i = 0; i < this._listeners.length; i++){
-            this._listeners[i].OnFinished();
-        }
-    },
-    OnSoundFontLoad: function (loaded, full){
-        for (var i = 0; i < this._listeners.length; i++){
-            this._listeners[i].OnSoundFontLoad(loaded, full);
-        }
-    },
-    OnSoundFontLoaded: function (){
-        for (var i = 0; i < this._listeners.length; i++){
-            this._listeners[i].OnSoundFontLoaded();
-        }
-    },
-    OnSoundFontLoadFailed: function (){
-        for (var i = 0; i < this._listeners.length; i++){
-            this._listeners[i].OnSoundFontLoadFailed();
-        }
-    },
-    OnMidiLoad: function (loaded, full){
-        for (var i = 0; i < this._listeners.length; i++){
-            this._listeners[i].OnMidiLoad(loaded, full);
-        }
-    },
-    OnMidiLoaded: function (){
-        for (var i = 0; i < this._listeners.length; i++){
-            this._listeners[i].OnMidiLoaded();
-        }
-    },
-    OnMidiLoadFailed: function (){
-        for (var i = 0; i < this._listeners.length; i++){
-            this._listeners[i].OnMidiLoadFailed();
-        }
-    },
-    OnReadyForPlay: function (){
-        for (var i = 0; i < this._listeners.length; i++){
-            this._listeners[i].OnReadyForPlay();
-        }
-    },
-    Add: function (listener){
-        this._listeners.push(listener);
-    }
-};
 AlphaSynth.Player.SynthPlayer = function (){
-    this._output = null;
-    this._synth = null;
-    this._sequencer = null;
-    this._events = null;
     this._tickPosition = 0;
     this._timePosition = 0;
+    this.PositionChanged = null;
+    this.PlayerStateChanged = null;
+    this.Finished = null;
+    this.SoundFontLoad = null;
+    this.SoundFontLoaded = null;
+    this.SoundFontLoadFailed = null;
+    this.MidiLoad = null;
+    this.MidiLoaded = null;
+    this.MidiLoadFailed = null;
+    this.ReadyForPlay = null;
+    this.Output = null;
+    this.Synth = null;
+    this.Sequencer = null;
     this.State = AlphaSynth.Player.SynthPlayerState.Stopped;
     this.IsSoundFontLoaded = false;
     this.IsMidiLoaded = false;
     AlphaSynth.Util.Logger.Debug("Initializing player");
-    this._events = new AlphaSynth.Player.SynthPlayerEventDispatcher();
     this.State = AlphaSynth.Player.SynthPlayerState.Stopped;
-    this.FirePlayerStateChanged();
+    this.OnPlayerStateChanged(new AlphaSynth.Player.PlayerStateChangedEventArgs(this.State));
+    AlphaSynth.Util.Logger.Debug("Creating synthesizer");
+    this.Synth = new AlphaSynth.Synthesis.Synthesizer(44100, 2, 441, 3, 100);
+    this.Sequencer = new AlphaSynth.Sequencer.MidiFileSequencer(this.Synth);
     AlphaSynth.Util.Logger.Debug("Opening output");
-    this._output = AlphaSynth.Platform.Platform.CreateOutput();
-    this._output.add_Finished($CreateAnonymousDelegate(this, function (){
+    this.Output = AlphaSynth.Platform.Platform.CreateOutput(this.Synth);
+    this.Sequencer.AddFinishedListener($CreateDelegate(this.Output, this.Output.SequencerFinished));
+    this.Output.add_Finished($CreateAnonymousDelegate(this, function (){
         // stop everything
         this.Stop();
         AlphaSynth.Util.Logger.Debug("Finished playback");
-        this._events.OnFinished();
+        this.OnFinished();
     }));
-    this._output.add_SampleRequest($CreateAnonymousDelegate(this, function (){
+    this.Output.add_SampleRequest($CreateAnonymousDelegate(this, function (){
         // synthesize buffer
-        this._sequencer.FillMidiEventQueue();
-        this._synth.Synthesize();
+        this.Sequencer.FillMidiEventQueue();
+        this.Synth.Synthesize();
         // send it to output
-        this._output.AddSamples(this._synth.SampleBuffer);
+        this.Output.AddSamples(this.Synth.SampleBuffer);
     }));
-    this._output.add_PositionChanged($CreateAnonymousDelegate(this, function (pos){
+    this.Output.add_PositionChanged($CreateAnonymousDelegate(this, function (pos){
         // log position
         this.FirePositionChanged(pos);
     }));
-    AlphaSynth.Util.Logger.Debug("Creating synthesizer");
-    this._synth = new AlphaSynth.Synthesis.Synthesizer(44100, 2, 441, 3, 100);
-    this._sequencer = new AlphaSynth.Sequencer.MidiFileSequencer(this._synth);
-    this._sequencer.AddFinishedListener($CreateDelegate(this._output, this._output.SequencerFinished));
-    this._output.Open();
+    this.Output.Open();
 };
 AlphaSynth.Player.SynthPlayer.prototype = {
     get_TickPosition: function (){
         return this._tickPosition;
     },
     set_TickPosition: function (value){
-        this.set_TimePosition(this._sequencer.TicksToMillis(value));
+        this.set_TimePosition(this.Sequencer.TicksToMillis(value));
     },
     get_MasterVolume: function (){
-        return this._synth.get_MasterVolume();
+        return this.Synth.get_MasterVolume();
     },
     set_MasterVolume: function (value){
-        this._synth.set_MasterVolume(value);
+        this.Synth.set_MasterVolume(value);
     },
     get_TimePosition: function (){
         return this._timePosition;
@@ -4015,14 +3973,14 @@ AlphaSynth.Player.SynthPlayer.prototype = {
     set_TimePosition: function (value){
         AlphaSynth.Util.Logger.Debug("Seeking to position " + value + "ms");
         if (this.State == AlphaSynth.Player.SynthPlayerState.Playing){
-            this._sequencer.Pause();
-            this._output.Pause();
+            this.Sequencer.Pause();
+            this.Output.Pause();
         }
-        this._sequencer.Seek(value);
-        this._output.Seek(value);
+        this.Sequencer.Seek(value);
+        this.Output.Seek(value);
         if (this.State == AlphaSynth.Player.SynthPlayerState.Playing){
-            this._sequencer.Play();
-            this._output.Play();
+            this.Sequencer.Play();
+            this.Output.Play();
         }
     },
     get_IsReady: function (){
@@ -4032,19 +3990,19 @@ AlphaSynth.Player.SynthPlayer.prototype = {
         if (this.State == AlphaSynth.Player.SynthPlayerState.Playing || !this.get_IsReady())
             return;
         AlphaSynth.Util.Logger.Debug("Starting playback");
-        this._sequencer.Play();
-        this._output.Play();
+        this.Sequencer.Play();
+        this.Output.Play();
         this.State = AlphaSynth.Player.SynthPlayerState.Playing;
-        this.FirePlayerStateChanged();
+        this.OnPlayerStateChanged(new AlphaSynth.Player.PlayerStateChangedEventArgs(this.State));
     },
     Pause: function (){
         if (this.State != AlphaSynth.Player.SynthPlayerState.Playing || !this.get_IsReady())
             return;
         AlphaSynth.Util.Logger.Debug("Pausing playback");
-        this._sequencer.Pause();
-        this._output.Pause();
+        this.Sequencer.Pause();
+        this.Output.Pause();
         this.State = AlphaSynth.Player.SynthPlayerState.Paused;
-        this.FirePlayerStateChanged();
+        this.OnPlayerStateChanged(new AlphaSynth.Player.PlayerStateChangedEventArgs(this.State));
     },
     PlayPause: function (){
         if (this.State == AlphaSynth.Player.SynthPlayerState.Playing || !this.get_IsReady())
@@ -4056,11 +4014,11 @@ AlphaSynth.Player.SynthPlayer.prototype = {
         if (this.State == AlphaSynth.Player.SynthPlayerState.Stopped || !this.get_IsReady())
             return;
         AlphaSynth.Util.Logger.Debug("Stopping playback");
-        this._sequencer.Stop();
-        this._synth.Stop();
-        this._output.Stop();
+        this.Sequencer.Stop();
+        this.Synth.Stop();
+        this.Output.Stop();
         this.State = AlphaSynth.Player.SynthPlayerState.Stopped;
-        this.FirePlayerStateChanged();
+        this.OnPlayerStateChanged(new AlphaSynth.Player.PlayerStateChangedEventArgs(this.State));
         this.FirePositionChanged(0);
     },
     LoadSoundFontUrl: function (url){
@@ -4071,7 +4029,7 @@ AlphaSynth.Player.SynthPlayer.prototype = {
         loader.Url = url;
         loader.Method = "GET";
         loader.Complete = $CreateDelegate(this, this.LoadSoundFontBytes);
-        loader.Progress = $CreateDelegate(this, this.OnSoundFontLoad);
+        loader.Progress = $CreateDelegate(this, this.OnLoaderSoundFontLoad);
         try{
             loader.Load();
         }
@@ -4087,18 +4045,18 @@ AlphaSynth.Player.SynthPlayer.prototype = {
             AlphaSynth.Util.Logger.Info("Loading soundfont from bytes");
             var bank = new AlphaSynth.Bank.PatchBank();
             bank.LoadSf2(input);
-            this._synth.LoadBank(bank);
+            this.Synth.LoadBank(bank);
             this.IsSoundFontLoaded = true;
-            this._events.OnSoundFontLoaded();
+            this.OnSoundFontLoaded();
             AlphaSynth.Util.Logger.Info("soundFont successfully loaded");
             if (this.get_IsReady())
-                this._events.OnReadyForPlay();
+                this.OnReadyForPlay();
         }
         catch(e){
             AlphaSynth.Util.Logger.Error("Could not load soundfont from bytes " + e);
             this.IsSoundFontLoaded = false;
-            this._synth.UnloadBank();
-            this._events.OnSoundFontLoadFailed();
+            this.Synth.UnloadBank();
+            this.OnSoundFontLoadFailed();
         }
     },
     LoadMidiUrl: function (url){
@@ -4109,7 +4067,7 @@ AlphaSynth.Player.SynthPlayer.prototype = {
         loader.Url = url;
         loader.Method = "GET";
         loader.Complete = $CreateDelegate(this, this.LoadMidiBytes);
-        loader.Progress = $CreateDelegate(this, this.OnMidiLoad);
+        loader.Progress = $CreateDelegate(this, this.OnLoaderMidiLoad);
         try{
             loader.Load();
         }
@@ -4125,45 +4083,174 @@ AlphaSynth.Player.SynthPlayer.prototype = {
             AlphaSynth.Util.Logger.Info("Loading midi from bytes");
             var midi = new AlphaSynth.Midi.MidiFile();
             midi.Load(input);
-            this._sequencer.LoadMidi(midi);
+            this.Sequencer.LoadMidi(midi);
             this.IsMidiLoaded = true;
-            this._events.OnMidiLoaded();
+            this.OnMidiLoaded();
             AlphaSynth.Util.Logger.Info("Midi successfully loaded");
             if (this.get_IsReady())
-                this._events.OnReadyForPlay();
+                this.OnReadyForPlay();
             this.FirePositionChanged(0);
         }
         catch(e){
             AlphaSynth.Util.Logger.Error("Could not load midi from bytes " + e);
             this.IsMidiLoaded = false;
-            this._sequencer.UnloadMidi();
-            this._events.OnMidiLoadFailed();
+            this.Sequencer.UnloadMidi();
+            this.OnMidiLoadFailed();
         }
     },
-    OnSoundFontLoad: function (loaded, total){
+    OnLoaderSoundFontLoad: function (loaded, total){
         AlphaSynth.Util.Logger.Debug("Soundfont downloading: " + loaded + "/" + total + " bytes");
-        this._events.OnSoundFontLoad(loaded, total);
+        this.OnSoundFontLoad(new AlphaSynth.Player.ProgressEventArgs(loaded, total));
     },
-    OnMidiLoad: function (loaded, total){
+    OnLoaderMidiLoad: function (loaded, total){
         AlphaSynth.Util.Logger.Debug("Midi downloading: " + loaded + "/" + total + " bytes");
-        this._events.OnMidiLoad(loaded, total);
+        this.OnMidiLoad(new AlphaSynth.Player.ProgressEventArgs(loaded, total));
     },
     FirePositionChanged: function (pos){
-        var endTime = (((this._sequencer.EndTime / this._synth.SampleRate) | 0) * 1000);
+        var endTime = (((this.Sequencer.EndTime / this.Synth.SampleRate) | 0) * 1000);
         var currentTime = pos;
-        var endTick = this._sequencer.MillisToTicks(endTime);
-        var currentTick = this._sequencer.MillisToTicks(currentTime);
+        var endTick = this.Sequencer.MillisToTicks(endTime);
+        var currentTick = this.Sequencer.MillisToTicks(currentTime);
         this._tickPosition = currentTick;
         this._timePosition = currentTime;
         AlphaSynth.Util.Logger.Debug("Position changed: (time: " + currentTime + "/" + endTime + ", tick: " + currentTick + "/" + endTime + ")");
-        this._events.OnPositionChanged(currentTime, endTime, currentTick, endTick);
+        this.OnPositionChanged(new AlphaSynth.Player.PositionChangedEventArgs(currentTime, endTime, currentTick, endTick));
     },
-    FirePlayerStateChanged: function (){
-        this._events.OnPlayerStateChanged(this.State);
+    add_PositionChanged: function (value){
+        this.PositionChanged = $CombineDelegates(this.PositionChanged, value);
     },
-    AddEventListener: function (listener){
-        this._events.Add(listener);
+    remove_PositionChanged: function (value){
+        this.PositionChanged = $RemoveDelegate(this.PositionChanged, value);
+    },
+    OnPositionChanged: function (e){
+        var handler = this.PositionChanged;
+        if (handler != null)
+            handler(this, e);
+    },
+    add_PlayerStateChanged: function (value){
+        this.PlayerStateChanged = $CombineDelegates(this.PlayerStateChanged, value);
+    },
+    remove_PlayerStateChanged: function (value){
+        this.PlayerStateChanged = $RemoveDelegate(this.PlayerStateChanged, value);
+    },
+    OnPlayerStateChanged: function (e){
+        var handler = this.PlayerStateChanged;
+        if (handler != null)
+            handler(this, e);
+    },
+    add_Finished: function (value){
+        this.Finished = $CombineDelegates(this.Finished, value);
+    },
+    remove_Finished: function (value){
+        this.Finished = $RemoveDelegate(this.Finished, value);
+    },
+    OnFinished: function (){
+        var handler = this.Finished;
+        if (handler != null)
+            handler(this, AlphaSynth.Player.EmptyEventArgs.Instance);
+    },
+    add_SoundFontLoad: function (value){
+        this.SoundFontLoad = $CombineDelegates(this.SoundFontLoad, value);
+    },
+    remove_SoundFontLoad: function (value){
+        this.SoundFontLoad = $RemoveDelegate(this.SoundFontLoad, value);
+    },
+    OnSoundFontLoad: function (e){
+        var handler = this.SoundFontLoad;
+        if (handler != null)
+            handler(this, e);
+    },
+    add_SoundFontLoaded: function (value){
+        this.SoundFontLoaded = $CombineDelegates(this.SoundFontLoaded, value);
+    },
+    remove_SoundFontLoaded: function (value){
+        this.SoundFontLoaded = $RemoveDelegate(this.SoundFontLoaded, value);
+    },
+    OnSoundFontLoaded: function (){
+        var handler = this.SoundFontLoaded;
+        if (handler != null)
+            handler(this, AlphaSynth.Player.EmptyEventArgs.Instance);
+    },
+    add_SoundFontLoadFailed: function (value){
+        this.SoundFontLoadFailed = $CombineDelegates(this.SoundFontLoadFailed, value);
+    },
+    remove_SoundFontLoadFailed: function (value){
+        this.SoundFontLoadFailed = $RemoveDelegate(this.SoundFontLoadFailed, value);
+    },
+    OnSoundFontLoadFailed: function (){
+        var handler = this.SoundFontLoadFailed;
+        if (handler != null)
+            handler(this, AlphaSynth.Player.EmptyEventArgs.Instance);
+    },
+    add_MidiLoad: function (value){
+        this.MidiLoad = $CombineDelegates(this.MidiLoad, value);
+    },
+    remove_MidiLoad: function (value){
+        this.MidiLoad = $RemoveDelegate(this.MidiLoad, value);
+    },
+    OnMidiLoad: function (e){
+        var handler = this.MidiLoad;
+        if (handler != null)
+            handler(this, e);
+    },
+    add_MidiLoaded: function (value){
+        this.MidiLoaded = $CombineDelegates(this.MidiLoaded, value);
+    },
+    remove_MidiLoaded: function (value){
+        this.MidiLoaded = $RemoveDelegate(this.MidiLoaded, value);
+    },
+    OnMidiLoaded: function (){
+        var handler = this.MidiLoaded;
+        if (handler != null)
+            handler(this, AlphaSynth.Player.EmptyEventArgs.Instance);
+    },
+    add_MidiLoadFailed: function (value){
+        this.MidiLoadFailed = $CombineDelegates(this.MidiLoadFailed, value);
+    },
+    remove_MidiLoadFailed: function (value){
+        this.MidiLoadFailed = $RemoveDelegate(this.MidiLoadFailed, value);
+    },
+    OnMidiLoadFailed: function (){
+        var handler = this.MidiLoadFailed;
+        if (handler != null)
+            handler(this, AlphaSynth.Player.EmptyEventArgs.Instance);
+    },
+    add_ReadyForPlay: function (value){
+        this.ReadyForPlay = $CombineDelegates(this.ReadyForPlay, value);
+    },
+    remove_ReadyForPlay: function (value){
+        this.ReadyForPlay = $RemoveDelegate(this.ReadyForPlay, value);
+    },
+    OnReadyForPlay: function (){
+        var handler = this.ReadyForPlay;
+        if (handler != null)
+            handler(this, AlphaSynth.Player.EmptyEventArgs.Instance);
     }
+};
+AlphaSynth.Player.EmptyEventArgs = function (){
+};
+$StaticConstructor(function (){
+    AlphaSynth.Player.EmptyEventArgs.Instance = new AlphaSynth.Player.EmptyEventArgs();
+});
+AlphaSynth.Player.ProgressEventArgs = function (loaded, total){
+    this.Loaded = 0;
+    this.Total = 0;
+    this.Loaded = loaded;
+    this.Total = total;
+};
+AlphaSynth.Player.PlayerStateChangedEventArgs = function (state){
+    this.State = AlphaSynth.Player.SynthPlayerState.Stopped;
+    this.State = state;
+};
+AlphaSynth.Player.PositionChangedEventArgs = function (currentTime, endTime, currentTick, endTick){
+    this.CurrentTime = 0;
+    this.EndTime = 0;
+    this.CurrentTick = 0;
+    this.EndTick = 0;
+    this.CurrentTime = currentTime;
+    this.EndTime = endTime;
+    this.CurrentTick = currentTick;
+    this.EndTick = endTick;
 };
 AlphaSynth.Sequencer = AlphaSynth.Sequencer || {};
 AlphaSynth.Sequencer.MidiFileSequencer = function (synth){

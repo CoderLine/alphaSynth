@@ -1,4 +1,5 @@
-﻿using AlphaSynth.Player;
+﻿using System;
+using AlphaSynth.Player;
 using AlphaSynth.Util;
 using SharpKit.Html;
 using SharpKit.JavaScript;
@@ -9,7 +10,7 @@ namespace AlphaSynth.Main
     /// This class implements a HTML5 WebWorker based version of alphaSynth
     /// which can be controlled via WebWorker messages.
     /// </summary>
-    class AlphaSynthWebWorker : IAlphaSynthSync, ISynthPlayerListener
+    class AlphaSynthWebWorker : IAlphaSynthSync
     {
         private SynthPlayer _player;
         private SharpKit.Html.workers.WorkerContext _main;
@@ -20,7 +21,18 @@ namespace AlphaSynth.Main
             _main.addEventListener("message", HandleMessage, false);
 
             _player = new SynthPlayer();
-            _player.AddEventListener(this);
+
+            _player.PositionChanged += OnPositionChanged;
+            _player.PlayerStateChanged += OnPlayerStateChanged;
+            _player.Finished += OnFinished;
+            _player.SoundFontLoad += OnSoundFontLoad;
+            _player.SoundFontLoaded += OnSoundFontLoaded;
+            _player.SoundFontLoadFailed += OnSoundFontLoadFailed;
+            _player.MidiLoad += OnMidiLoad;
+            _player.MidiLoaded += OnMidiLoaded;
+            _player.MidiLoadFailed += OnMidiLoadFailed;
+            _player.ReadyForPlay += OnReadyForPlay;
+
             OnReady();
         }
 
@@ -177,28 +189,28 @@ namespace AlphaSynth.Main
             PostMessage(new { cmd = "ready" });
         }
 
-        public void OnPositionChanged(int currentTime, int endTime, int currentTick, int endTick)
+        public void OnPositionChanged(object sender, PositionChangedEventArgs e)
         {
             PostMessage(new
             {
                 cmd = "positionChanged",
-                currentTime = currentTime,
-                endTime = endTime,
-                currentTick = currentTick,
-                endTick = endTick
+                currentTime = e.CurrentTime,
+                endTime = e.EndTime,
+                currentTick = e.CurrentTick,
+                endTick = e.EndTick
             });
         }
 
-        public void OnPlayerStateChanged(SynthPlayerState state)
+        public void OnPlayerStateChanged(object sender, PlayerStateChangedEventArgs e)
         {
             PostMessage(new
             {
                 cmd = "playerStateChanged",
-                state = state
+                state = e.State
             });
         }
 
-        public void OnFinished()
+        public void OnFinished(object sender, EventArgs e)
         {
             PostMessage(new
             {
@@ -206,17 +218,17 @@ namespace AlphaSynth.Main
             });
         }
 
-        public void OnSoundFontLoad(int loaded, int full)
+        public void OnSoundFontLoad(object sender, ProgressEventArgs e)
         {
             PostMessage(new
             {
                 cmd = "soundFontLoad",
-                loaded = loaded,
-                full = full
+                loaded = e.Loaded,
+                total = e.Total
             });
         }
 
-        public void OnSoundFontLoaded()
+        public void OnSoundFontLoaded(object sender, EventArgs e)
         {
             PostMessage(new
             {
@@ -224,7 +236,7 @@ namespace AlphaSynth.Main
             });
         }
 
-        public void OnSoundFontLoadFailed()
+        public void OnSoundFontLoadFailed(object sender, EventArgs e)
         {
             PostMessage(new
             {
@@ -232,17 +244,17 @@ namespace AlphaSynth.Main
             });
         }
 
-        public void OnMidiLoad(int loaded, int full)
+        public void OnMidiLoad(object sender, ProgressEventArgs e)
         {
             PostMessage(new
             {
                 cmd = "midiLoad",
-                loaded = loaded,
-                full = full
+                loaded = e.Loaded,
+                total = e.Total
             });
         }
 
-        public void OnMidiLoaded()
+        public void OnMidiLoaded(object sender, EventArgs e)
         {
             PostMessage(new
             {
@@ -250,7 +262,7 @@ namespace AlphaSynth.Main
             });
         }
 
-        public void OnMidiLoadFailed()
+        public void OnMidiLoadFailed(object sender, EventArgs e)
         {
             PostMessage(new
             {
@@ -258,7 +270,7 @@ namespace AlphaSynth.Main
             });
         }
 
-        public void OnReadyForPlay()
+        public void OnReadyForPlay(object sender, EventArgs e)
         {
             PostMessage(new
             {

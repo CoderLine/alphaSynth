@@ -16,6 +16,7 @@
  * License along with this library.
  */
 using System;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using AlphaSynth.Bank;
 using AlphaSynth.IO;
@@ -162,7 +163,7 @@ namespace AlphaSynth.Player
             loader.Url = url;
             loader.Method = "GET";
             loader.Complete = LoadSoundFontBytes;
-            loader.Progress = OnSoundFontLoad;
+            loader.Progress = OnLoaderSoundFontLoad;
             try
             {
                 loader.Load();
@@ -205,7 +206,7 @@ namespace AlphaSynth.Player
             loader.Url = url;
             loader.Method = "GET";
             loader.Complete = LoadMidiBytes;
-            loader.Progress = OnMidiLoad;
+            loader.Progress = OnLoaderMidiLoad;
             try
             {
                 loader.Load();
@@ -241,13 +242,13 @@ namespace AlphaSynth.Player
             }
         }
 
-        private void OnSoundFontLoad(int loaded, int total)
+        private void OnLoaderSoundFontLoad(int loaded, int total)
         {
             Logger.Debug("Soundfont downloading: " + loaded + "/" + total + " bytes");
             OnSoundFontLoad(new ProgressEventArgs(loaded, total));
         }
 
-        private void OnMidiLoad(int loaded, int total)
+        private void OnLoaderMidiLoad(int loaded, int total)
         {
             Logger.Debug("Midi downloading: " + loaded + "/" + total + " bytes");
             OnMidiLoad(new ProgressEventArgs(loaded, total));
@@ -267,7 +268,6 @@ namespace AlphaSynth.Player
         }
 
 
-        // int currentTime, int endTime, int currentTick, int endTick
         public event EventHandler<PositionChangedEventArgs> PositionChanged;
         protected virtual void OnPositionChanged(PositionChangedEventArgs e)
         {
@@ -286,7 +286,7 @@ namespace AlphaSynth.Player
         protected virtual void OnFinished()
         {
             EventHandler handler = Finished;
-            if (handler != null) handler(this, EventArgs.Empty);
+            if (handler != null) handler(this, EmptyEventArgs.Instance);
         }
 
         public event EventHandler<ProgressEventArgs> SoundFontLoad;
@@ -300,14 +300,14 @@ namespace AlphaSynth.Player
         protected virtual void OnSoundFontLoaded()
         {
             EventHandler handler = SoundFontLoaded;
-            if (handler != null) handler(this, EventArgs.Empty);
+            if (handler != null) handler(this, EmptyEventArgs.Instance);
         }
 
         public event EventHandler SoundFontLoadFailed;
         protected virtual void OnSoundFontLoadFailed()
         {
             EventHandler handler = SoundFontLoadFailed;
-            if (handler != null) handler(this, EventArgs.Empty);
+            if (handler != null) handler(this, EmptyEventArgs.Instance);
         }
 
         public event EventHandler<ProgressEventArgs> MidiLoad;
@@ -321,21 +321,30 @@ namespace AlphaSynth.Player
         protected virtual void OnMidiLoaded()
         {
             EventHandler handler = MidiLoaded;
-            if (handler != null) handler(this, EventArgs.Empty);
+            if (handler != null) handler(this, EmptyEventArgs.Instance);
         }
 
         public event EventHandler MidiLoadFailed;
         protected virtual void OnMidiLoadFailed()
         {
             EventHandler handler = MidiLoadFailed;
-            if (handler != null) handler(this, EventArgs.Empty);
+            if (handler != null) handler(this, EmptyEventArgs.Instance);
         }
 
         public event EventHandler ReadyForPlay;
         protected virtual void OnReadyForPlay()
         {
             EventHandler handler = ReadyForPlay;
-            if (handler != null) handler(this, EventArgs.Empty);
+            if (handler != null) handler(this, EmptyEventArgs.Instance);
+        }
+    }
+
+    public class EmptyEventArgs : EventArgs
+    {
+        public static readonly EmptyEventArgs Instance = new EmptyEventArgs();
+        private EmptyEventArgs()
+        {
+
         }
     }
 
