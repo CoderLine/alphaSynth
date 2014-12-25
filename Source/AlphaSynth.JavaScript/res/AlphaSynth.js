@@ -185,6 +185,7 @@ AlphaSynth.Main = AlphaSynth.Main || {};
 AlphaSynth.Main.AlphaSynthApi = function (asRoot, swfObjectRoot){
     this.RealInstance = null;
     this.Ready = false;
+    this.ReadyForPlay = false;
     // var swf = SwfObject;
     var supportsWebAudio = !!window.ScriptProcessorNode;
     var supportsWebWorkers = !!window.Worker;
@@ -214,8 +215,11 @@ AlphaSynth.Main.AlphaSynthApi = function (asRoot, swfObjectRoot){
 };
 AlphaSynth.Main.AlphaSynthApi.prototype = {
     Startup: function (){
-        this.RealInstance.On("readyForPlay", $CreateAnonymousDelegate(this, function (){
+        this.RealInstance.On("ready", $CreateAnonymousDelegate(this, function (){
             this.Ready = true;
+        }));
+        this.RealInstance.On("readyForPlay", $CreateAnonymousDelegate(this, function (){
+            this.ReadyForPlay = true;
         }));
         this.RealInstance.Startup();
     },
@@ -896,7 +900,7 @@ AlphaSynth.Main.AlphaSynthWebWorkerApiBase.prototype = {
     },
     LoadSoundFontBytes: function (data){
         this._synth.postMessage({
-            cmd: "loadSoundFontData",
+            cmd: "loadSoundFontBytes",
             data: data
         });
     },
@@ -908,7 +912,7 @@ AlphaSynth.Main.AlphaSynthWebWorkerApiBase.prototype = {
     },
     LoadMidiBytes: function (data){
         this._synth.postMessage({
-            cmd: "loadMidiData",
+            cmd: "loadMidiBytes",
             data: data
         });
     },

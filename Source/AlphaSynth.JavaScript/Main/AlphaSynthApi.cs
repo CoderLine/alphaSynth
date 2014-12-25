@@ -51,12 +51,17 @@ namespace AlphaSynth.Main
 
         public IAlphaSynthAsync RealInstance { get; set; }
         public bool Ready { get; set; }
+        public bool ReadyForPlay { get; set; }
 
         public void Startup()
         {
-            RealInstance.On("readyForPlay", () =>
+            RealInstance.On("ready", () =>
             {
                 Ready = true;
+            });
+            RealInstance.On("readyForPlay", () =>
+            {
+                ReadyForPlay = true;
             });
             RealInstance.Startup();
         }

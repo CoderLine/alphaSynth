@@ -109,7 +109,7 @@ namespace AlphaSynth.Main
 
         public void LoadSoundFontBytes(byte[] data)
         {
-            _synth.postMessage(new { cmd = "loadSoundFontData", data = data });
+            _synth.postMessage(new { cmd = "loadSoundFontBytes", data = data });
         }
 
         public void LoadMidiUrl(string url)
@@ -119,7 +119,7 @@ namespace AlphaSynth.Main
 
         public void LoadMidiBytes(byte[] data)
         {
-            _synth.postMessage(new { cmd = "loadMidiData", data = data });
+            _synth.postMessage(new { cmd = "loadMidiBytes", data = data });
         }
 
         public void GetState()
