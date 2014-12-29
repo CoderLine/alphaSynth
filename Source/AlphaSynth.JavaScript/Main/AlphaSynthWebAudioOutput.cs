@@ -60,6 +60,7 @@ namespace AlphaSynth.Main
             if (_seekTime != null)
             {
                 _startTime = (int)(_context.currentTime * 1000 - _seekTime.Value);
+                _seekTime = null;
                 _pauseTime = 0;
                 _paused = false;
             }
@@ -97,6 +98,7 @@ namespace AlphaSynth.Main
         {
             _finished = true;
             _paused = false;
+            _seekTime = null;
             if (_source != null)
             {
                 _source.stop(0);
