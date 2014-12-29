@@ -27,6 +27,8 @@ namespace AlphaSynth.Main
 
         private bool _finished;
 
+        private int? _seekTime;
+
         private int _startTime;
         private int _pauseStart;
         private int _pauseTime;
@@ -55,7 +57,13 @@ namespace AlphaSynth.Main
         {
             RequestBuffers();
             _finished = false;
-            if (_paused)
+            if (_seekTime != null)
+            {
+                _startTime = (int)(_context.currentTime * 1000 - _seekTime.Value);
+                _pauseTime = 0;
+                _paused = false;
+            }
+            else if (_paused)
             {
                 _paused = false;
                 _pauseTime += (int)(_context.currentTime * 1000 - _pauseStart);
@@ -100,8 +108,7 @@ namespace AlphaSynth.Main
 
         public void Seek(int position)
         {
-            _startTime = (int)(_context.currentTime * 1000 - position);
-            _pauseTime = 0;
+            _seekTime = position;
         }
 
         public void SequencerFinished()
