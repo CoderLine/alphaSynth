@@ -18,16 +18,15 @@
 
 using System;
 using AlphaSynth.Player;
-using AlphaSynth.Synthesis;
 
 namespace AlphaSynth.Platform
 {
     public class Platform
     {
-        public static Func<Synthesizer, ISynthOutput> OutputFactory { get; set; }
-        public static ISynthOutput CreateOutput(Synthesizer synth)
+        public static Func<ISynthOutput> OutputFactory { get; set; }
+        public static ISynthOutput CreateOutput()
         {
-            return OutputFactory != null ? OutputFactory(synth) : null;
+            return OutputFactory != null ? OutputFactory() : null;
         }
     }
 }

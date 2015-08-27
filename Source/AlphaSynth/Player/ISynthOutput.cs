@@ -30,6 +30,8 @@ namespace AlphaSynth.Player
         void Stop();
         void AddSamples(SampleArray samples);
         void Seek(int position);
+        
+        int SampleRate { get; }
 
         event Action<bool> ReadyChanged;
         event Action<int> PositionChanged;

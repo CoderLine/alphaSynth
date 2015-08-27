@@ -22,7 +22,7 @@ namespace AlphaSynth.Platform
 {
     public class Platform
     {
-        public static ISynthOutput CreateOutput(Synthesizer synth)
+        public static ISynthOutput CreateOutput()
         {
             return new WebWorkerOutput();
         }

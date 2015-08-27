@@ -10,6 +10,67 @@
             The return values are provided directly as return value
             </summary>
         </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynthSync.IsReadyForPlay">
+            <summary>
+             Is ready for play
+            </summary>
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynthSync.GetState">
+            <summary>
+            Returns the current player state
+            </summary>
+            <returns>the current player state</returns>
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynthSync.GetMasterVolume">
+            <summary>
+            Returns the current master volume
+            </summary>
+            <returns>the current master volume</returns>
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynthSync.IsSoundFontLoaded">
+            <summary>
+             Returns whether the soundfont was loaded and parsed
+            </summary>
+            <returns>true if the soundfont was loaded and parsed</returns>
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynthSync.IsMidiLoaded">
+            <summary>
+             Returns whether the midi data was loaded and parsed
+            </summary>
+            <returns>true if the midi data was loaded and parsed</returns>
+        </member>
+        <member name="T:AlphaSynth.Main.IAlphaSynthAsync">
+            <summary>
+            Adds some getters to the IAlphaSynth interface. 
+            The return values are reported asynchronously via event.
+            </summary>
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynthAsync.IsReadyForPlay">
+            <summary>
+             Is ready for play
+            </summary>
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynthAsync.GetState">
+            <summary>
+             Returns the current player state
+            </summary>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:AlphaSynth.Main.IAlphaSynthAsync.IsSoundFontLoaded" -->
+        <member name="M:AlphaSynth.Main.IAlphaSynthAsync.IsMidiLoaded">
+            <summary>
+             Returns whether the midi data was loaded and parsed
+            </summary>
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynthAsync.GetMasterVolume">
+            <summary>
+            Returns the current master volume
+            </summary>
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynthAsync.On(System.String,System.Action)">
+            <summary>
+             Adds a new event listener to events
+            </summary>
+        </member>
         <member name="M:AlphaSynth.Main.IAlphaSynth.Play">
              <summary>
             Starts the playback if possible
@@ -78,75 +139,9 @@
             </summary>
             <param name="level">the logging level</param>
         </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynthSync.IsReadyForPlay">
-            <summary>
-             Is ready for play
-            </summary>
-        </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynthSync.GetState">
-            <summary>
-            Returns the current player state
-            </summary>
-            <returns>the current player state</returns>
-        </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynthSync.GetMasterVolume">
-            <summary>
-            Returns the current master volume
-            </summary>
-            <returns>the current master volume</returns>
-        </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynthSync.IsSoundFontLoaded">
-            <summary>
-             Returns whether the soundfont was loaded and parsed
-            </summary>
-            <returns>true if the soundfont was loaded and parsed</returns>
-        </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynthSync.IsMidiLoaded">
-            <summary>
-             Returns whether the midi data was loaded and parsed
-            </summary>
-            <returns>true if the midi data was loaded and parsed</returns>
-        </member>
-        <member name="T:AlphaSynth.Main.IAlphaSynthAsync">
-            <summary>
-            Adds some getters to the IAlphaSynth interface. 
-            The return values are reported asynchronously via event.
-            </summary>
-        </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynthAsync.IsReadyForPlay">
-            <summary>
-             Is ready for play
-            </summary>
-        </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynthAsync.GetState">
-            <summary>
-             Returns the current player state
-            </summary>
-        </member>
-        <!-- Badly formed XML comment ignored for member "M:AlphaSynth.Main.IAlphaSynthAsync.IsSoundFontLoaded" -->
-        <member name="M:AlphaSynth.Main.IAlphaSynthAsync.IsMidiLoaded">
-            <summary>
-             Returns whether the midi data was loaded and parsed
-            </summary>
-        </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynthAsync.GetMasterVolume">
-            <summary>
-            Returns the current master volume
-            </summary>
-        </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynthAsync.On(System.String,System.Action)">
-            <summary>
-             Adds a new event listener to events
-            </summary>
-        </member>
         <member name="T:AlphaSynth.Synthesis.SynthParameters">
             <summary>
             Parameters for a single synth channel including its program, bank, and cc list.
-            </summary>
-        </member>
-        <member name="M:AlphaSynth.Synthesis.SynthParameters.ResetControllers">
-            <summary>
-            Resets all of the channel's controllers to initial first power on values. Not the same as CC-121.
             </summary>
         </member>
         <member name="P:AlphaSynth.Synthesis.SynthParameters.Program">
@@ -222,6 +217,11 @@
         <member name="P:AlphaSynth.Synthesis.SynthParameters.Rpn">
             <summary>
             registered parameter number
+            </summary>
+        </member>
+        <member name="M:AlphaSynth.Synthesis.SynthParameters.ResetControllers">
+            <summary>
+            Resets all of the channel's controllers to initial first power on values. Not the same as CC-121.
             </summary>
         </member>
         <member name="P:AlphaSynth.Synthesis.Synthesizer.AudioChannels">

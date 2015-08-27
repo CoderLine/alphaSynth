@@ -21,6 +21,8 @@ namespace AlphaSynth.Main
 
     class AlphaSynthFlashOutput : HtmlContext, ISynthOutput
     {
+        public const int PreferredSampleRate = 44100;
+
         private readonly string _asRoot;
         private readonly string _swfObjectRoot;
         private const string Id = "alphaSynthFlashPlayer";
@@ -36,6 +38,11 @@ namespace AlphaSynth.Main
         private string _id;
         private string _swfId;
         private HtmlElement _swfContainer;
+
+        public int SampleRate
+        {
+            get { return PreferredSampleRate; }
+        }
 
         public AlphaSynthFlashOutput(string asRoot, string swfObjectRoot)
         {
@@ -61,9 +68,10 @@ namespace AlphaSynth.Main
                 _asRoot + "AlphaSynth.FlashOutput.swf",
                 _id, "1px", "1px", "9.0.0",
                 _swfObjectRoot + "expressInstall.swf",
-                new { id = _id, sampleRate = SynthConstants.SampleRate }, new { allowScriptAccess = "always" }, new { id = _swfId }
+                new { id = _id, sampleRate = PreferredSampleRate }, new { allowScriptAccess = "always" }, new { id = _swfId }
             );
         }
+
 
         public void SequencerFinished()
         {

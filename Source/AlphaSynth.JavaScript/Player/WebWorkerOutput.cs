@@ -9,11 +9,21 @@ namespace AlphaSynth.Player
 {
     class WebWorkerOutput : ISynthOutput
     {
+        // this value is initialized by the alphaSynth WebWorker wrapper 
+        // that also includes the alphaSynth library into the worker. 
+        public static int PreferredSampleRate { get; set; }
+
         private Action<int> _positionChangedListeners;
         private Action _finishedListeners;
         private Action _sampleRequestListeners;
 
         private WorkerContext _workerSelf;
+        private int _sampleRate;
+
+        public int SampleRate
+        {
+            get { return PreferredSampleRate; }
+        }
 
         public void Open()
         {

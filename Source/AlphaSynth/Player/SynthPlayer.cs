@@ -40,12 +40,13 @@ namespace AlphaSynth.Player
             State = SynthPlayerState.Stopped;
             OnPlayerStateChanged(new PlayerStateChangedEventArgs(State));
 
+            Logger.Debug("Opening output");
+            Output = Platform.Platform.CreateOutput();
+
             Logger.Debug("Creating synthesizer");
-            Synth = new Synthesizer(SynthConstants.SampleRate, 2, 441, 3, 100);
+            Synth = new Synthesizer(Output.SampleRate, SynthConstants.AudioChannels, 441, 3, 100);
             Sequencer = new MidiFileSequencer(Synth);
 
-            Logger.Debug("Opening output");
-            Output = Platform.Platform.CreateOutput(Synth);
             Sequencer.AddFinishedListener(Output.SequencerFinished);
 
             Output.Finished += () =>

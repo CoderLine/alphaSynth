@@ -61,7 +61,7 @@ namespace AlphaSynth.Main
                 root.Append(window.location.port);
             }
             root.Append(_asRoot);
-            _synth.postMessage(new { cmd = "playerReady", root = root.ToString() });
+            _synth.postMessage(new { cmd = "playerReady", root = root.ToString(), sampleRate = _player.SampleRate });
         }
 
         //

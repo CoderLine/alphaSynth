@@ -59,7 +59,7 @@ namespace AlphaSynth.NAudio
 
             //
             // Creating Synth
-            Platform.Platform.OutputFactory = synth => new NAudioSynthOutput(synth);
+            Platform.Platform.OutputFactory = () => new NAudioSynthOutput();
             SynthPlayer player;
             try
             {

@@ -10,8 +10,8 @@ namespace AlphaSynth.NAudio
     class NAudioSynthOutput : WaveProvider32, ISynthOutput
     {
         private const int BufferSize = 4096;
-        private const float Latency = (BufferSize * 1000) / (2 * SynthConstants.SampleRate);
         private const int BufferCount = 10;
+        private const int PreferredSampleRate = 44100;
 
         private DirectSoundOut _context;
 
@@ -23,10 +23,17 @@ namespace AlphaSynth.NAudio
         private int _pauseStart;
         private int _pauseTime;
         private bool _paused;
+        private readonly double _latency;
 
-        public NAudioSynthOutput(Synthesizer synth)
-            : base(synth.SampleRate, synth.AudioChannels)
+        public int SampleRate
         {
+            get { return PreferredSampleRate; }
+        }
+
+        public NAudioSynthOutput()
+            : base(PreferredSampleRate, SynthConstants.AudioChannels)
+        {
+            _latency = (BufferSize * 1000) / (2.0 * WaveFormat.SampleRate);
         }
 
         public void Open()
@@ -61,7 +68,7 @@ namespace AlphaSynth.NAudio
                 _startTime = (int)(_context.PlaybackPosition.TotalSeconds * 1000);
                 _pauseTime = 0;
             }
-            
+
             _context.Play();
         }
 
@@ -112,7 +119,7 @@ namespace AlphaSynth.NAudio
 
         private double CalcPosition()
         {
-            return (_context.PlaybackPosition.TotalSeconds * 1000 - _startTime - _pauseTime - Latency);
+            return (_context.PlaybackPosition.TotalSeconds * 1000 - _startTime - _pauseTime - _latency);
         }
 
         public override int Read(float[] buffer, int offset, int count)
@@ -127,7 +134,7 @@ namespace AlphaSynth.NAudio
                 else
                 {
                     // when buffering we count it as pause time
-                    _pauseTime += (BufferSize * 1000) / (2 * SynthConstants.SampleRate);
+                    _pauseTime += (BufferSize * 1000) / (2 * WaveFormat.SampleRate);
                 }
             }
             else

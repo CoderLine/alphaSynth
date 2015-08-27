@@ -23,7 +23,7 @@ namespace AlphaSynth.Util
     {
         public const Interpolation InterpolationMode = Interpolation.Linear;
 
-        public const int SampleRate = 44100;
+        public const int AudioChannels = 2;
 
         public const double Pi = 3.14159265358979;
         public const double TwoPi = 2.0*Pi;

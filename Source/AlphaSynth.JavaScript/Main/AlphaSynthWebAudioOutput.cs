@@ -15,7 +15,6 @@ namespace AlphaSynth.Main
     class AlphaSynthWebAudioOutput : ISynthOutput
     {
         private const int BufferSize = 4096;
-        private const float Latency = (BufferSize * 1000) / (2 * SynthConstants.SampleRate);
         private const int BufferCount = 10;
 
         private AudioContext _context;
@@ -33,6 +32,12 @@ namespace AlphaSynth.Main
         private int _pauseStart;
         private int _pauseTime;
         private bool _paused;
+        private double _latency;
+
+        public int SampleRate
+        {
+            get { return (int)_context.sampleRate; }
+        }
 
         public void Open()
         {
@@ -43,8 +48,10 @@ namespace AlphaSynth.Main
             JsContext.JsCode("window.AudioContext = window.AudioContext || window.webkitAudioContext");
             _context = new AudioContext();
 
+            _latency = (BufferSize * 1000) / (2 * _context.sampleRate);
+
             // create an empty buffer source (silence)
-            _buffer = _context.createBuffer(2, BufferSize, SynthConstants.SampleRate);
+            _buffer = _context.createBuffer(2, BufferSize, _context.sampleRate);
 
             // create a script processor node which will replace the silence with the generated audio
             _audioNode = _context.createScriptProcessor(BufferSize, 0, 2);
@@ -139,7 +146,7 @@ namespace AlphaSynth.Main
 
         private double CalcPosition()
         {
-            return (_context.currentTime * 1000 - _startTime - _pauseTime - Latency);
+            return (_context.currentTime * 1000 - _startTime - _pauseTime - _latency);
         }
 
         private void GenerateSound(DOMEvent e)
@@ -158,7 +165,7 @@ namespace AlphaSynth.Main
                 else
                 {
                     // when buffering we count it as pause time
-                    _pauseTime += (BufferSize * 1000) / (2 * SynthConstants.SampleRate);
+                    _pauseTime += (int)((BufferSize * 1000) / (2 * _context.sampleRate));
                 }
             }
             else
