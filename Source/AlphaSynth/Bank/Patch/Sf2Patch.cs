@@ -128,6 +128,7 @@ namespace AlphaSynth.Bank.Patch
                 }
                 //--Volume calculation
                 float volume = (float)SynthHelper.DBtoLinear(voiceparams.VolOffset + voiceparams.Envelopes[1].Value + voiceparams.Lfos[0].Value * modLfoToVolume) * baseVolume;
+
                 //--Mix block based on number of channels
                 if (voiceparams.SynthParams.Synth.AudioChannels == 2)
                     voiceparams.MixMonoToStereoInterp(x,

@@ -6,8 +6,8 @@
     /// </summary>
     class AlphaSynthWebWorkerApi : AlphaSynthWebWorkerApiBase
     {
-        public AlphaSynthWebWorkerApi(string asRoot)
-            : base(new AlphaSynthWebAudioOutput(), asRoot)
+        public AlphaSynthWebWorkerApi(string alphaSynthScriptFile)
+            : base(new AlphaSynthWebAudioOutput(), alphaSynthScriptFile)
         {
         }
     }

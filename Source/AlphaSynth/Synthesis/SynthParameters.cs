@@ -134,13 +134,7 @@ namespace AlphaSynth.Synthesis
             Rpn.Combined = 0x3FFF; //Reset rpn
             UpdateCurrentPan();
             UpdateCurrentPitch();
-            UpdateCurrentVolume();
-        }
-
-        public void UpdateCurrentVolume()
-        {
-            CurrentVolume = Expression.Combined / 16383f;
-            CurrentVolume *= CurrentVolume;
+            UpdateCurrentVolumeFromExpression();
         }
 
         public void UpdateCurrentPitch()
@@ -158,6 +152,19 @@ namespace AlphaSynth.Synthesis
             double value = SynthConstants.HalfPi * (Pan.Combined / 16383.0);
             CurrentPan.Left = (float)Math.Cos(value);
             CurrentPan.Right = (float)Math.Sin(value);
+        }
+
+        public void UpdateCurrentVolumeFromVolume()
+        {
+            CurrentVolume = Volume.Combined / 16383f;
+            CurrentVolume *= CurrentVolume;
+            CurrentVolume = 1;
+        }
+
+        public void UpdateCurrentVolumeFromExpression()
+        {
+            CurrentVolume = Expression.Combined / 16383f;
+            CurrentVolume *= CurrentVolume;
         }
     }
 }

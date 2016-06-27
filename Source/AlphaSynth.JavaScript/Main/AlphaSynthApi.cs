@@ -1,4 +1,5 @@
 ﻿using System;
+using AlphaSynth.Ds;
 using AlphaSynth.Util;
 using SharpKit.Html;
 using SharpKit.JavaScript;
@@ -24,30 +25,6 @@ namespace AlphaSynth.Main
     public class AlphaSynthApi : HtmlContext, IAlphaSynthAsync
     {
         public const string AlphaSynthId = "AlphaSynth";
-
-        private static JsObject SwfObject
-        {
-            [JsMethod(InlineCode = "swfobject", Export = false)]
-            get { return null; }
-        }
-
-        private static bool SupportsWebAudio
-        {
-            [JsMethod(InlineCode = "!!window.ScriptProcessorNode", Export = false)]
-            get { return false; }
-        }
-
-        private static bool SupportsWebWorkers
-        {
-            [JsMethod(InlineCode = "!!window.Worker", Export = false)]
-            get { return false; }
-        }
-
-        private static bool ForceFlash
-        {
-            [JsMethod(InlineCode = "!!window.ForceFlash", Export = false)]
-            get { return false; }
-        }
 
         public IAlphaSynthAsync RealInstance { get; set; }
         public bool Ready { get; set; }
@@ -168,37 +145,56 @@ namespace AlphaSynth.Main
             }
         }
 
-        public AlphaSynthApi(string asRoot = "", string swfObjectRoot = "")
+        public AlphaSynthApi(string alphaSynthScriptFile = "")
         {
             // var swf = SwfObject;
-            var supportsWebAudio = SupportsWebAudio;
-            var supportsWebWorkers = SupportsWebWorkers;
-            var forceFlash = ForceFlash;
+            var supportsWebAudio = Platform.Platform.SupportsWebAudio;
+            var supportsWebWorkers = Platform.Platform.SupportsWebWorkers;
+            var forceFlash = Platform.Platform.ForceFlash;
 
-            if (asRoot == "")
+            // explicitly specified file/root path
+            if (!string.IsNullOrEmpty(alphaSynthScriptFile))
             {
-                asRoot = window["AsRoot"].toString();
+                // append script name 
+                if (!alphaSynthScriptFile.EndsWith(".js"))
+                {
+                    if (!alphaSynthScriptFile.EndsWith("/"))
+                    {
+                        alphaSynthScriptFile += "/";
+                    }
+                    alphaSynthScriptFile += "AlphaSynth.js";
+                }
+                if (!alphaSynthScriptFile.StartsWith("http") && !alphaSynthScriptFile.StartsWith("https"))
+                {
+                    var root = new StringBuilder();
+                    root.Append(window.location.protocol);
+                    root.Append("//");
+                    root.Append(window.location.hostname);
+                    if (window.location.port.As<bool>())
+                    {
+                        root.Append(":");
+                        root.Append(window.location.port);
+                    }
+                    root.Append(alphaSynthScriptFile);
+                    alphaSynthScriptFile = root.ToString();
+                }
+            }
+            // find automatically
+            else
+            {
+                alphaSynthScriptFile = Platform.Platform.ScriptFile;
             }
 
-            if (swfObjectRoot == "")
-            {
-                swfObjectRoot = window["SwfObjectRoot"].toString();
-            }
-
-            if (string.IsNullOrEmpty(swfObjectRoot))
-            {
-                swfObjectRoot = asRoot;
-            }
 
             if (supportsWebAudio && !forceFlash)
             {
                 Logger.Info("Will use webworkers for synthesizing and web audio api for playback");
-                RealInstance = new AlphaSynthWebWorkerApi(asRoot);
+                RealInstance = new AlphaSynthWebWorkerApi(alphaSynthScriptFile);
             }
             else if (supportsWebWorkers)
             {
                 Logger.Info("Will use webworkers for synthesizing and flash for playback");
-                RealInstance = new AlphaSynthFlashPlayerApi(asRoot, swfObjectRoot);
+                RealInstance = new AlphaSynthFlashPlayerApi(alphaSynthScriptFile);
             }
             else
             {

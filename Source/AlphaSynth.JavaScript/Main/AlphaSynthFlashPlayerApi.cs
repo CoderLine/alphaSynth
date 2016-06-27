@@ -10,8 +10,8 @@ namespace AlphaSynth.Main
     /// </summary>
     class AlphaSynthFlashPlayerApi : AlphaSynthWebWorkerApiBase
     {
-        public AlphaSynthFlashPlayerApi(string asRoot, string swfObjectRoot)
-            : base(new AlphaSynthFlashOutput(asRoot, swfObjectRoot), asRoot)
+        public AlphaSynthFlashPlayerApi(string alphaSynthScriptFile)
+            : base(new AlphaSynthFlashOutput(alphaSynthScriptFile), alphaSynthScriptFile)
         {
         }
     }

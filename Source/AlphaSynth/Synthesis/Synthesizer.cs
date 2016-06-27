@@ -547,9 +547,11 @@ namespace AlphaSynth.Synthesis
                             break;
                         case ControllerTypeEnum.VolumeCoarse: //Channel volume coarse
                             _synthChannels[channel].Volume.Coarse = (byte)data2;
+                            _synthChannels[channel].UpdateCurrentVolumeFromVolume();
                             break;
                         case ControllerTypeEnum.VolumeFine: //Channel volume fine
                             _synthChannels[channel].Volume.Fine = (byte)data2;
+                            _synthChannels[channel].UpdateCurrentVolumeFromVolume();
                             break;
                         case ControllerTypeEnum.PanCoarse: //Pan coarse
                             _synthChannels[channel].Pan.Coarse = (byte)data2;
@@ -561,11 +563,11 @@ namespace AlphaSynth.Synthesis
                             break;
                         case ControllerTypeEnum.ExpressionControllerCoarse: //Expression coarse
                             _synthChannels[channel].Expression.Coarse = (byte)data2;
-                            _synthChannels[channel].UpdateCurrentVolume();
+                            _synthChannels[channel].UpdateCurrentVolumeFromExpression();
                             break;
                         case ControllerTypeEnum.ExpressionControllerFine: //Expression fine
                             _synthChannels[channel].Expression.Fine = (byte)data2;
-                            _synthChannels[channel].UpdateCurrentVolume();
+                            _synthChannels[channel].UpdateCurrentVolumeFromExpression();
                             break;
                         case ControllerTypeEnum.HoldPedal: //Hold pedal
                             if (_synthChannels[channel].HoldPedal && !(data2 > 63)) //if hold pedal is released stop any voices with pending release tags
@@ -628,7 +630,7 @@ namespace AlphaSynth.Synthesis
                             _synthChannels[channel].PitchBend.Combined = 0x2000;
                             _synthChannels[channel].ChannelAfterTouch = 0;
                             _synthChannels[channel].UpdateCurrentPitch(); //because pitchBend was reset
-                            _synthChannels[channel].UpdateCurrentVolume(); //because expression was reset
+                            _synthChannels[channel].UpdateCurrentVolumeFromExpression(); //because expression was reset
                             break;
                         default:
                             return;

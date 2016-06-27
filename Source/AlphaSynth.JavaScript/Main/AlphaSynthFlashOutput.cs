@@ -23,8 +23,7 @@ namespace AlphaSynth.Main
     {
         public const int PreferredSampleRate = 44100;
 
-        private readonly string _asRoot;
-        private readonly string _swfObjectRoot;
+        private readonly string _alphaSynthRoot;
         private const string Id = "alphaSynthFlashPlayer";
         private static readonly FastDictionary<string, AlphaSynthFlashOutput> Lookup;
 
@@ -44,10 +43,15 @@ namespace AlphaSynth.Main
             get { return PreferredSampleRate; }
         }
 
-        public AlphaSynthFlashOutput(string asRoot, string swfObjectRoot)
+        public AlphaSynthFlashOutput(string alphaSynthRoot)
         {
-            _asRoot = asRoot;
-            _swfObjectRoot = swfObjectRoot;
+            _alphaSynthRoot = alphaSynthRoot;
+
+            var lastSlash = _alphaSynthRoot.LastIndexOf("/");
+            if (lastSlash != -1)
+            {
+                _alphaSynthRoot = _alphaSynthRoot.Substring(0, lastSlash + 1);
+            }
         }
 
         public void Open()
@@ -65,9 +69,9 @@ namespace AlphaSynth.Main
             var swf = JsCode("swfobject");
             var embedSwf = swf.Member("embedSWF").As<Action<string, string, string, string, string, string, object, object, object>>();
             embedSwf(
-                _asRoot + "AlphaSynth.FlashOutput.swf",
+                _alphaSynthRoot + "AlphaSynth.FlashOutput.swf",
                 _id, "1px", "1px", "9.0.0",
-                _swfObjectRoot + "expressInstall.swf",
+                null,
                 new { id = _id, sampleRate = PreferredSampleRate }, new { allowScriptAccess = "always" }, new { id = _swfId }
             );
         }

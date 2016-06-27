@@ -3,6 +3,7 @@ using AlphaSynth.Ds;
 using AlphaSynth.Player;
 using AlphaSynth.Util;
 using SharpKit.Html;
+using SharpKit.Html.fileapi;
 using SharpKit.Html.workers;
 using SharpKit.JavaScript;
 
@@ -14,7 +15,7 @@ namespace AlphaSynth.Main
     /// </summary>
     class AlphaSynthWebWorkerApiBase : HtmlContext, IAlphaSynthAsync
     {
-        private readonly string _asRoot;
+        private readonly string _alphaSynthScriptFile;
         private readonly Worker _synth;
         private readonly ISynthOutput _player;
 
@@ -23,9 +24,8 @@ namespace AlphaSynth.Main
 
         private readonly FastDictionary<string, FastList<JsFunction>> _events;
 
-        public AlphaSynthWebWorkerApiBase(ISynthOutput player, string asRoot)
+        public AlphaSynthWebWorkerApiBase(ISynthOutput player, string alphaSynthScriptFile)
         {
-            _asRoot = asRoot;
             _player = player;
             _player.ReadyChanged += PlayerReadyChanged;
             _player.PositionChanged += PlayerPositionChanged;
@@ -34,14 +34,39 @@ namespace AlphaSynth.Main
 
             _events = new FastDictionary<string, FastList<JsFunction>>();
 
-            if (asRoot != "" && !asRoot.EndsWith("/"))
-            {
-                asRoot += "/";
-            }
-            _asRoot = asRoot;
+            _alphaSynthScriptFile = alphaSynthScriptFile;
 
             // create web worker
-            _synth = new Worker(asRoot + "AlphaSynth.worker.js");
+            _synth = new Worker(CreateWorkerUrl());
+        }
+
+
+        private string CreateWorkerUrl()
+        {
+            var source = @"self.onmessage = function(e) {
+                if(e.data.cmd == 'playerReady') {
+                    importScripts(e.data.alphaSynthScript);
+                    AlphaSynth.Player.WebWorkerOutput.PreferredSampleRate = e.data.sampleRate;
+                    new AlphaSynth.Main.AlphaSynthWebWorker(self);
+                }
+            }";
+
+            JsCode("window.URL = window.URL || window.webkitURL;");
+            JsCode("window.BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder  || window.MozBlobBuilder;");
+
+            Blob blob;
+            try
+            {
+                blob = new Blob(new[] { source }, new { type = "application/javascript" });
+            }
+            catch
+            {
+                dynamic builder = JsCode("new BlobBuilder()");
+                builder.append(source);
+                blob = builder.getBlob();
+            }
+
+            return JsCode("URL.createObjectURL(blob)").As<string>();
         }
 
         public void Startup()
@@ -51,17 +76,7 @@ namespace AlphaSynth.Main
             // start worker
             _synth.addEventListener("message", HandleWorkerMessage, false);
 
-            var root = new StringBuilder();
-            root.Append(window.location.protocol);
-            root.Append("//");
-            root.Append(window.location.hostname);
-            if (window.location.port.As<bool>())
-            {
-                root.Append(":");
-                root.Append(window.location.port);
-            }
-            root.Append(_asRoot);
-            _synth.postMessage(new { cmd = "playerReady", root = root.ToString(), sampleRate = _player.SampleRate });
+            _synth.postMessage(new { cmd = "playerReady", alphaSynthScript = _alphaSynthScriptFile, sampleRate = _player.SampleRate });
         }
 
         //

@@ -24,6 +24,7 @@ namespace AlphaSynth.Platform
     public class Platform
     {
         public static Func<ISynthOutput> OutputFactory { get; set; }
+
         public static ISynthOutput CreateOutput()
         {
             return OutputFactory != null ? OutputFactory() : null;
