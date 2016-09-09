@@ -1,7 +1,6 @@
 ﻿using System;
 using AlphaSynth.Ds;
 using AlphaSynth.Player;
-using AlphaSynth.Util;
 using SharpKit.Html;
 using SharpKit.Html.webaudio;
 using SharpKit.JavaScript;
@@ -25,14 +24,8 @@ namespace AlphaSynth.Main
         private CircularSampleBuffer _circularBuffer;
 
         private bool _finished;
-
-        private int? _seekTime;
-
-        private int _startTime;
-        private int _pauseStart;
-        private int _pauseTime;
-        private bool _paused;
-        private double _latency;
+        private double _currentTime;
+        private double _playbackSpeed;
 
         public int SampleRate
         {
@@ -41,6 +34,7 @@ namespace AlphaSynth.Main
 
         public void Open()
         {
+            _playbackSpeed = 1;
             _finished = false;
 
             _circularBuffer = new CircularSampleBuffer(BufferSize * BufferCount);
@@ -48,7 +42,7 @@ namespace AlphaSynth.Main
             JsContext.JsCode("window.AudioContext = window.AudioContext || window.webkitAudioContext");
             _context = new AudioContext();
 
-            _latency = (BufferSize * 1000) / (2 * _context.sampleRate);
+            _currentTime = 0;
 
             // create an empty buffer source (silence)
             _buffer = _context.createBuffer(2, BufferSize, _context.sampleRate);
@@ -64,23 +58,6 @@ namespace AlphaSynth.Main
         {
             RequestBuffers();
             _finished = false;
-            if (_seekTime != null)
-            {
-                _startTime = (int)(_context.currentTime * 1000 - _seekTime.Value);
-                _seekTime = null;
-                _pauseTime = 0;
-                _paused = false;
-            }
-            else if (_paused)
-            {
-                _paused = false;
-                _pauseTime += (int)(_context.currentTime * 1000 - _pauseStart);
-            }
-            else
-            {
-                _startTime = (int)(_context.currentTime * 1000);
-                _pauseTime = 0;
-            }
             _source = _context.createBufferSource();
             _source.buffer = _buffer;
             _source.loop = true;
@@ -96,20 +73,17 @@ namespace AlphaSynth.Main
                 _source.stop(0);
             }
             _source = null;
-            _paused = true;
-            _pauseStart = (int)(_context.currentTime * 1000);
             _audioNode.disconnect(0);
         }
 
         public void Stop()
         {
             _finished = true;
-            _paused = false;
-            _seekTime = null;
             if (_source != null)
             {
                 _source.stop(0);
             }
+            _currentTime = 0;
             _source = null;
             _circularBuffer.Clear();
             _audioNode.disconnect(0);
@@ -117,7 +91,8 @@ namespace AlphaSynth.Main
 
         public void Seek(int position)
         {
-            _seekTime = position;
+            _currentTime = position;
+            _circularBuffer.Clear();
         }
 
         public void SequencerFinished()
@@ -144,11 +119,6 @@ namespace AlphaSynth.Main
             }
         }
 
-        private double CalcPosition()
-        {
-            return (_context.currentTime * 1000 - _startTime - _pauseTime - _latency);
-        }
-
         private void GenerateSound(DOMEvent e)
         {
             var ae = (AudioProcessingEvent)e;
@@ -162,11 +132,6 @@ namespace AlphaSynth.Main
                     if (Finished != null) Finished();
                     Stop();
                 }
-                else
-                {
-                    // when buffering we count it as pause time
-                    _pauseTime += (int)((BufferSize * 1000) / (2 * _context.sampleRate));
-                }
             }
             else
             {
@@ -179,17 +144,24 @@ namespace AlphaSynth.Main
                     left[i] = buffer[s++];
                     right[i] = buffer[s++];
                 }
+
+                _currentTime += (left.length / (double)SampleRate) * 1000 * _playbackSpeed;
             }
 
             if (PositionChanged != null)
             {
-                PositionChanged((int)(CalcPosition()));
+                PositionChanged((int)_currentTime);
             }
 
             if (!_finished)
             {
                 RequestBuffers();
             }
+        }
+
+        public void SetPlaybackSpeed(float playbackSpeed)
+        {
+            _playbackSpeed = playbackSpeed;
         }
 
         public event Action SampleRequest;

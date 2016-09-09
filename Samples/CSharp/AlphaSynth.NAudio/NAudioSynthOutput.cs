@@ -1,5 +1,6 @@
 ﻿using System;
 using AlphaSynth.Ds;
+using AlphaSynth.Platform;
 using AlphaSynth.Player;
 using AlphaSynth.Synthesis;
 using AlphaSynth.Util;
@@ -18,12 +19,8 @@ namespace AlphaSynth.NAudio
         private CircularSampleBuffer _circularBuffer;
 
         private bool _finished;
-
-        private int _startTime;
-        private int _pauseStart;
-        private int _pauseTime;
-        private bool _paused;
-        private readonly double _latency;
+        private double _currentTime;
+        private double _playbackSpeed;
 
         public int SampleRate
         {
@@ -33,13 +30,13 @@ namespace AlphaSynth.NAudio
         public NAudioSynthOutput()
             : base(PreferredSampleRate, SynthConstants.AudioChannels)
         {
-            _latency = (BufferSize * 1000) / (2.0 * WaveFormat.SampleRate);
         }
 
         public void Open()
         {
+            _playbackSpeed = 1;
             _finished = false;
-
+            _currentTime = 0;
             _circularBuffer = new CircularSampleBuffer(BufferSize * BufferCount);
 
             _context = new DirectSoundOut(100);
@@ -58,39 +55,26 @@ namespace AlphaSynth.NAudio
         {
             RequestBuffers();
             _finished = false;
-            if (_paused)
-            {
-                _paused = false;
-                _pauseTime += (int)(_context.PlaybackPosition.TotalSeconds * 1000 - _pauseStart);
-            }
-            else
-            {
-                _startTime = (int)(_context.PlaybackPosition.TotalSeconds * 1000);
-                _pauseTime = 0;
-            }
-
             _context.Play();
         }
 
         public void Pause()
         {
             _context.Pause();
-            _paused = true;
-            _pauseStart = (int)(_context.PlaybackPosition.TotalSeconds * 1000);
         }
 
         public void Stop()
         {
             _finished = true;
-            _paused = false;
             _context.Stop();
+            _currentTime = 0;
             _circularBuffer.Clear();
         }
 
         public void Seek(int position)
         {
-            _startTime = (int)(_context.PlaybackPosition.TotalSeconds * 1000 - position);
-            _pauseTime = 0;
+            _currentTime = position;
+            _circularBuffer.Clear();
         }
 
         public void SequencerFinished()
@@ -117,11 +101,6 @@ namespace AlphaSynth.NAudio
             }
         }
 
-        private double CalcPosition()
-        {
-            return (_context.PlaybackPosition.TotalSeconds * 1000 - _startTime - _pauseTime - _latency);
-        }
-
         public override int Read(float[] buffer, int offset, int count)
         {
             if (_circularBuffer.Count < count)
@@ -130,11 +109,6 @@ namespace AlphaSynth.NAudio
                 {
                     if (Finished != null) Finished();
                     Stop();
-                }
-                else
-                {
-                    // when buffering we count it as pause time
-                    _pauseTime += (BufferSize * 1000) / (2 * WaveFormat.SampleRate);
                 }
             }
             else
@@ -146,11 +120,15 @@ namespace AlphaSynth.NAudio
                 {
                     buffer[offset + i] = read[i];
                 }
+
+                var samples = count/2.0;
+                _currentTime += (samples / SampleRate) * 1000 * _playbackSpeed;
+
             }
 
             if (PositionChanged != null)
             {
-                PositionChanged((int)(CalcPosition()));
+                PositionChanged((int)_currentTime);
             }
 
             if (!_finished)
@@ -159,6 +137,11 @@ namespace AlphaSynth.NAudio
             }
 
             return count;
+        }
+
+        public void SetPlaybackSpeed(float playbackSpeed)
+        {
+            _playbackSpeed = playbackSpeed;
         }
 
         public event Action SampleRequest;

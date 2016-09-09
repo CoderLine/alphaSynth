@@ -17,6 +17,7 @@ namespace AlphaSynth.Main
         void AlphaSynthStop();
         void AlphaSynthAddSamples(string base64Samples);
         void AlphaSynthSeek(int position);
+        void AlphaSynthSetPlaybackSpeed(double playbackSpeed);
     }
 
     class AlphaSynthFlashOutput : HtmlContext, ISynthOutput
@@ -37,6 +38,7 @@ namespace AlphaSynth.Main
         private string _id;
         private string _swfId;
         private HtmlElement _swfContainer;
+        private float _playbackSpeed;
 
         public int SampleRate
         {
@@ -56,6 +58,7 @@ namespace AlphaSynth.Main
 
         public void Open()
         {
+            _playbackSpeed = 1;
             _id = Id + NextId;
             _swfId = _id + "swf";
             Lookup[_id] = this;
@@ -74,6 +77,11 @@ namespace AlphaSynth.Main
                 null,
                 new { id = _id, sampleRate = PreferredSampleRate }, new { allowScriptAccess = "always" }, new { id = _swfId }
             );
+        }
+
+        public void SetPlaybackSpeed(float playbackSpeed)
+        {
+            document.getElementById(_swfId).As<IFlashSynthOutput>().AlphaSynthSetPlaybackSpeed(playbackSpeed);
         }
 
 

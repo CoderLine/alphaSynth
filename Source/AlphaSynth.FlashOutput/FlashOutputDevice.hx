@@ -28,9 +28,9 @@ class FlashOutputDevice
     
     private var _circularBuffer:CircularSampleBuffer;
     
-    private var _position:Int;
+    private var _playbackSpeed:Float;
     private var _finished:Bool;
-    private var _bufferTime:Int;
+    private var _currentTime:Float;
     
     public function new(id:String, sampleRate:Int)
     {
@@ -38,10 +38,11 @@ class FlashOutputDevice
         logDebug('Initializing Flash Output');
         
         _sampleRate = sampleRate;
+        _playbackSpeed = 1;
+        _currentTime = 0;
         _latency = (BufferSize * 1000) / (2 * sampleRate);
         
         _finished = false;
-        _bufferTime = 0;
         _circularBuffer = new CircularSampleBuffer(BufferSize * BufferCount);
         _sound = new Sound();
         _sound.addEventListener(SampleDataEvent.SAMPLE_DATA, generateSound);
@@ -52,6 +53,7 @@ class FlashOutputDevice
         ExternalInterface.addCallback("AlphaSynthPause", pause);         
         ExternalInterface.addCallback("AlphaSynthStop", stop);         
         ExternalInterface.addCallback("AlphaSynthSeek", seek);  
+        ExternalInterface.addCallback("AlphaSynthSetPlaybackSpeed", setPlaybackSpeed);  
 
         readyChanged(true);
         
@@ -80,17 +82,12 @@ class FlashOutputDevice
         {
             sampleRequest();
             _finished = false;
-            if(_position == 0)
-            {
-                _bufferTime = 0;
-            }
-            _soundChannel = _sound.play(_position);
+            _soundChannel = _sound.play(0);
         }
         catch(e:Dynamic)
         {
             logError('FlashOutput: Play Error: ' + Std.string(e));
         }
-        return true;
     }
     
     private function pause()
@@ -100,7 +97,6 @@ class FlashOutputDevice
         {
             if(_soundChannel != null) 
             {
-                _position = Std.int(_soundChannel.position);
                 _soundChannel.stop();
                 _soundChannel = null;
             }
@@ -116,9 +112,9 @@ class FlashOutputDevice
         logDebug('FlashOutput: Stop');
         try
         {
-            _position = 0;
             _finished = true;
             _circularBuffer.clear();
+            _currentTime = 0;
             if(_soundChannel != null)
             {
                 _soundChannel.stop();
@@ -134,7 +130,14 @@ class FlashOutputDevice
     private function seek(position:Int)
     {
         logDebug('FlashOutput: Seek - ' + position);
-       _position = position;
+       _currentTime = position;
+       _circularBuffer.clear();
+    }
+    
+    private function setPlaybackSpeed(playbackSpeed:Float)
+    {
+        logDebug('FlashOutput: SetPlayback - ' + playbackSpeed);
+       _playbackSpeed = playbackSpeed;
     }
     
     // API to JavaScript
@@ -195,8 +198,7 @@ class FlashOutputDevice
                     {
                         e.data.writeFloat(0);
                     }
-                    _bufferTime += Std.int((BufferSize * 1000) / (2 * _sampleRate));
-                }
+                }                
             }
             else
             {
@@ -210,12 +212,12 @@ class FlashOutputDevice
                 {
                     e.data.writeFloat(raw.readFloat());
                 }
+                
+                var sampleCount = BufferSize / 2.0;
+                _currentTime += (sampleCount / _sampleRate) * 1000 * _playbackSpeed;
             }
             
-            if (_soundChannel != null && _soundChannel.position != 0)
-            {
-                positionChanged(Std.int(_soundChannel.position - _bufferTime));
-            }
+            positionChanged(Std.int(_currentTime - _latency));
             
             if (!_finished)
             {

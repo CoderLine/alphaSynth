@@ -30,7 +30,8 @@ namespace AlphaSynth.Player
         void Stop();
         void AddSamples(SampleArray samples);
         void Seek(int position);
-        
+        void SetPlaybackSpeed(float playbackSpeed);
+
         int SampleRate { get; }
 
         event Action<bool> ReadyChanged;

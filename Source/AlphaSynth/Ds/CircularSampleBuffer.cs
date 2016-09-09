@@ -93,6 +93,5 @@ namespace AlphaSynth.Ds
             _sampleCount -= samplesRead;
             return samplesRead;
         }
-
     }
 }

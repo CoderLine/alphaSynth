@@ -114,5 +114,10 @@ namespace AlphaSynth.Player
         {
             PostMessage(new { cmd = "playerSeek", pos = position });
         }
+
+        public void SetPlaybackSpeed(float playbackSpeed)
+        {
+            PostMessage(new { cmd = "setPlaybackSpeed", value = playbackSpeed });
+        }
     }
 }

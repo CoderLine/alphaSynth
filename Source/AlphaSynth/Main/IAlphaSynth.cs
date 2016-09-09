@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-using AlphaSynth.IO;
 using AlphaSynth.Util;
 
 namespace AlphaSynth.Main
@@ -59,6 +58,12 @@ namespace AlphaSynth.Main
         /// </summary>
         /// <param name="volume">the master volume from 0.0-3.0 (default 1.0)</param>
         void SetMasterVolume(float volume);
+
+        /// <summary>
+        /// Sets the current playback speed. 
+        /// </summary>
+        /// <param name="playbackSpeed">The playback speed where 1 is normal speed (100%) (0.125-8.0)</param>
+        void SetPlaybackSpeed(float playbackSpeed);
 
         /// <summary>
         /// Loads a soundfont from the given url

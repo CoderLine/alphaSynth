@@ -57,6 +57,12 @@ namespace AlphaSynth.Main
                 case "setMasterVolume":
                     _player.MasterVolume = data.Member("value").As<float>();
                     break;
+                case "getPlaybackSpeed":
+                    PostMessage(new { cmd = "getPlaybackSpeed", value = _player.Sequencer.PlaybackSpeed });
+                    break;
+                case "setPlaybackSpeed":
+                    _player.PlaybackSpeed = data.Member("value").As<float>();
+                    break;
                 case "playPause":
                     PlayPause();
                     break;
@@ -181,6 +187,17 @@ namespace AlphaSynth.Main
         {
             _player.MasterVolume = volume;
         }
+
+        public float GetPlaybackSpeed()
+        {
+            return _player.PlaybackSpeed;
+        }
+
+        public void SetPlaybackSpeed(float playbackSpeed)
+        {
+            _player.PlaybackSpeed = playbackSpeed;
+        }
+
         //
         // Events
 

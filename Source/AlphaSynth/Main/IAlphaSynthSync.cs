@@ -43,6 +43,11 @@ namespace AlphaSynth.Main
         float GetMasterVolume();
 
         /// <summary>
+        /// Returns the current playback speed. 
+        /// </summary>
+        float GetPlaybackSpeed();
+
+        /// <summary>
         ///  Returns whether the soundfont was loaded and parsed
         /// </summary>
         /// <returns>true if the soundfont was loaded and parsed</returns>

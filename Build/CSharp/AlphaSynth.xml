@@ -27,6 +27,11 @@
             </summary>
             <returns>the current master volume</returns>
         </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynthSync.GetPlaybackSpeed">
+            <summary>
+            Returns the current playback speed. 
+            </summary>
+        </member>
         <member name="M:AlphaSynth.Main.IAlphaSynthSync.IsSoundFontLoaded">
             <summary>
              Returns whether the soundfont was loaded and parsed
@@ -64,6 +69,11 @@
         <member name="M:AlphaSynth.Main.IAlphaSynthAsync.GetMasterVolume">
             <summary>
             Returns the current master volume
+            </summary>
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynthAsync.GetPlaybackSpeed">
+            <summary>
+            Returns the current playback speed. 
             </summary>
         </member>
         <member name="M:AlphaSynth.Main.IAlphaSynthAsync.On(System.String,System.Action)">
@@ -108,6 +118,12 @@
             Sets the master volume of the generated audio
             </summary>
             <param name="volume">the master volume from 0.0-3.0 (default 1.0)</param>
+        </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynth.SetPlaybackSpeed(System.Single)">
+            <summary>
+            Sets the current playback speed. 
+            </summary>
+            <param name="playbackSpeed">The playback speed where 1 is normal speed (100%) (0.125-8.0)</param>
         </member>
         <member name="M:AlphaSynth.Main.IAlphaSynth.LoadSoundFontUrl(System.String)">
             <summary>

@@ -61,6 +61,18 @@ namespace AlphaSynth.Main
             RealInstance.SetMasterVolume(volume);
         }
 
+        public void GetPlaybackSpeed()
+        {
+            if (RealInstance == null) return;
+            RealInstance.GetPlaybackSpeed();
+        }
+
+        public void SetPlaybackSpeed(float playbackSpeed)
+        {
+            if (RealInstance == null) return;
+            RealInstance.SetPlaybackSpeed(playbackSpeed);
+        }
+
         public void GetState()
         {
             if (RealInstance == null) return;

@@ -152,6 +152,16 @@ namespace AlphaSynth.Main
             _synth.postMessage(new { cmd = "setMasterVolume", value = volume });
         }
 
+        public void GetPlaybackSpeed()
+        {
+            _synth.postMessage(new { cmd = "getPlaybackSpeed" });
+        }
+
+        public void SetPlaybackSpeed(float playbackSpeed)
+        {
+            _synth.postMessage(new { cmd = "setPlaybackSpeed", value = playbackSpeed });
+        }
+
         public void IsSoundFontLoaded()
         {
             _synth.postMessage(new { cmd = "isSoundFontLoaded" });
@@ -192,7 +202,7 @@ namespace AlphaSynth.Main
                     TriggerEvent(cmd, new[] { data.Member("value") });
                     break;
 
-                    // events
+                // events
                 case "ready":
                     _isWorkerReady = true;
                     CheckForReadyState();
@@ -230,7 +240,7 @@ namespace AlphaSynth.Main
                 case "log":
                     Log(data.Member("level").As<LogLevel>(), data.Member("message").As<string>());
                     break;
-                    // js player communication
+                // js player communication
                 case "playerSequencerFinished":
                     _player.SequencerFinished();
                     break;
@@ -248,6 +258,9 @@ namespace AlphaSynth.Main
                     break;
                 case "playerSeek":
                     _player.Seek(data.Member("pos").As<int>());
+                    break;
+                case "setPlaybackSpeed":
+                    _player.SetPlaybackSpeed(data.Member("value").As<float>());
                     break;
             }
         }

@@ -31,7 +31,6 @@ namespace AlphaSynth.Sequencer
         private FastList<MidiFileSequencerTempoChange> _tempoChanges;
         private FastList<Action> _finished;
         private bool[] _blockList;
-        private float _playbackRate;
         private int _eventIndex;
         private int _division;
 
@@ -42,10 +41,10 @@ namespace AlphaSynth.Sequencer
         public int CurrentTime { get; private set; }
         public int EndTime { get; private set; }
 
-        public float PlaySpeed
+        public float PlaybackSpeed
         {
-            get { return _playbackRate; }
-            set { _playbackRate = SynthHelper.ClampF(value, 0.125f, 8.0f); }
+            get;
+            set;
         }
 
         public MidiFileSequencer(Synthesizer synth)
@@ -53,7 +52,7 @@ namespace AlphaSynth.Sequencer
             Synth = synth;
             _eventIndex = 0;
             _division = 0;
-            _playbackRate = 1;
+            PlaybackSpeed = 1;
             IsPlaying = false;
             _blockList = new bool[SynthConstants.DefaultChannelCount];
             _finished = new FastList<Action>();
@@ -168,7 +167,7 @@ namespace AlphaSynth.Sequencer
                 return;
             }
 
-            var newMSize = (int)(Synth.MicroBufferSize * _playbackRate);
+            var newMSize = (int)(Synth.MicroBufferSize * PlaybackSpeed);
             var endSample = CurrentTime + (newMSize * Synth.MicroBufferCount);
             for (int x = 0; x < Synth.MicroBufferCount; x++)
             {

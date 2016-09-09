@@ -52,10 +52,16 @@ namespace AlphaSynth.Main
         void GetMasterVolume();
 
         /// <summary>
+        /// Returns the current playback speed. 
+        /// </summary>
+        void GetPlaybackSpeed();
+
+        /// <summary>
         ///  Adds a new event listener to events
         /// </summary>
         void On(string events, Action fn);
 
         void Startup();
+        
     }
 }

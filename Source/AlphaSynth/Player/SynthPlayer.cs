@@ -79,11 +79,12 @@ namespace AlphaSynth.Player
 
         private int _tickPosition;
         private int _timePosition;
+        private float _playbackSpeed;
 
         public int TickPosition
         {
             get { return _tickPosition; }
-            set { TimePosition = Sequencer.TicksToMillis(value); }
+            set { TimePosition = (int)(Sequencer.TicksToMillis(value) / Sequencer.PlaybackSpeed); }
         }
 
         public float MasterVolume
@@ -113,10 +114,22 @@ namespace AlphaSynth.Player
             }
         }
 
+        public float PlaybackSpeed
+        {
+            get { return _playbackSpeed; }
+            set
+            {
+                _playbackSpeed = SynthHelper.ClampF(value, 0.125f, 8.0f);
+                Sequencer.PlaybackSpeed = _playbackSpeed;
+                Output.SetPlaybackSpeed(_playbackSpeed);
+            }
+        }
+
         public bool IsReady
         {
             get { return IsSoundFontLoaded && IsMidiLoaded; }
         }
+
 
         public void Play()
         {
@@ -257,7 +270,7 @@ namespace AlphaSynth.Player
 
         private void FirePositionChanged(int pos)
         {
-            var endTime = (int)((Sequencer.EndTime / Synth.SampleRate) * 1000);
+            var endTime = (Sequencer.EndTime / Synth.SampleRate) * 1000;
             var currentTime = pos;
             var endTick = Sequencer.MillisToTicks(endTime);
             var currentTick = Sequencer.MillisToTicks(currentTime);
