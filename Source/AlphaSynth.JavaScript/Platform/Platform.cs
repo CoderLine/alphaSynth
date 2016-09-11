@@ -60,22 +60,68 @@ namespace AlphaSynth.Platform
             {
                 var scriptElement = HtmlContext.document.Member("currentScript").As<HtmlScriptElement>();
 
-                // fallback to script tag that has an alphatab data attribute set.
                 if (!scriptElement.As<bool>())
                 {
-                    scriptElement = HtmlContext.document.querySelector("script[data-alphasynth]").As<HtmlScriptElement>();
+                    // try to get javascript from exception stack
+                    try
+                    {
+                        var error = new JsError();
+                        var stack = error.Member("stack");
+                        if (!stack.As<bool>())
+                        {
+                            throw error;
+                        }
+
+                        ScriptFile = ScriptFileFromStack(stack.As<JsString>());
+                    }
+                    catch (JsError e)
+                    {
+                        var stack = e.Member("stack");
+                        if (!stack.As<bool>())
+                        {
+                            scriptElement = HtmlContext.document.querySelector("script[data-alphasynth]").As<HtmlScriptElement>();
+                        }
+                        else
+                        {
+                            ScriptFile = ScriptFileFromStack(stack.As<JsString>());
+                        }
+                    }
                 }
 
                 // failed to automatically resolve
-                if (!scriptElement.As<bool>())
+                if (!string.IsNullOrEmpty(ScriptFile))
                 {
-                    HtmlContext.console.warn("Could not automatically find alphaSynth script file for worker, please add the data-alphasynth attribute to the script tag that includes alphasynth or provide it when initializing");
-                }
-                else
-                {
-                    ScriptFile = scriptElement.src;
+                    if (!scriptElement.As<bool>())
+                    {
+                        HtmlContext.console.warn(
+                            "Could not automatically find alphaSynth script file for worker, please add the data-alphasynth attribute to the script tag that includes alphaSynth or provide it when initializing alphaSynth");
+                    }
+                    else
+                    {
+                        ScriptFile = scriptElement.src;
+                    }
                 }
             }
         }
+
+        // based on https://github.com/JamesMGreene/currentExecutingScript
+        private static string ScriptFileFromStack(JsString stack)
+        {
+            var matches = stack.match(@"(data:text\/javascript(?:;[^,]+)?,.+?|(?:|blob:)(?:http[s]?|file):\/\/[\/]?.+?\/[^:\)]*?)(?::\d+)(?::\d+)?");
+            if (!matches.As<bool>())
+            {
+                matches = stack.match(@"^(?:|[^:@]*@|.+\)@(?=data:text\/javascript|blob|http[s]?|file)|.+?\s+(?: at |@)(?:[^:\(]+ )*[\(]?)(data:text\/javascript(?:;[^,]+)?,.+?|(?:|blob:)(?:http[s]?|file):\/\/[\/]?.+?\/[^:\)]*?)(?::\d+)(?::\d+)?");
+                if (!matches.As<bool>())
+                {
+                    matches = stack.match(@"\)@(data:text\/javascript(?:;[^,]+)?,.+?|(?:|blob:)(?:http[s]?|file):\/\/[\/]?.+?\/[^:\)]*?)(?::\d+)(?::\d+)?");
+                    if (!matches.As<bool>())
+                    {
+                        return null;
+                    }
+                }
+            }
+            return matches[1];
+        }
+
     }
 }
