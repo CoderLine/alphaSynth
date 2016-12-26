@@ -89,7 +89,7 @@ namespace AlphaSynth.Platform
                 }
 
                 // failed to automatically resolve
-                if (!string.IsNullOrEmpty(ScriptFile))
+                if (string.IsNullOrEmpty(ScriptFile))
                 {
                     if (!scriptElement.As<bool>())
                     {
