@@ -19,8 +19,7 @@ namespace AlphaSynth.Player
 {
     public enum SynthPlayerState
     {
-        Stopped,
-        Playing,
-        Paused
+        Paused,
+        Playing
     }
 }

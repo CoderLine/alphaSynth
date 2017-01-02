@@ -218,13 +218,6 @@ namespace AlphaSynth.Synthesis
             }
         }
 
-        public void Stop()
-        {
-            ResetSynthControls();
-            ResetPrograms();
-            NoteOffAll(true);
-        }
-
         public void ResetSynthControls()
         {
             for (int x = 0; x < _synthChannels.Length; x++)

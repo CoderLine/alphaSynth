@@ -125,6 +125,13 @@
             </summary>
             <param name="playbackSpeed">The playback speed where 1 is normal speed (100%) (0.125-8.0)</param>
         </member>
+        <member name="M:AlphaSynth.Main.IAlphaSynth.SetPlaybackRange(System.Int32,System.Int32)">
+            <summary>
+            Sets range that should be played. Call this method with -1,-1 to reset the playbackrange
+            </summary>
+            <param name="startTick">The start tick of the range to be played.</param>
+            <param name="endTick">The end tick of the range to be played</param>
+        </member>
         <member name="M:AlphaSynth.Main.IAlphaSynth.LoadSoundFontUrl(System.String)">
             <summary>
             Loads a soundfont from the given url

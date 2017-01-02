@@ -47,7 +47,7 @@ namespace AlphaSynth.Player
                     OnFinished();
                     break;
                 case "playerPositionChanged":
-                    OnPositionChanged(data.Member("pos").As<int>());
+                    OnPositionChanged(data.Member("pos").As<double>());
                     break;
             }
         }
@@ -57,10 +57,10 @@ namespace AlphaSynth.Player
         {
         }
 
-        public event Action<int> PositionChanged;
-        protected virtual void OnPositionChanged(int obj)
+        public event Action<double> PositionChanged;
+        protected virtual void OnPositionChanged(double obj)
         {
-            Action<int> handler = PositionChanged;
+            Action<double> handler = PositionChanged;
             if (handler != null) handler(obj);
         }
 
@@ -105,12 +105,7 @@ namespace AlphaSynth.Player
             PostMessage(new { cmd = "playerPause" });
         }
 
-        public void Stop()
-        {
-            PostMessage(new { cmd = "playerStop" });
-        }
-
-        public void Seek(int position)
+        public void Seek(double position)
         {
             PostMessage(new { cmd = "playerSeek", pos = position });
         }

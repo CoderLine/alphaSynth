@@ -162,6 +162,11 @@ namespace AlphaSynth.Main
             _synth.postMessage(new { cmd = "setPlaybackSpeed", value = playbackSpeed });
         }
 
+        public void SetPlaybackRange(int startTick, int endTick)
+        {
+            _synth.postMessage(new { cmd = "setPlaybackRange", startTick = startTick, endTick = endTick });
+        }
+
         public void IsSoundFontLoaded()
         {
             _synth.postMessage(new { cmd = "isSoundFontLoaded" });
@@ -253,9 +258,6 @@ namespace AlphaSynth.Main
                 case "playerPause":
                     _player.Pause();
                     break;
-                case "playerStop":
-                    _player.Stop();
-                    break;
                 case "playerSeek":
                     _player.Seek(data.Member("pos").As<int>());
                     break;
@@ -310,7 +312,7 @@ namespace AlphaSynth.Main
             _synth.postMessage(new { cmd = "playerFinished" });
         }
 
-        public void PlayerPositionChanged(int pos)
+        public void PlayerPositionChanged(double pos)
         {
             _synth.postMessage(new { cmd = "playerPositionChanged", pos = pos });
         }

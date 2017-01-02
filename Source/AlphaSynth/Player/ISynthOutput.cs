@@ -27,15 +27,14 @@ namespace AlphaSynth.Player
         void SequencerFinished();
         void Play();
         void Pause();
-        void Stop();
         void AddSamples(SampleArray samples);
-        void Seek(int position);
+        void Seek(double position);
         void SetPlaybackSpeed(float playbackSpeed);
 
         int SampleRate { get; }
 
         event Action<bool> ReadyChanged;
-        event Action<int> PositionChanged;
+        event Action<double> PositionChanged;
         event Action Finished;
         event Action SampleRequest;
     }

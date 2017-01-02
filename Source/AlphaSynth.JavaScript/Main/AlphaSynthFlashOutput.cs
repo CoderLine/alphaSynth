@@ -14,9 +14,8 @@ namespace AlphaSynth.Main
         void AlphaSynthSequencerFinished();
         void AlphaSynthPlay();
         void AlphaSynthPause();
-        void AlphaSynthStop();
         void AlphaSynthAddSamples(string base64Samples);
-        void AlphaSynthSeek(int position);
+        void AlphaSynthSeek(double position);
         void AlphaSynthSetPlaybackSpeed(double playbackSpeed);
     }
 
@@ -107,12 +106,7 @@ namespace AlphaSynth.Main
             document.getElementById(_swfId).As<IFlashSynthOutput>().AlphaSynthPause();
         }
 
-        public void Stop()
-        {
-            document.getElementById(_swfId).As<IFlashSynthOutput>().AlphaSynthStop();
-        }
-
-        public void Seek(int position)
+        public void Seek(double position)
         {
             document.getElementById(_swfId).As<IFlashSynthOutput>().AlphaSynthSeek(position);
         }
@@ -135,8 +129,8 @@ namespace AlphaSynth.Main
             }
         }
 
-        public event Action<int> PositionChanged;
-        public static void OnPositionChanged(string id, int position)
+        public event Action<double> PositionChanged;
+        public static void OnPositionChanged(string id, double position)
         {
             if (Lookup.ContainsKey(id) && Lookup[id].PositionChanged != null)
             {

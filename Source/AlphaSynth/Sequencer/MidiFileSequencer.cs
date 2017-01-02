@@ -16,7 +16,6 @@
  * License along with this library.
  */
 using System;
-using System.Runtime.CompilerServices;
 using AlphaSynth.Ds;
 using AlphaSynth.Midi;
 using AlphaSynth.Midi.Event;
@@ -38,8 +37,26 @@ namespace AlphaSynth.Sequencer
         public bool IsPlaying { get; private set; }
         public bool IsMidiLoaded { get { return _synthData != null; } }
         public int CurrentTempo { get; private set; }
-        public int CurrentTime { get; private set; }
+        public int CurrentSampleTime { get; private set; }
         public int EndTime { get; private set; }
+
+        public int PlaybackRangeStartSampleTime { get; private set; }
+        public double PlaybackRangeStart
+        {
+            get
+            {
+                return PlaybackRangeStartSampleTime < 0 ? -1 : SampleTimeToMillis(PlaybackRangeStartSampleTime);
+            }
+        }
+
+        public int PlaybackRangeEndSampleTime { get; private set; }
+        public double PlaybackRangeEnd
+        {
+            get
+            {
+                return PlaybackRangeEndSampleTime < 0 ? -1 : SampleTimeToMillis(PlaybackRangeEndSampleTime);
+            }
+        }
 
         public float PlaybackSpeed
         {
@@ -57,6 +74,14 @@ namespace AlphaSynth.Sequencer
             _blockList = new bool[SynthConstants.DefaultChannelCount];
             _finished = new FastList<Action>();
             synth.AddMidiMessageProcessed(MidiEventProcessed);
+            PlaybackRangeEndSampleTime = -1;
+            PlaybackRangeStartSampleTime = -1;
+        }
+
+        public void SetPlaybackRange(int startTick, int endTick)
+        {
+            PlaybackRangeStartSampleTime = MillisToSampleTime((int)(TicksToMillis(startTick) / PlaybackSpeed));
+            PlaybackRangeEndSampleTime = MillisToSampleTime((int)(TicksToMillis(endTick) / PlaybackSpeed));
         }
 
         public void AddFinishedListener(Action listener)
@@ -100,13 +125,6 @@ namespace AlphaSynth.Sequencer
             IsPlaying = false;
         }
 
-        public void Stop()
-        {
-            IsPlaying = false;
-            CurrentTime = 0;
-            _eventIndex = 0;
-        }
-
         public bool IsChannelMuted(int channel)
         {
             return _blockList[channel];
@@ -133,16 +151,16 @@ namespace AlphaSynth.Sequencer
             _blockList[channel] = muteValue;
         }
 
-        public void Seek(int milliseconds)
+        public void Seek(double milliseconds)
         {
-            var targetSampleTime = (int)(Synth.SampleRate * (milliseconds / 1000.0));
-            if (targetSampleTime > CurrentTime)
+            var targetSampleTime = MillisToSampleTime(milliseconds);
+            if (targetSampleTime > CurrentSampleTime)
             {//process forward
-                SilentProcess(targetSampleTime - CurrentTime);
+                SilentProcess(targetSampleTime - CurrentSampleTime);
             }
-            else if (targetSampleTime < CurrentTime)
+            else if (targetSampleTime < CurrentSampleTime)
             {//we have to restart the midi to make sure we get the right state: instruments, volume, pan, etc
-                CurrentTime = 0;
+                CurrentSampleTime = 0;
                 _eventIndex = 0;
                 Synth.NoteOffAll(true);
                 Synth.ResetPrograms();
@@ -151,28 +169,26 @@ namespace AlphaSynth.Sequencer
             }
         }
 
+        private int MillisToSampleTime(double milliseconds)
+        {
+            return (int)(Synth.SampleRate * (milliseconds / 1000.0));
+        }
+
+        private double SampleTimeToMillis(int sampleTime)
+        {
+            return sampleTime / (double)Synth.SampleRate * 1000;
+        }
+
         public void FillMidiEventQueue()
         {
             if (!IsPlaying || Synth.MidiEventQueue.Length != 0)
                 return;
-            if (CurrentTime >= EndTime)
-            {
-                CurrentTime = 0;
-                _eventIndex = 0;
-                IsPlaying = false;
-                Synth.NoteOffAll(true);
-                Synth.ResetPrograms();
-                Synth.ResetSynthControls();
-                FireFinished();
-                return;
-            }
-
+            
             var newMSize = (int)(Synth.MicroBufferSize * PlaybackSpeed);
-            var endSample = CurrentTime + (newMSize * Synth.MicroBufferCount);
             for (int x = 0; x < Synth.MicroBufferCount; x++)
             {
-                CurrentTime += newMSize;
-                while (_eventIndex < _synthData.Length && _synthData[_eventIndex].Delta < CurrentTime)
+                CurrentSampleTime += newMSize;
+                while (_eventIndex < _synthData.Length && _synthData[_eventIndex].Delta < CurrentSampleTime)
                 {
                     if (_synthData[_eventIndex].Event.Command != MidiEventTypeEnum.NoteOn || !_blockList[_synthData[_eventIndex].Event.Channel])
                     {
@@ -197,7 +213,7 @@ namespace AlphaSynth.Sequencer
             _synthData = new SynthEvent[midiFile.Tracks[0].MidiEvents.Length];
             _division = midiFile.Division;
             _eventIndex = 0;
-            CurrentTime = 0;
+            CurrentSampleTime = 0;
             CurrentTempo = (int)bpm;
             //Calculate sample based time using double counter and round down to nearest integer sample.
             var absDelta = 0.0;
@@ -237,7 +253,7 @@ namespace AlphaSynth.Sequencer
             return command == MidiEventTypeEnum.Meta && data1 == (int)MetaEventTypeEnum.Tempo;
         }
 
-        public int MillisToTicks(int time)
+        public int MillisToTicks(double time)
         {
             var ticks = 0;
             var bpm = 120.0;
@@ -259,13 +275,13 @@ namespace AlphaSynth.Sequencer
             // add the missing ticks
             time -= lastChange;
             ticks += (int)(time / (60000.0 / (bpm * _division)));
-
-            return ticks;
+            // we add 1 for possible rounding errors.(floating point issuses)
+            return ticks + 1;
         }
 
-        public int TicksToMillis(int ticks)
+        public double TicksToMillis(int ticks)
         {
-            var time = 0;
+            var time = 0.0;
             var bpm = 120.0;
             var lastChange = 0;
 
@@ -284,7 +300,7 @@ namespace AlphaSynth.Sequencer
 
             // add the missing millis
             ticks -= lastChange;
-            time += (int)(ticks * (60000.0 / (bpm * _division)));
+            time += (ticks * (60000.0 / (bpm * _division)));
 
             return time;
         }
@@ -292,7 +308,7 @@ namespace AlphaSynth.Sequencer
         private void SilentProcess(int amount)
         {
             if (amount <= 0) return;
-            while (_eventIndex < _synthData.Length && _synthData[_eventIndex].Delta < (CurrentTime + amount))
+            while (_eventIndex < _synthData.Length && _synthData[_eventIndex].Delta < (CurrentSampleTime + amount))
             {
                 if (_synthData[_eventIndex].Event.Command != MidiEventTypeEnum.NoteOn)
                 {
@@ -301,7 +317,32 @@ namespace AlphaSynth.Sequencer
                 }
                 _eventIndex++;
             }
-            CurrentTime += amount;
+            CurrentSampleTime += amount;
+        }
+
+        public void CheckForStop(double pos)
+        {
+            pos = MillisToSampleTime(pos);
+            if (PlaybackRangeEndSampleTime < 0 && pos >= EndTime)
+            {
+                CurrentSampleTime = 0;
+                _eventIndex = 0;
+                IsPlaying = false;
+                Synth.NoteOffAll(true);
+                Synth.ResetPrograms();
+                Synth.ResetSynthControls();
+                FireFinished();
+            }
+            else if (PlaybackRangeEndSampleTime > 0 && pos >= PlaybackRangeEndSampleTime)
+            {
+                CurrentSampleTime = PlaybackRangeStartSampleTime;
+                _eventIndex = 0;
+                IsPlaying = false;
+                Synth.NoteOffAll(true);
+                Synth.ResetPrograms();
+                Synth.ResetSynthControls();
+                FireFinished();
+            }
         }
     }
 

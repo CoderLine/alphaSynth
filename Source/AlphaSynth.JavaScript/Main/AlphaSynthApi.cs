@@ -140,6 +140,12 @@ namespace AlphaSynth.Main
             RealInstance.LoadMidiBytes(data);
         }
 
+        public void SetPlaybackRange(int startTick, int endTick)
+        {
+            if (RealInstance == null) return;
+            RealInstance.SetPlaybackRange(startTick, endTick);
+        }
+
         public void SetLogLevel(LogLevel level)
         {
             Logger.LogLevel = level;

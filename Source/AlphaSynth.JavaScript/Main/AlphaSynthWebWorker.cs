@@ -63,6 +63,9 @@ namespace AlphaSynth.Main
                 case "setPlaybackSpeed":
                     _player.PlaybackSpeed = data.Member("value").As<float>();
                     break;
+                case "setPlaybackRange":
+                    SetPlaybackRange(data.Member("startTick").As<int>(), data.Member("endTick").As<int>());
+                    break;
                 case "playPause":
                     PlayPause();
                     break;
@@ -196,6 +199,11 @@ namespace AlphaSynth.Main
         public void SetPlaybackSpeed(float playbackSpeed)
         {
             _player.PlaybackSpeed = playbackSpeed;
+        }
+
+        public void SetPlaybackRange(int startTick, int endTick)
+        {
+            _player.SetPlaybackRange(startTick, endTick);
         }
 
         //

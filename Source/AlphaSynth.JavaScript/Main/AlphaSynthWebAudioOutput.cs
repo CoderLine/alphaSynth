@@ -76,20 +76,7 @@ namespace AlphaSynth.Main
             _audioNode.disconnect(0);
         }
 
-        public void Stop()
-        {
-            _finished = true;
-            if (_source != null)
-            {
-                _source.stop(0);
-            }
-            _currentTime = 0;
-            _source = null;
-            _circularBuffer.Clear();
-            _audioNode.disconnect(0);
-        }
-
-        public void Seek(int position)
+        public void Seek(double position)
         {
             _currentTime = position;
             _circularBuffer.Clear();
@@ -130,7 +117,6 @@ namespace AlphaSynth.Main
                 if (_finished)
                 {
                     if (Finished != null) Finished();
-                    Stop();
                 }
             }
             else
@@ -150,7 +136,7 @@ namespace AlphaSynth.Main
 
             if (PositionChanged != null)
             {
-                PositionChanged((int)_currentTime);
+                PositionChanged(_currentTime);
             }
 
             if (!_finished)
@@ -166,7 +152,7 @@ namespace AlphaSynth.Main
 
         public event Action SampleRequest;
         public event Action Finished;
-        public event Action<int> PositionChanged;
+        public event Action<double> PositionChanged;
         public event Action<bool> ReadyChanged;
         protected virtual void OnReadyChanged(bool isReady)
         {

@@ -32,8 +32,8 @@ namespace AlphaSynth.Util
         protected PcmData(int bits, byte[] pcmData, bool isDataInLittleEndianFormat)
         {
             BytesPerSample = (byte)(bits / 8);
-            if (pcmData.Length % BytesPerSample != 0)
-                throw new Exception("Invalid PCM format. The PCM data was an invalid size.");
+            //if (pcmData.Length % BytesPerSample != 0)
+            //    throw new Exception("Invalid PCM format. The PCM data was an invalid size.");
             Data = pcmData;
             Length = Data.Length / BytesPerSample;
             if (TypeUtils.IsLittleEndian != isDataInLittleEndianFormat)

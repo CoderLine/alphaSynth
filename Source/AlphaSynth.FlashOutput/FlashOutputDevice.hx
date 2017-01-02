@@ -51,7 +51,6 @@ class FlashOutputDevice
         ExternalInterface.addCallback("AlphaSynthAddSamples", addSamples);         
         ExternalInterface.addCallback("AlphaSynthPlay", play);         
         ExternalInterface.addCallback("AlphaSynthPause", pause);         
-        ExternalInterface.addCallback("AlphaSynthStop", stop);         
         ExternalInterface.addCallback("AlphaSynthSeek", seek);  
         ExternalInterface.addCallback("AlphaSynthSetPlaybackSpeed", setPlaybackSpeed);  
 
@@ -107,27 +106,7 @@ class FlashOutputDevice
         }            
     }
     
-    private function stop()
-    {
-        logDebug('FlashOutput: Stop');
-        try
-        {
-            _finished = true;
-            _circularBuffer.clear();
-            _currentTime = 0;
-            if(_soundChannel != null)
-            {
-                _soundChannel.stop();
-                _soundChannel = null;
-            }
-        }
-        catch(e:Dynamic)
-        {
-            logError('FlashOutput: Stop Error: ' + Std.string(e));
-        }            
-    }
-    
-    private function seek(position:Int)
+    private function seek(position:Float)
     {
         logDebug('FlashOutput: Seek - ' + position);
        _currentTime = position;
@@ -160,7 +139,7 @@ class FlashOutputDevice
         ExternalInterface.call("AlphaSynth.Main.AlphaSynthFlashOutput.OnFinished", _id);
     }
     
-    private function positionChanged(position:Int)
+    private function positionChanged(position:Float)
     {
         ExternalInterface.call("AlphaSynth.Main.AlphaSynthFlashOutput.OnPositionChanged", _id, position);   
     }
@@ -190,7 +169,6 @@ class FlashOutputDevice
                 if (_finished)
                 {
                     finished();
-                    stop();
                 }
                 else
                 {
@@ -217,7 +195,7 @@ class FlashOutputDevice
                 _currentTime += (sampleCount / _sampleRate) * 1000 * _playbackSpeed;
             }
             
-            positionChanged(Std.int(_currentTime - _latency));
+            positionChanged(_currentTime - _latency);
             
             if (!_finished)
             {

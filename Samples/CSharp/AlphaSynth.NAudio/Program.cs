@@ -75,8 +75,8 @@ namespace AlphaSynth.NAudio
                     Console.CursorTop--;
                     Console.Write("".PadLeft(Console.BufferWidth - 1, ' '));
                     Console.CursorLeft = 0;
-                    Console.WriteLine("{0:mm\\:ss\\:fff} of {1:mm\\:ss\\:fff} (Tempo {2})",
-                        currentTime, endTime, 
+                    Console.WriteLine("{0:mm\\:ss\\:fff} ({1}) of {2:mm\\:ss\\:fff} ({3}) (Tempo {4})",
+                        currentTime, args.CurrentTick, endTime, args.EndTick,
                         player.Sequencer.CurrentTempo);
                 };
                 player.Finished += (sender, args) => ((NAudioSynthOutput) player.Output).Close();
@@ -98,7 +98,7 @@ namespace AlphaSynth.NAudio
                 try
                 {
                     Reader.ReadLine(5000);
-                    player.Stop();
+                    player.Pause();
                 }
                 catch (Exception)
                 {
@@ -108,7 +108,9 @@ namespace AlphaSynth.NAudio
 
             // 
             // Cleanup
-            player.Stop();
+            player.Pause();
+
+            Console.ReadLine();
         }
     }
 }

@@ -66,6 +66,13 @@ namespace AlphaSynth.Main
         void SetPlaybackSpeed(float playbackSpeed);
 
         /// <summary>
+        /// Sets range that should be played. Call this method with -1,-1 to reset the playbackrange
+        /// </summary>
+        /// <param name="startTick">The start tick of the range to be played.</param>
+        /// <param name="endTick">The end tick of the range to be played</param>
+        void SetPlaybackRange(int startTick, int endTick);
+
+        /// <summary>
         /// Loads a soundfont from the given url
         /// </summary>
         /// <param name="url">the url to load the soundfont from</param>

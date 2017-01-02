@@ -15,6 +15,8 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
+
+using System;
 using System.Runtime.CompilerServices;
 using AlphaSynth.Sf2;
 using AlphaSynth.Util;
@@ -46,7 +48,14 @@ namespace AlphaSynth.Bank
             End = sample.End;
             LoopStart = sample.StartLoop;
             LoopEnd = sample.EndLoop;
-            SampleData = PcmData.Create(sampleData.BitsPerSample, sampleData.SampleData, true);
+            if ((sample.SoundFontSampleLink & SFSampleLink.OggVobis) != 0)
+            {
+                throw new Exception("Ogg Vobis encoded soundfonts not supported");
+            }
+            else
+            {
+                SampleData = PcmData.Create(sampleData.BitsPerSample, sampleData.SampleData, true);
+            }
         }
     }
 }

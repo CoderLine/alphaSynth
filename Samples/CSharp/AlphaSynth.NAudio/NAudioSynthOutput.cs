@@ -47,7 +47,9 @@ namespace AlphaSynth.NAudio
 
         public void Close()
         {
-            Stop();
+            _finished = true;
+            _context.Stop();
+            _circularBuffer.Clear();
             _context.Dispose();
         }
 
@@ -63,15 +65,7 @@ namespace AlphaSynth.NAudio
             _context.Pause();
         }
 
-        public void Stop()
-        {
-            _finished = true;
-            _context.Stop();
-            _currentTime = 0;
-            _circularBuffer.Clear();
-        }
-
-        public void Seek(int position)
+        public void Seek(double position)
         {
             _currentTime = position;
             _circularBuffer.Clear();
@@ -108,7 +102,6 @@ namespace AlphaSynth.NAudio
                 if (_finished)
                 {
                     if (Finished != null) Finished();
-                    Stop();
                 }
             }
             else
@@ -128,7 +121,7 @@ namespace AlphaSynth.NAudio
 
             if (PositionChanged != null)
             {
-                PositionChanged((int)_currentTime);
+                PositionChanged(_currentTime);
             }
 
             if (!_finished)
@@ -146,7 +139,7 @@ namespace AlphaSynth.NAudio
 
         public event Action SampleRequest;
         public event Action Finished;
-        public event Action<int> PositionChanged;
+        public event Action<double> PositionChanged;
         public event Action<bool> ReadyChanged;
         protected virtual void OnReadyChanged(bool isReady)
         {

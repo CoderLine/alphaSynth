@@ -37,7 +37,7 @@ namespace AlphaSynth.Player
         {
             Logger.Debug("Initializing player");
 
-            State = SynthPlayerState.Stopped;
+            State = SynthPlayerState.Paused;
             OnPlayerStateChanged(new PlayerStateChangedEventArgs(State));
 
             Logger.Debug("Opening output");
@@ -67,7 +67,10 @@ namespace AlphaSynth.Player
             Output.PositionChanged += pos =>
             {
                 // log position
-                FirePositionChanged(pos);
+                if (State == SynthPlayerState.Playing)
+                {
+                    FirePositionChanged(pos);   
+                }
             };
 
             Output.Open();
@@ -78,13 +81,13 @@ namespace AlphaSynth.Player
         public bool IsMidiLoaded { get; private set; }
 
         private int _tickPosition;
-        private int _timePosition;
+        private double _timePosition;
         private float _playbackSpeed;
 
         public int TickPosition
         {
             get { return _tickPosition; }
-            set { TimePosition = (int)(Sequencer.TicksToMillis(value) / Sequencer.PlaybackSpeed); }
+            set { TimePosition = Sequencer.TicksToMillis(value) / Sequencer.PlaybackSpeed; }
         }
 
         public float MasterVolume
@@ -93,7 +96,7 @@ namespace AlphaSynth.Player
             set { Synth.MasterVolume = value; }
         }
 
-        public int TimePosition
+        public double TimePosition
         {
             get { return _timePosition; }
             set
@@ -111,6 +114,10 @@ namespace AlphaSynth.Player
                     Sequencer.Play();
                     Output.Play();
                 }
+                else
+                {
+                    FirePositionChanged(value);
+                }
             }
         }
 
@@ -125,11 +132,22 @@ namespace AlphaSynth.Player
             }
         }
 
+        public void SetPlaybackRange(int startTick, int endTick)
+        {
+            // pause playback to prevent flickering on audio, 
+            // for now we don't support on-the-fly changing of the playback range.
+            if (State == SynthPlayerState.Playing)
+            {
+                Pause();
+            }
+            Sequencer.SetPlaybackRange(startTick, endTick);
+            TickPosition = startTick;
+        }
+
         public bool IsReady
         {
             get { return IsSoundFontLoaded && IsMidiLoaded; }
         }
-
 
         public void Play()
         {
@@ -159,19 +177,13 @@ namespace AlphaSynth.Player
 
         public void Stop()
         {
-            if (State == SynthPlayerState.Stopped || !IsReady) return;
-            Logger.Debug("Stopping playback");
-            Sequencer.Stop();
-            Synth.Stop();
-            Output.Stop();
-            State = SynthPlayerState.Stopped;
-            OnPlayerStateChanged(new PlayerStateChangedEventArgs(State));
-            FirePositionChanged(0);
+            Pause();
+            TimePosition = (Sequencer.PlaybackRangeStart > 0) ? Sequencer.PlaybackRangeStart : 0;
         }
 
         public void LoadSoundFontUrl(string url)
         {
-            if (State != SynthPlayerState.Stopped) return;
+            if (State != SynthPlayerState.Paused) return;
             Logger.Info("Start loading soundfont from url " + url);
             var loader = new UrlLoader();
             loader.Url = url;
@@ -190,7 +202,7 @@ namespace AlphaSynth.Player
 
         public void LoadSoundFontBytes(byte[] data)
         {
-            if (State != SynthPlayerState.Stopped) return;
+            if (State != SynthPlayerState.Paused) return;
             var input = ByteBuffer.FromBuffer(data);
             try
             {
@@ -214,7 +226,7 @@ namespace AlphaSynth.Player
 
         public void LoadMidiUrl(string url)
         {
-            if (State != SynthPlayerState.Stopped) return;
+            if (State != SynthPlayerState.Paused) return;
             Logger.Info("Start loading midi from url " + url);
             var loader = new UrlLoader();
             loader.Url = url;
@@ -233,7 +245,7 @@ namespace AlphaSynth.Player
 
         public void LoadMidiBytes(byte[] data)
         {
-            if (State != SynthPlayerState.Stopped) return;
+            if (State != SynthPlayerState.Paused) return;
             var input = ByteBuffer.FromBuffer(data);
             try
             {
@@ -268,9 +280,11 @@ namespace AlphaSynth.Player
             OnMidiLoad(new ProgressEventArgs(loaded, total));
         }
 
-        private void FirePositionChanged(int pos)
+        private void FirePositionChanged(double pos)
         {
-            var endTime = (Sequencer.EndTime / Synth.SampleRate) * 1000;
+            Sequencer.CheckForStop(pos);
+
+            var endTime = Math.Ceiling(Sequencer.EndTime / (double)Synth.SampleRate) * 1000;
             var currentTime = pos;
             var endTick = Sequencer.MillisToTicks(endTime);
             var currentTick = Sequencer.MillisToTicks(currentTime);
@@ -386,12 +400,12 @@ namespace AlphaSynth.Player
 
     public class PositionChangedEventArgs : EventArgs
     {
-        public int CurrentTime { get; private set; }
-        public int EndTime { get; private set; }
+        public double CurrentTime { get; private set; }
+        public double EndTime { get; private set; }
         public int CurrentTick { get; private set; }
         public int EndTick { get; private set; }
 
-        public PositionChangedEventArgs(int currentTime, int endTime, int currentTick, int endTick)
+        public PositionChangedEventArgs(double currentTime, double endTime, int currentTick, int endTick)
         {
             CurrentTime = currentTime;
             EndTime = endTime;
