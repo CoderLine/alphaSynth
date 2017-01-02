@@ -111,6 +111,7 @@ class FlashOutputDevice
         logDebug('FlashOutput: Seek - ' + position);
        _currentTime = position;
        _circularBuffer.clear();
+        positionChanged(_currentTime - _latency);
     }
     
     private function setPlaybackSpeed(playbackSpeed:Float)

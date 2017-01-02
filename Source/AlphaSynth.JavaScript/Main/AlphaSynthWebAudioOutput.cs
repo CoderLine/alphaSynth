@@ -80,6 +80,10 @@ namespace AlphaSynth.Main
         {
             _currentTime = position;
             _circularBuffer.Clear();
+            if (PositionChanged != null)
+            {
+                PositionChanged(_currentTime);
+            }
         }
 
         public void SequencerFinished()

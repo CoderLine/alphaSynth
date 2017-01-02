@@ -67,10 +67,7 @@ namespace AlphaSynth.Player
             Output.PositionChanged += pos =>
             {
                 // log position
-                if (State == SynthPlayerState.Playing)
-                {
-                    FirePositionChanged(pos);   
-                }
+                FirePositionChanged(pos);   
             };
 
             Output.Open();
@@ -141,7 +138,11 @@ namespace AlphaSynth.Player
                 Pause();
             }
             Sequencer.SetPlaybackRange(startTick, endTick);
-            TickPosition = startTick;
+            var isLimited = Sequencer.PlaybackRangeEnd > 0;
+            if (isLimited)
+            {
+                TickPosition = startTick;   
+            }
         }
 
         public bool IsReady

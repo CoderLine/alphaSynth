@@ -517,6 +517,9 @@ AlphaSynth.Main.AlphaSynthWebAudioOutput.prototype = {
     Seek: function (position){
         this._currentTime = position;
         this._circularBuffer.Clear();
+        if (this.PositionChanged != null){
+            this.PositionChanged(this._currentTime);
+        }
     },
     SequencerFinished: function (){
         this._finished = true;
@@ -4083,9 +4086,7 @@ AlphaSynth.Player.SynthPlayer = function (){
     }));
     this.Output.add_PositionChanged($CreateAnonymousDelegate(this, function (pos){
         // log position
-        if (this.State == AlphaSynth.Player.SynthPlayerState.Playing){
-            this.FirePositionChanged(pos);
-        }
+        this.FirePositionChanged(pos);
     }));
     this.Output.Open();
 };
@@ -4136,7 +4137,10 @@ AlphaSynth.Player.SynthPlayer.prototype = {
             this.Pause();
         }
         this.Sequencer.SetPlaybackRange(startTick, endTick);
-        this.set_TickPosition(startTick);
+        var isLimited = this.Sequencer.get_PlaybackRangeEnd() > 0;
+        if (isLimited){
+            this.set_TickPosition(startTick);
+        }
     },
     get_IsReady: function (){
         return this.IsSoundFontLoaded && this.IsMidiLoaded;
