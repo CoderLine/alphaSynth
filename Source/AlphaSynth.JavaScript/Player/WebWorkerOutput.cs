@@ -40,13 +40,13 @@ namespace AlphaSynth.Player
             var cmd = data.Member("cmd").As<string>();
             switch (cmd)
             {
-                case "playerSampleRequest":
+                case "alphaSynth.playerSampleRequest":
                     OnSampleRequest();
                     break;
-                case "playerFinished":
+                case "alphaSynth.playerFinished":
                     OnFinished();
                     break;
-                case "playerPositionChanged":
+                case "alphaSynth.playerPositionChanged":
                     OnPositionChanged(data.Member("pos").As<double>());
                     break;
             }
@@ -87,32 +87,32 @@ namespace AlphaSynth.Player
 
         public void SequencerFinished()
         {
-            PostMessage(new { cmd = "playerSequencerFinished" });
+            PostMessage(new { cmd = "alphaSynth.playerSequencerFinished" });
         }
 
         public void AddSamples(SampleArray samples)
         {
-            PostMessage(new { cmd = "playerAddSamples", samples = samples });
+            PostMessage(new { cmd = "alphaSynth.playerAddSamples", samples = samples });
         }
 
         public void Play()
         {
-            PostMessage(new { cmd = "playerPlay" });
+            PostMessage(new { cmd = "alphaSynth.playerPlay" });
         }
 
         public void Pause()
         {
-            PostMessage(new { cmd = "playerPause" });
+            PostMessage(new { cmd = "alphaSynth.playerPause" });
         }
 
         public void Seek(double position)
         {
-            PostMessage(new { cmd = "playerSeek", pos = position });
+            PostMessage(new { cmd = "alphaSynth.playerSeek", pos = position });
         }
 
         public void SetPlaybackSpeed(float playbackSpeed)
         {
-            PostMessage(new { cmd = "setPlaybackSpeed", value = playbackSpeed });
+            PostMessage(new { cmd = "alphaSynth.setPlaybackSpeed", value = playbackSpeed });
         }
     }
 }

@@ -40,7 +40,19 @@ namespace AlphaSynth.Main
         {
             if (!HtmlContext.self.document.As<bool>())
             {
-                new AlphaSynthWebWorker(HtmlContext.self.As<SharpKit.Html.workers.WorkerContext>());
+                var main = HtmlContext.self.As<SharpKit.Html.workers.WorkerContext>();
+                main.addEventListener("message", e =>
+                {
+                    var data = e.As<MessageEvent>().data;
+                    var cmd = data.Member("cmd").As<string>();
+                    switch (cmd)
+                    {
+                        case "alphaSynth.playerReady":
+                            WebWorkerOutput.PreferredSampleRate = data.Member("sampleRate").As<int>();
+                            new AlphaSynthWebWorker(main);
+                            break;
+                    }
+                }, false);
             }
         }
 
@@ -50,10 +62,6 @@ namespace AlphaSynth.Main
             var cmd = data.Member("cmd").As<string>();
             switch (cmd)
             {
-                case "alphaSynth.playerReady":
-                    WebWorkerOutput.PreferredSampleRate = data.Member("sampleRate").As<int>();
-                    Play();
-                    break;
                 case "alphaSynth.play":
                     Play();
                     break;

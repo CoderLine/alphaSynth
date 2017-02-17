@@ -625,10 +625,6 @@ AlphaSynth.Main.AlphaSynthWebWorker.prototype = {
         var data = e.data;
         var cmd = data["cmd"];
         switch (cmd){
-            case "alphaSynth.playerReady":
-                AlphaSynth.Player.WebWorkerOutput.PreferredSampleRate = data["sampleRate"];
-                this.Play();
-                break;
             case "alphaSynth.play":
                 this.Play();
                 break;
@@ -862,7 +858,17 @@ AlphaSynth.Main.AlphaSynthWebWorker.prototype = {
 };
 $StaticConstructor(function (){
     if (!self.document){
-        new AlphaSynth.Main.AlphaSynthWebWorker(self);
+        var main = self;
+        main.addEventListener("message", function (e){
+            var data = e.data;
+            var cmd = data["cmd"];
+            switch (cmd){
+                case "alphaSynth.playerReady":
+                    AlphaSynth.Player.WebWorkerOutput.PreferredSampleRate = data["sampleRate"];
+                    new AlphaSynth.Main.AlphaSynthWebWorker(main);
+                    break;
+            }
+        }, false);
     }
 });
 AlphaSynth.Main.AlphaSynthWebWorkerApiBase = function (player, alphaSynthScriptFile){
@@ -1304,13 +1310,13 @@ AlphaSynth.Player.WebWorkerOutput.prototype = {
         var data = e.data;
         var cmd = data["cmd"];
         switch (cmd){
-            case "playerSampleRequest":
+            case "alphaSynth.playerSampleRequest":
                 this.OnSampleRequest();
                 break;
-            case "playerFinished":
+            case "alphaSynth.playerFinished":
                 this.OnFinished();
                 break;
-            case "playerPositionChanged":
+            case "alphaSynth.playerPositionChanged":
                 this.OnPositionChanged(data["pos"]);
                 break;
         }
@@ -1363,39 +1369,39 @@ AlphaSynth.Player.WebWorkerOutput.prototype = {
     },
     SequencerFinished: function (){
         this._workerSelf.postMessage({
-    cmd: "playerSequencerFinished"
+    cmd: "alphaSynth.playerSequencerFinished"
 }
 );
     },
     AddSamples: function (samples){
         this._workerSelf.postMessage({
-    cmd: "playerAddSamples",
+    cmd: "alphaSynth.playerAddSamples",
     samples: samples
 }
 );
     },
     Play: function (){
         this._workerSelf.postMessage({
-    cmd: "playerPlay"
+    cmd: "alphaSynth.playerPlay"
 }
 );
     },
     Pause: function (){
         this._workerSelf.postMessage({
-    cmd: "playerPause"
+    cmd: "alphaSynth.playerPause"
 }
 );
     },
     Seek: function (position){
         this._workerSelf.postMessage({
-    cmd: "playerSeek",
+    cmd: "alphaSynth.playerSeek",
     pos: position
 }
 );
     },
     SetPlaybackSpeed: function (playbackSpeed){
         this._workerSelf.postMessage({
-    cmd: "setPlaybackSpeed",
+    cmd: "alphaSynth.setPlaybackSpeed",
     value: playbackSpeed
 }
 );
