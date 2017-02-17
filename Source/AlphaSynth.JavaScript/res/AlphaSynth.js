@@ -1009,66 +1009,74 @@ AlphaSynth.Main.AlphaSynthWebWorkerApiBase.prototype = {
         var data = e.data;
         var cmd = data["cmd"];
         switch (cmd){
-            case "isReadyForPlay":
-            case "getState":
-            case "getMasterVolume":
-            case "isSoundFontLoaded":
-            case "isMidiLoaded":
-                this.TriggerEvent(cmd, [data["value"]]);
+            case "alphaSynth.isReadyForPlay":
+                this.TriggerEvent("isReadyForPlay", [data["value"]]);
                 break;
-            case "ready":
+            case "alphaSynth.getState":
+                this.TriggerEvent("getState", [data["value"]]);
+                break;
+            case "alphaSynth.getMasterVolume":
+                this.TriggerEvent("getMasterVolume", [data["value"]]);
+                break;
+            case "alphaSynth.isSoundFontLoaded":
+                this.TriggerEvent("isSoundFontLoaded", [data["value"]]);
+                break;
+            case "alphaSynth.isMidiLoaded":
+                this.TriggerEvent("isMidiLoaded", [data["value"]]);
+                break;
+            case "alphaSynth.ready":
                 this._isWorkerReady = true;
                 this.CheckForReadyState();
                 break;
-            case "positionChanged":
-                this.TriggerEvent(cmd, [data["currentTime"], data["endTime"], data["currentTick"], data["endTick"]]);
+            case "alphaSynth.positionChanged":
+                this.TriggerEvent("positionChanged", [data["currentTime"], data["endTime"], data["currentTick"], data["endTick"]]);
                 break;
-            case "playerStateChanged":
-                this.TriggerEvent(cmd, [data["state"]]);
+            case "alphaSynth.playerStateChanged":
+                this.TriggerEvent("playerStateChanged", [data["state"]]);
                 break;
-            case "finished":
-                this.TriggerEvent(cmd, null);
+            case "alphaSynth.finished":
+                this.TriggerEvent("finished", null);
                 break;
-            case "soundFontLoad":
-                this.TriggerEvent(cmd, [data["loaded"], data["total"]]);
+            case "alphaSynth.soundFontLoad":
+                this.TriggerEvent("soundFontLoad", [data["loaded"], data["total"]]);
                 break;
-            case "soundFontLoaded":
-                this.TriggerEvent(cmd, null);
+            case "alphaSynth.soundFontLoaded":
+                this.TriggerEvent("soundFontLoaded", null);
                 break;
-            case "soundFontLoadFailed":
-                this.TriggerEvent(cmd, null);
+            case "alphaSynth.soundFontLoadFailed":
+                this.TriggerEvent("soundFontLoadFailed", null);
                 break;
-            case "midiLoad":
-                this.TriggerEvent(cmd, [data["loaded"], data["total"]]);
+            case "alphaSynth.midiLoad":
+                this.TriggerEvent("midiLoad", [data["loaded"], data["total"]]);
                 break;
-            case "midiFileLoaded":
-                this.TriggerEvent(cmd, null);
+            case "alphaSynth.midiFileLoaded":
+                this.TriggerEvent("midiFileLoaded", null);
                 break;
-            case "midiFileLoadFailed":
-                this.TriggerEvent(cmd, null);
+            case "alphaSynth.midiFileLoadFailed":
+                this.TriggerEvent("midiFileLoadFailed", null);
                 break;
-            case "readyForPlay":
-                this.TriggerEvent(cmd, [data["value"]]);
+            case "alphaSynth.readyForPlay":
+                this.TriggerEvent("readyForPlay", [data["value"]]);
                 break;
-            case "log":
+            case "alphaSynth.log":
                 this.Log(data["level"], data["message"]);
                 break;
-            case "playerSequencerFinished":
+            case "alphaSynth.playerSequencerFinished":
                 this._player.SequencerFinished();
                 break;
-            case "playerAddSamples":
+            case "alphaSynth.playerAddSamples":
                 this._player.AddSamples(data["samples"]);
                 break;
-            case "playerPlay":
+            case "alphaSynth.playerPlay":
                 this._player.Play();
                 break;
-            case "playerPause":
+            case "alphaSynth.playerPause":
                 this._player.Pause();
                 break;
-            case "playerSeek":
+            case "alphaSynth.playerSeek":
                 this._player.Seek(data["pos"]);
                 break;
-            case "setPlaybackSpeed":
+            case "alphaSynth.setPlaybackSpeed":
                 this._player.SetPlaybackSpeed(data["value"]);
                 break;
         }

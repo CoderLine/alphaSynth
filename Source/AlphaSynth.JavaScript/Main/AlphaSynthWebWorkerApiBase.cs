@@ -170,69 +170,77 @@ namespace AlphaSynth.Main
             switch (cmd)
             {
                 // responses
-                case "isReadyForPlay":
-                case "getState":
-                case "getMasterVolume":
-                case "isSoundFontLoaded":
-                case "isMidiLoaded":
-                    TriggerEvent(cmd, new[] { data.Member("value") });
+                case "alphaSynth.isReadyForPlay":
+                    TriggerEvent("isReadyForPlay", new[] { data.Member("value") });
+                    break;
+                case "alphaSynth.getState":
+                    TriggerEvent("getState", new[] { data.Member("value") });
+                    break;
+                case "alphaSynth.getMasterVolume":
+                    TriggerEvent("getMasterVolume", new[] { data.Member("value") });
+                    break;
+                case "alphaSynth.isSoundFontLoaded":
+                    TriggerEvent("isSoundFontLoaded", new[] { data.Member("value") });
+                    break;
+                case "alphaSynth.isMidiLoaded":
+                    TriggerEvent("isMidiLoaded", new[] { data.Member("value") });
                     break;
 
                 // events
-                case "ready":
+                case "alphaSynth.ready":
                     _isWorkerReady = true;
                     CheckForReadyState();
                     break;
-                case "positionChanged":
-                    TriggerEvent(cmd, new[] { data.Member("currentTime"), data.Member("endTime"), data.Member("currentTick"), data.Member("endTick") });
+                case "alphaSynth.positionChanged":
+                    TriggerEvent("positionChanged", new[] { data.Member("currentTime"), data.Member("endTime"), data.Member("currentTick"), data.Member("endTick") });
                     break;
-                case "playerStateChanged":
-                    TriggerEvent(cmd, new[] { data.Member("state") });
+                case "alphaSynth.playerStateChanged":
+                    TriggerEvent("playerStateChanged", new[] { data.Member("state") });
                     break;
-                case "finished":
-                    TriggerEvent(cmd);
+                case "alphaSynth.finished":
+                    TriggerEvent("finished");
                     break;
-                case "soundFontLoad":
-                    TriggerEvent(cmd, new[] { data.Member("loaded"), data.Member("total") });
+                case "alphaSynth.soundFontLoad":
+                    TriggerEvent("soundFontLoad", new[] { data.Member("loaded"), data.Member("total") });
                     break;
-                case "soundFontLoaded":
-                    TriggerEvent(cmd);
+                case "alphaSynth.soundFontLoaded":
+                    TriggerEvent("soundFontLoaded");
                     break;
-                case "soundFontLoadFailed":
-                    TriggerEvent(cmd);
+                case "alphaSynth.soundFontLoadFailed":
+                    TriggerEvent("soundFontLoadFailed");
                     break;
-                case "midiLoad":
-                    TriggerEvent(cmd, new[] { data.Member("loaded"), data.Member("total") });
+                case "alphaSynth.midiLoad":
+                    TriggerEvent("midiLoad", new[] { data.Member("loaded"), data.Member("total") });
                     break;
-                case "midiFileLoaded":
-                    TriggerEvent(cmd);
+                case "alphaSynth.midiFileLoaded":
+                    TriggerEvent("midiFileLoaded");
                     break;
-                case "midiFileLoadFailed":
-                    TriggerEvent(cmd);
+                case "alphaSynth.midiFileLoadFailed":
+                    TriggerEvent("midiFileLoadFailed");
                     break;
-                case "readyForPlay":
-                    TriggerEvent(cmd, new[] { data.Member("value") });
+                case "alphaSynth.readyForPlay":
+                    TriggerEvent("readyForPlay", new[] { data.Member("value") });
                     break;
-                case "log":
+                case "alphaSynth.log":
                     Log(data.Member("level").As<LogLevel>(), data.Member("message").As<string>());
                     break;
                 // js player communication
-                case "playerSequencerFinished":
+                case "alphaSynth.playerSequencerFinished":
                     _player.SequencerFinished();
                     break;
-                case "playerAddSamples":
+                case "alphaSynth.playerAddSamples":
                     _player.AddSamples(data.Member("samples").As<SampleArray>());
                     break;
-                case "playerPlay":
+                case "alphaSynth.playerPlay":
                     _player.Play();
                     break;
-                case "playerPause":
+                case "alphaSynth.playerPause":
                     _player.Pause();
                     break;
-                case "playerSeek":
+                case "alphaSynth.playerSeek":
                     _player.Seek(data.Member("pos").As<int>());
                     break;
-                case "setPlaybackSpeed":
+                case "alphaSynth.setPlaybackSpeed":
                     _player.SetPlaybackSpeed(data.Member("value").As<float>());
                     break;
             }
