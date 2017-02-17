@@ -37,36 +37,7 @@ namespace AlphaSynth.Main
             _alphaSynthScriptFile = alphaSynthScriptFile;
 
             // create web worker
-            _synth = new Worker(CreateWorkerUrl());
-        }
-
-
-        private string CreateWorkerUrl()
-        {
-            var source = @"self.onmessage = function(e) {
-                if(e.data.cmd == 'playerReady') {
-                    importScripts(e.data.alphaSynthScript);
-                    AlphaSynth.Player.WebWorkerOutput.PreferredSampleRate = e.data.sampleRate;
-                    new AlphaSynth.Main.AlphaSynthWebWorker(self);
-                }
-            }";
-
-            JsCode("window.URL = window.URL || window.webkitURL;");
-            JsCode("window.BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder  || window.MozBlobBuilder;");
-
-            Blob blob;
-            try
-            {
-                blob = new Blob(new[] { source }, new { type = "application/javascript" });
-            }
-            catch
-            {
-                dynamic builder = JsCode("new BlobBuilder()");
-                builder.append(source);
-                blob = builder.getBlob();
-            }
-
-            return JsCode("URL.createObjectURL(blob)").As<string>();
+            _synth = new Worker(_alphaSynthScriptFile);
         }
 
         public void Startup()
@@ -76,7 +47,7 @@ namespace AlphaSynth.Main
             // start worker
             _synth.addEventListener("message", HandleWorkerMessage, false);
 
-            _synth.postMessage(new { cmd = "playerReady", alphaSynthScript = _alphaSynthScriptFile, sampleRate = _player.SampleRate });
+            _synth.postMessage(new { cmd = "alphaSynth.playerReady", alphaSynthScript = _alphaSynthScriptFile, sampleRate = _player.SampleRate });
         }
 
         //
@@ -84,102 +55,102 @@ namespace AlphaSynth.Main
 
         public void IsReadyForPlay()
         {
-            _synth.postMessage(new { cmd = "isReadyForPlay" });
+            _synth.postMessage(new { cmd = "alphaSynth.isReadyForPlay" });
         }
 
         public void Play()
         {
-            _synth.postMessage(new { cmd = "play" });
+            _synth.postMessage(new { cmd = "alphaSynth.play" });
         }
 
         public void Pause()
         {
-            _synth.postMessage(new { cmd = "pause" });
+            _synth.postMessage(new { cmd = "alphaSynth.pause" });
         }
 
         public void PlayPause()
         {
-            _synth.postMessage(new { cmd = "playPause" });
+            _synth.postMessage(new { cmd = "alphaSynth.playPause" });
         }
 
         public void Stop()
         {
-            _synth.postMessage(new { cmd = "stop" });
+            _synth.postMessage(new { cmd = "alphaSynth.stop" });
         }
 
         public void SetPositionTick(int tick)
         {
-            _synth.postMessage(new { cmd = "setPositionTick", tick = tick });
+            _synth.postMessage(new { cmd = "alphaSynth.setPositionTick", tick = tick });
         }
 
         public void SetPositionTime(int millis)
         {
-            _synth.postMessage(new { cmd = "setPositionTime", time = millis });
+            _synth.postMessage(new { cmd = "alphaSynth.setPositionTime", time = millis });
         }
 
         public void LoadSoundFontUrl(string url)
         {
-            _synth.postMessage(new { cmd = "loadSoundFontUrl", url = QualifyUrl(url) });
+            _synth.postMessage(new { cmd = "alphaSynth.loadSoundFontUrl", url = QualifyUrl(url) });
         }
 
         public void LoadSoundFontBytes(byte[] data)
         {
-            _synth.postMessage(new { cmd = "loadSoundFontBytes", data = data });
+            _synth.postMessage(new { cmd = "alphaSynth.loadSoundFontBytes", data = data });
         }
 
         public void LoadMidiUrl(string url)
         {
-            _synth.postMessage(new { cmd = "loadMidiUrl", url = QualifyUrl(url) });
+            _synth.postMessage(new { cmd = "alphaSynth.loadMidiUrl", url = QualifyUrl(url) });
         }
 
         public void LoadMidiBytes(byte[] data)
         {
-            _synth.postMessage(new { cmd = "loadMidiBytes", data = data });
+            _synth.postMessage(new { cmd = "alphaSynth.loadMidiBytes", data = data });
         }
 
         public void GetState()
         {
-            _synth.postMessage(new { cmd = "getState" });
+            _synth.postMessage(new { cmd = "alphaSynth.getState" });
         }
 
         public void GetMasterVolume()
         {
-            _synth.postMessage(new { cmd = "getMasterVolume" });
+            _synth.postMessage(new { cmd = "alphaSynth.getMasterVolume" });
         }
 
         public void SetMasterVolume(float volume)
         {
-            _synth.postMessage(new { cmd = "setMasterVolume", value = volume });
+            _synth.postMessage(new { cmd = "alphaSynth.setMasterVolume", value = volume });
         }
 
         public void GetPlaybackSpeed()
         {
-            _synth.postMessage(new { cmd = "getPlaybackSpeed" });
+            _synth.postMessage(new { cmd = "alphaSynth.getPlaybackSpeed" });
         }
 
         public void SetPlaybackSpeed(float playbackSpeed)
         {
-            _synth.postMessage(new { cmd = "setPlaybackSpeed", value = playbackSpeed });
+            _synth.postMessage(new { cmd = "alphaSynth.setPlaybackSpeed", value = playbackSpeed });
         }
 
         public void SetPlaybackRange(int startTick, int endTick)
         {
-            _synth.postMessage(new { cmd = "setPlaybackRange", startTick = startTick, endTick = endTick });
+            _synth.postMessage(new { cmd = "alphaSynth.setPlaybackRange", startTick = startTick, endTick = endTick });
         }
 
         public void IsSoundFontLoaded()
         {
-            _synth.postMessage(new { cmd = "isSoundFontLoaded" });
+            _synth.postMessage(new { cmd = "alphaSynth.isSoundFontLoaded" });
         }
 
         public void IsMidiLoaded()
         {
-            _synth.postMessage(new { cmd = "isMidiLoaded" });
+            _synth.postMessage(new { cmd = "alphaSynth.isMidiLoaded" });
         }
 
         public void SetLogLevel(LogLevel level)
         {
-            _synth.postMessage(new { cmd = "setLogLevel", level = level });
+            _synth.postMessage(new { cmd = "alphaSynth.setLogLevel", level = level });
         }
 
         private static string QualifyUrl(string url)
@@ -304,17 +275,17 @@ namespace AlphaSynth.Main
 
         public void PlayerSampleRequest()
         {
-            _synth.postMessage(new { cmd = "playerSampleRequest" });
+            _synth.postMessage(new { cmd = "alphaSynth.playerSampleRequest" });
         }
 
         public void PlayerFinished()
         {
-            _synth.postMessage(new { cmd = "playerFinished" });
+            _synth.postMessage(new { cmd = "alphaSynth.playerFinished" });
         }
 
         public void PlayerPositionChanged(double pos)
         {
-            _synth.postMessage(new { cmd = "playerPositionChanged", pos = pos });
+            _synth.postMessage(new { cmd = "alphaSynth.playerPositionChanged", pos = pos });
         }
 
         private void Log(LogLevel level, string message)

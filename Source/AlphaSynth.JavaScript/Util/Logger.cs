@@ -59,7 +59,10 @@ namespace AlphaSynth.Util
 
             var caller = GetCaller();
 
-            LogHandler(caller + "-" + msg);
+            if (LogHandler != null)
+            {
+                LogHandler(caller + "-" + msg);
+            }
         }
 
 

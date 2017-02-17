@@ -36,70 +36,82 @@ namespace AlphaSynth.Main
             OnReady();
         }
 
+        static AlphaSynthWebWorker()
+        {
+            if (!HtmlContext.self.document.As<bool>())
+            {
+                new AlphaSynthWebWorker(HtmlContext.self.As<SharpKit.Html.workers.WorkerContext>());
+            }
+        }
+
         public void HandleMessage(DOMEvent e)
         {
             var data = e.As<MessageEvent>().data;
             var cmd = data.Member("cmd").As<string>();
             switch (cmd)
             {
-                case "play":
+                case "alphaSynth.playerReady":
+                    WebWorkerOutput.PreferredSampleRate = data.Member("sampleRate").As<int>();
                     Play();
                     break;
-                case "pause":
+                case "alphaSynth.play":
+                    Play();
+                    break;
+                case "alphaSynth.pause":
                     Pause();
                     break;
-                case "isReadyForPlay":
-                    PostMessage(new { cmd = "isReadyForPlay", value = IsReadyForPlay() });
+                case "alphaSynth.isReadyForPlay":
+                    PostMessage(new { cmd = "alphaSynth.isReadyForPlay", value = IsReadyForPlay() });
                     break;
-                case "getMasterVolume":
-                    PostMessage(new { cmd = "getMasterVolume", value = _player.MasterVolume });
+                case "alphaSynth.getMasterVolume":
+                    PostMessage(new { cmd = "alphaSynth.getMasterVolume", value = _player.MasterVolume });
                     break;
-                case "setMasterVolume":
+                case "alphaSynth.setMasterVolume":
                     _player.MasterVolume = data.Member("value").As<float>();
                     break;
-                case "getPlaybackSpeed":
-                    PostMessage(new { cmd = "getPlaybackSpeed", value = _player.Sequencer.PlaybackSpeed });
+                case "alphaSynth.getPlaybackSpeed":
+                    PostMessage(new { cmd = "alphaSynth.getPlaybackSpeed", value = _player.Sequencer.PlaybackSpeed });
                     break;
-                case "setPlaybackSpeed":
+                case "alphaSynth.setPlaybackSpeed":
                     _player.PlaybackSpeed = data.Member("value").As<float>();
                     break;
-                case "setPlaybackRange":
+                case "alphaSynth.setPlaybackRange":
                     SetPlaybackRange(data.Member("startTick").As<int>(), data.Member("endTick").As<int>());
                     break;
-                case "playPause":
+                case "alphaSynth.playPause":
                     PlayPause();
                     break;
-                case "stop":
+                case "alphaSynth.stop":
                     Stop();
                     break;
-                case "setPositionTick":
+                case "alphaSynth.setPositionTick":
                     SetPositionTick(data.Member("tick").As<int>());
                     break;
-                case "setPositionTime":
+                case "alphaSynth.setPositionTime":
                     SetPositionTime(data.Member("time").As<int>());
                     break;
-                case "loadSoundFontUrl":
+                case "alphaSynth.loadSoundFontUrl":
                     LoadSoundFontUrl(data.Member("url").As<string>());
                     break;
-                case "loadSoundFontBytes":
+                case "alphaSynth.loadSoundFontBytes":
                     LoadSoundFontBytes(data.Member("data").As<byte[]>());
                     break;
-                case "loadMidiUrl":
+                case "alphaSynth.loadMidiUrl":
                     LoadMidiUrl(data.Member("url").As<string>());
                     break;
-                case "loadMidiBytes":
+                case "alphaSynth.loadMidiBytes":
                     LoadMidiBytes(data.Member("data").As<byte[]>());
                     break;
-                case "getState":
+                case "alphaSynth.getState":
                     PostMessage(new { cmd = "getState", value = GetState() });
                     break;
-                case "isSoundFontLoaded":
+                case "alphaSynth.isSoundFontLoaded":
                     PostMessage(new { cmd = "isSoundFontLoaded", value = IsSoundFontLoaded() });
                     break;
-                case "isMidiLoaded":
+                case "alphaSynth.isMidiLoaded":
                     PostMessage(new { cmd = "isMidiLoaded", value = IsMidiLoaded() });
                     break;
-                case "setLogLevel":
+                case "alphaSynth.setLogLevel":
                     SetLogLevel(data.Member("level").As<LogLevel>());
                     break;
             }
@@ -211,14 +223,14 @@ namespace AlphaSynth.Main
 
         public void OnReady()
         {
-            PostMessage(new { cmd = "ready" });
+            PostMessage(new { cmd = "alphaSynth.ready" });
         }
 
         public void OnPositionChanged(object sender, PositionChangedEventArgs e)
         {
             PostMessage(new
             {
-                cmd = "positionChanged",
+                cmd = "alphaSynth.positionChanged",
                 currentTime = e.CurrentTime,
                 endTime = e.EndTime,
                 currentTick = e.CurrentTick,
@@ -230,7 +242,7 @@ namespace AlphaSynth.Main
         {
             PostMessage(new
             {
-                cmd = "playerStateChanged",
+                cmd = "alphaSynth.playerStateChanged",
                 state = e.State
             });
         }
@@ -239,7 +251,7 @@ namespace AlphaSynth.Main
         {
             PostMessage(new
             {
-                cmd = "finished"
+                cmd = "alphaSynth.finished"
             });
         }
 
@@ -247,7 +259,7 @@ namespace AlphaSynth.Main
         {
             PostMessage(new
             {
-                cmd = "soundFontLoad",
+                cmd = "alphaSynth.soundFontLoad",
                 loaded = e.Loaded,
                 total = e.Total
             });
@@ -257,7 +269,7 @@ namespace AlphaSynth.Main
         {
             PostMessage(new
             {
-                cmd = "soundFontLoaded"
+                cmd = "alphaSynth.soundFontLoaded"
             });
         }
 
@@ -265,7 +277,7 @@ namespace AlphaSynth.Main
         {
             PostMessage(new
             {
-                cmd = "soundFontLoadFailed"
+                cmd = "alphaSynth.soundFontLoadFailed"
             });
         }
 
@@ -273,7 +285,7 @@ namespace AlphaSynth.Main
         {
             PostMessage(new
             {
-                cmd = "midiLoad",
+                cmd = "alphaSynth.midiLoad",
                 loaded = e.Loaded,
                 total = e.Total
             });
@@ -283,7 +295,7 @@ namespace AlphaSynth.Main
         {
             PostMessage(new
             {
-                cmd = "midiFileLoaded"
+                cmd = "alphaSynth.midiFileLoaded"
             });
         }
 
@@ -291,7 +303,7 @@ namespace AlphaSynth.Main
         {
             PostMessage(new
             {
-                cmd = "midiFileLoadFailed"
+                cmd = "alphaSynth.midiFileLoadFailed"
             });
         }
 
@@ -299,7 +311,7 @@ namespace AlphaSynth.Main
         {
             PostMessage(new
             {
-                cmd = "readyForPlay",
+                cmd = "alphaSynth.readyForPlay",
                 value = IsReadyForPlay()
             });
         }
@@ -308,7 +320,7 @@ namespace AlphaSynth.Main
         {
             PostMessage(new
             {
-                cmd = "log",
+                cmd = "alphaSynth.log",
                 level = level,
                 message = s
             });
