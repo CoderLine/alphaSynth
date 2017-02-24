@@ -1,6 +1,7 @@
 ﻿using System;
 using AlphaSynth.Ds;
 using AlphaSynth.Player;
+using AlphaSynth.Util;
 using SharpKit.Html;
 using SharpKit.Html.webaudio;
 using SharpKit.JavaScript;
@@ -41,6 +42,25 @@ namespace AlphaSynth.Main
 
             JsContext.JsCode("window.AudioContext = window.AudioContext || window.webkitAudioContext");
             _context = new AudioContext();
+
+            // possible fix for Web Audio in iOS 9 (issue #4)
+            dynamic ctx = _context;
+            if (ctx.state == "suspended")
+            {
+                EventListener resume = null;
+                resume = e =>
+                {
+                    ctx.resume();
+                    HtmlContext.window.setTimeout(() =>
+                    {
+                        if (ctx.state == "running")
+                        {
+                            HtmlContext.document.body.removeEventListener("touchend", resume, false);
+                        }
+                    }, 0);
+                };
+                HtmlContext.document.body.addEventListener("touchend", resume, false);
+            }
 
             _currentTime = 0;
 
