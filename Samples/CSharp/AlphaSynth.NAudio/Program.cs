@@ -107,7 +107,6 @@ namespace AlphaSynth.NAudio
                 }
             }
 
-
             // 
             // Cleanup
             player.Pause();

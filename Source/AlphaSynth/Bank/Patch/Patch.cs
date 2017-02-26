@@ -34,7 +34,7 @@ namespace AlphaSynth.Bank.Patch
         }
 
         public abstract bool Start(VoiceParameters voiceparams);
-        public abstract void Process(VoiceParameters voiceparams, int startIndex, int endIndex);
+        public abstract void Process(VoiceParameters voiceparams, int startIndex, int endIndex, bool isMuted);
         public abstract void Stop(VoiceParameters voiceparams);
     }
 }

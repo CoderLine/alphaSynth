@@ -242,7 +242,7 @@ namespace AlphaSynth.Main
         /// <inheritdoc />
         public void SetChannelProgram(int channel, byte program)
         {
-            program = SynthHelper.ClampI(program, SynthConstants.MinProgram, SynthConstants.MaxProgram);
+            program = SynthHelper.ClampB(program, SynthConstants.MinProgram, SynthConstants.MaxProgram);
             _synth.postMessage(new { cmd = AlphaSynthWebWorker.CmdSetChannelProgram, channel = channel, program = program });
         }
 

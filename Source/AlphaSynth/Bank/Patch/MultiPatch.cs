@@ -90,7 +90,7 @@ namespace AlphaSynth.Bank.Patch
             return false;
         }
 
-        public override void Process(VoiceParameters voiceparams, int startIndex, int endIndex)
+        public override void Process(VoiceParameters voiceparams, int startIndex, int endIndex, bool isMuted)
         {
 
         }
@@ -98,7 +98,7 @@ namespace AlphaSynth.Bank.Patch
         public override void Stop(VoiceParameters voiceparams)
         {
         }
-        
+
         public void LoadSf2(Sf2Region[] regions, AssetManager assets)
         {
             _intervalList = new PatchInterval[regions.Length];

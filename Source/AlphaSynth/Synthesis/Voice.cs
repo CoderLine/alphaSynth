@@ -57,13 +57,14 @@ namespace AlphaSynth.Synthesis
             VoiceParams.State = VoiceStateEnum.Stopped;
         }
 
-        public void Process(int startIndex, int endIndex)
+        public void Process(int startIndex, int endIndex, bool isMuted)
         {
             //do not process if the voice is stopped
             if (VoiceParams.State == VoiceStateEnum.Stopped)
                 return;
+            
             //process using the patch's algorithm
-            Patch.Process(VoiceParams, startIndex, endIndex);
+            Patch.Process(VoiceParams, startIndex, endIndex, isMuted);
         }
 
         public void Configure(int channel, int note, int velocity, Patch patch, SynthParameters synthParams)

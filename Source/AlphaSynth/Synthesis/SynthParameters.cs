@@ -89,8 +89,6 @@ namespace AlphaSynth.Synthesis
         public CCValue Rpn { get; set; }
         public Synthesizer Synth { get; set; }
 
-        public bool IsMuted { get; set; }
-        public bool IsSolo { get; set; }
 
         //These are updated whenever a midi event that affects them is recieved. 
 

@@ -95,14 +95,15 @@ namespace AlphaSynth.Bank.Patch
             }
         }
 
-        public override void Process(VoiceParameters voiceparams, int startIndex, int endIndex)
+        public override void Process(VoiceParameters voiceparams, int startIndex, int endIndex, bool isMuted)
         {
             //--Base pitch calculation
             var basePitchFrequency = SynthHelper.CentsToPitch(voiceparams.SynthParams.CurrentPitch)*gen.Frequency;
             var pitchWithBend = basePitchFrequency*SynthHelper.CentsToPitch(voiceparams.PitchOffset);
             var basePitch = pitchWithBend / voiceparams.SynthParams.Synth.SampleRate;
 
-            float baseVolume = voiceparams.SynthParams.Synth.MasterVolume * voiceparams.SynthParams.CurrentVolume * SynthConstants.DefaultMixGain;
+            float baseVolume = isMuted ? 0 : voiceparams.SynthParams.Synth.MasterVolume * voiceparams.SynthParams.CurrentVolume * SynthConstants.DefaultMixGain;
+
             //--Main Loop
             for (int x = startIndex; x < endIndex; x += SynthConstants.DefaultBlockSize * SynthConstants.AudioChannels)
             {

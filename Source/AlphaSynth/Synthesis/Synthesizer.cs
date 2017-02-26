@@ -16,6 +16,7 @@
  * License along with this library.
  */
 using System;
+using System.Security.Authentication.ExtendedProtection;
 using AlphaSynth.Bank;
 using AlphaSynth.Bank.Patch;
 using AlphaSynth.Ds;
@@ -46,6 +47,10 @@ namespace AlphaSynth.Synthesis
         private readonly Patch[] _layerList;
         private readonly LinkedList<SynthEvent> _midiEventQueue;
         private readonly int[] _midiEventCounts;
+
+        private FastDictionary<int, bool> _mutedChannels;
+        private FastDictionary<int, bool> _soloChannels;
+        private bool _isAnySolo;
 
         /// <summary>
         /// The size of the individual sub buffers in samples
@@ -110,6 +115,9 @@ namespace AlphaSynth.Synthesis
             _midiEventCounts = new int[MicroBufferCount];
             _layerList = new Patch[15];
 
+            _mutedChannels = new FastDictionary<int, bool>();
+            _soloChannels = new FastDictionary<int, bool>();
+
             ResetSynthControls();
         }
 
@@ -160,6 +168,7 @@ namespace AlphaSynth.Synthesis
                 /*Break the process loop into sections representing the smallest timeframe before the midi controls need to be updated
                 the bigger the timeframe the more efficent the process is, but playback quality will be reduced.*/
                 var sampleIndex = 0;
+                var anySolo = _isAnySolo;
                 for (int x = 0; x < MicroBufferCount; x++)
                 {
                     if (_midiEventQueue.Length > 0)
@@ -174,7 +183,11 @@ namespace AlphaSynth.Synthesis
                     var node = _voiceManager.ActiveVoices.First; //node used to traverse the active voices
                     while (node != null)
                     {
-                        node.Value.Process(sampleIndex, sampleIndex + MicroBufferSize * SynthConstants.AudioChannels);
+                        var channel = node.Value.VoiceParams.Channel;
+                        // channel is muted if it is either explicitley muted, or another channel is set to solo but not this one. 
+                        var isChannelMuted = _mutedChannels.ContainsKey(channel) ||
+                                             (anySolo && !_soloChannels.ContainsKey(channel));
+                        node.Value.Process(sampleIndex, sampleIndex + MicroBufferSize * SynthConstants.AudioChannels, isChannelMuted);
                         //if an active voice has stopped remove it from the list
                         if (node.Value.VoiceParams.State == VoiceStateEnum.Stopped)
                         {
@@ -556,23 +569,35 @@ namespace AlphaSynth.Synthesis
 
         public void SetChannelMute(int channel, bool mute)
         {
-            if (channel < 0 || channel >= _synthChannels.Length) return;
-            _synthChannels[channel].IsMuted = mute;
+            if (mute)
+            {
+                _mutedChannels[channel] = true;
+            }
+            else
+            {
+                _mutedChannels.Remove(channel);
+            }
         }
 
         public void ResetChannelStates()
         {
-            foreach (var synthChannel in _synthChannels)
-            {
-                synthChannel.IsSolo = false;
-                synthChannel.IsMuted = false;
-            }
+            _mutedChannels = new FastDictionary<int, bool>();
+            _soloChannels = new FastDictionary<int, bool>();
+            _isAnySolo = false;
         }
 
         public void SetChannelSolo(int channel, bool solo)
         {
-            if (channel < 0 || channel >= _synthChannels.Length) return;
-            _synthChannels[channel].IsSolo = solo;
+            if (solo)
+            {
+                _soloChannels[channel] = true;
+            }
+            else
+            {
+                _soloChannels.Remove(channel);
+            }
+
+            _isAnySolo = _soloChannels.Count > 0;
         }
 
         public void SetChannelVolume(int channel, double volume)

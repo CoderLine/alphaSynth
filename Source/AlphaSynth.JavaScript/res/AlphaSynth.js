@@ -542,6 +542,9 @@ AlphaSynth.Main.AlphaSynthWebWorker.prototype = {
             case "alphaSynth.setChannelProgram":
                 this._player.SetChannelProgram(data["channel"], data["program"]);
                 break;
+            case "alphaSynth.resetChannelStates":
+                this._player.ResetChannelStates();
+                break;
         }
     },
     LoadMidiUrl: function (url){
@@ -671,6 +674,7 @@ $StaticConstructor(function (){
     AlphaSynth.Main.AlphaSynthWebWorker.CmdSetChannelSolo = "alphaSynth.setChannelSolo";
     AlphaSynth.Main.AlphaSynthWebWorker.CmdSetChannelVolume = "alphaSynth.setChannelVolume";
     AlphaSynth.Main.AlphaSynthWebWorker.CmdSetChannelProgram = "alphaSynth.setChannelProgram";
+    AlphaSynth.Main.AlphaSynthWebWorker.CmdResetChannelStates = "alphaSynth.resetChannelStates";
     AlphaSynth.Main.AlphaSynthWebWorker.CmdReady = "alphaSynth.ready";
     AlphaSynth.Main.AlphaSynthWebWorker.CmdReadyForPlayback = "alphaSynth.readyForPlayback";
     AlphaSynth.Main.AlphaSynthWebWorker.CmdPositionChanged = "alphaSynth.positionChanged";
@@ -874,6 +878,11 @@ AlphaSynth.Main.AlphaSynthWebWorkerApi.prototype = {
             mute: mute
         });
     },
+    ResetChannelStates: function (){
+        this._synth.postMessage({
+            cmd: "alphaSynth.resetChannelStates"
+        });
+    },
     SetChannelSolo: function (channel, solo){
         this._synth.postMessage({
             cmd: "alphaSynth.setChannelSolo",
@@ -890,7 +899,7 @@ AlphaSynth.Main.AlphaSynthWebWorkerApi.prototype = {
         });
     },
     SetChannelProgram: function (channel, program){
-        program = AlphaSynth.Synthesis.SynthHelper.ClampI(program, 0, 127);
+        program = AlphaSynth.Synthesis.SynthHelper.ClampB(program, 0, 127);
         this._synth.postMessage({
             cmd: "alphaSynth.setChannelProgram",
             channel: channel,
@@ -1382,17 +1391,12 @@ AlphaSynth.AlphaSynth.prototype = {
     },
     set_TimePosition: function (value){
         AlphaSynth.Util.Logger.Debug("Seeking to position " + value + "ms");
-        var state = this.get_State();
-        this.Pause();
         // tell the sequencer to jump to the given position
         this._sequencer.Seek(value * this._sequencer.PlaybackSpeed);
         // update the internal position 
         this.UpdateTimePosition(value);
         // tell the output to reset the already synthesized buffers and request data again 
         this.Output.ResetSamples();
-        if (state == AlphaSynth.PlayerState.Playing){
-            this.Play();
-        }
     },
     get_PlaybackRange: function (){
         return this._sequencer.get_PlaybackRange();
@@ -1418,6 +1422,7 @@ AlphaSynth.AlphaSynth.prototype = {
         this._state = AlphaSynth.PlayerState.Paused;
         this.OnPlayerStateChanged(new AlphaSynth.PlayerStateChangedEventArgs(this._state));
         this.Output.Pause();
+        this._synthesizer.NoteOffAll(false);
     },
     PlayPause: function (){
         if (this.get_State() == AlphaSynth.PlayerState.Playing || !this.get_IsReadyForPlayback()){
@@ -1477,18 +1482,23 @@ AlphaSynth.AlphaSynth.prototype = {
         }
     },
     SetChannelMute: function (channel, mute){
-        // TODO
+        this._synthesizer.SetChannelMute(channel, mute);
+    },
+    ResetChannelStates: function (){
+        this._synthesizer.ResetChannelStates();
     },
     SetChannelSolo: function (channel, solo){
-        // TODO
+        this._synthesizer.SetChannelSolo(channel, solo);
     },
     SetChannelVolume: function (channel, volume){
         volume = AlphaSynth.Synthesis.SynthHelper.ClampD(volume, 0, 10);
-        // TODO
+        this._sequencer.SetChannelVolume(channel, volume);
+        this._synthesizer.SetChannelVolume(channel, volume);
     },
     SetChannelProgram: function (channel, program){
-        program = AlphaSynth.Synthesis.SynthHelper.ClampI(program, 0, 127);
-        // TODO
+        program = AlphaSynth.Synthesis.SynthHelper.ClampB(program, 0, 127);
+        this._sequencer.SetChannelProgram(channel, program);
+        this._synthesizer.SetChannelProgram(channel, program);
     },
     OnSamplesPlayed: function (sampleCount){
         var playedMillis = (sampleCount / this._synthesizer.SampleRate) * 1000;
@@ -2656,12 +2666,12 @@ AlphaSynth.Bank.Patch.Sf2Patch.prototype = {
             voiceparams.Envelopes[1].ReleaseSf2VolumeEnvelope();
         }
     },
-    Process: function (voiceparams, startIndex, endIndex){
+    Process: function (voiceparams, startIndex, endIndex, isMuted){
         //--Base pitch calculation
         var basePitchFrequency = AlphaSynth.Synthesis.SynthHelper.CentsToPitch(voiceparams.SynthParams.CurrentPitch) * this.gen.Frequency;
         var pitchWithBend = basePitchFrequency * AlphaSynth.Synthesis.SynthHelper.CentsToPitch(voiceparams.PitchOffset);
         var basePitch = pitchWithBend / voiceparams.SynthParams.Synth.SampleRate;
-        var baseVolume = voiceparams.SynthParams.Synth.get_MasterVolume() * voiceparams.SynthParams.CurrentVolume * 0.35;
+        var baseVolume = isMuted ? 0 : voiceparams.SynthParams.Synth.get_MasterVolume() * voiceparams.SynthParams.CurrentVolume * 0.35;
         //--Main Loop
         for (var x = startIndex; x < endIndex; x += 128){
             voiceparams.Envelopes[0].Increment(64);
@@ -2921,7 +2931,7 @@ AlphaSynth.Bank.Patch.MultiPatch.prototype = {
     Start: function (voiceparams){
         return false;
     },
-    Process: function (voiceparams, startIndex, endIndex){
+    Process: function (voiceparams, startIndex, endIndex, isMuted){
     },
     Stop: function (voiceparams){
     },
@@ -3529,6 +3539,8 @@ AlphaSynth.IO.ByteBuffer.FromBuffer = function (data){
 AlphaSynth.MidiFileSequencer = function (synthesizer){
     this._synthesizer = null;
     this._tempoChanges = null;
+    this._firstVolumeEventPerChannel = null;
+    this._firstProgramEventPerChannel = null;
     this._synthData = null;
     this._division = 0;
     this._eventIndex = 0;
@@ -3541,6 +3553,8 @@ AlphaSynth.MidiFileSequencer = function (synthesizer){
     this.EndTick = 0;
     this.PlaybackSpeed = 0;
     this._synthesizer = synthesizer;
+    this._firstVolumeEventPerChannel = {};
+    this._firstProgramEventPerChannel = {};
     this.PlaybackSpeed = 1;
 };
 AlphaSynth.MidiFileSequencer.prototype = {
@@ -3612,22 +3626,31 @@ AlphaSynth.MidiFileSequencer.prototype = {
         var absTime = 0;
         for (var x = 0; x < midiFile.Tracks[0].MidiEvents.length; x++){
             var mEvent = midiFile.Tracks[0].MidiEvents[x];
-            this._synthData[x] = new AlphaSynth.Synthesis.SynthEvent(mEvent);
+            var synthData = this._synthData[x] = new AlphaSynth.Synthesis.SynthEvent(mEvent);
             absTick += mEvent.DeltaTime;
             absTime += mEvent.DeltaTime * (60000 / (bpm * midiFile.Division));
-            this._synthData[x].Delta = absTime;
+            synthData.Delta = absTime;
             // Update tempo
-            if (this.IsTempoMessage(mEvent.get_Command(), mEvent.get_Data1())){
+            if (mEvent.get_Command() == AlphaSynth.Midi.Event.MidiEventTypeEnum.Meta && mEvent.get_Data1() == 81){
                 var meta = mEvent;
                 bpm = 60000000 / meta.Value;
                 this._tempoChanges.push(new AlphaSynth.MidiFileSequencerTempoChange(bpm, absTick, ((absTime)) | 0));
             }
+            else if (mEvent.get_Command() == AlphaSynth.Midi.Event.MidiEventTypeEnum.Controller && mEvent.get_Data1() == 7){
+                var channel = mEvent.get_Channel();
+                if (!this._firstVolumeEventPerChannel.hasOwnProperty(channel)){
+                    this._firstVolumeEventPerChannel[channel] = synthData;
+                }
+            }
+            else if (mEvent.get_Command() == AlphaSynth.Midi.Event.MidiEventTypeEnum.ProgramChange){
+                var channel = mEvent.get_Channel();
+                if (!this._firstVolumeEventPerChannel.hasOwnProperty(channel)){
+                    this._firstVolumeEventPerChannel[channel] = synthData;
+                }
+            }
         }
         this._endTime = absTime;
         this.EndTick = absTick;
-    },
-    IsTempoMessage: function (command, data1){
-        return command == AlphaSynth.Midi.Event.MidiEventTypeEnum.Meta && data1 == 81;
     },
     FillMidiEventQueue: function (){
         var millisecondsPerBuffer = (this._synthesizer.MicroBufferSize / this._synthesizer.SampleRate) * 1000 * this.PlaybackSpeed;
@@ -3714,6 +3737,16 @@ AlphaSynth.MidiFileSequencer.prototype = {
             this._synthesizer.ResetSynthControls();
             this.OnFinished();
         }
+    },
+    SetChannelVolume: function (channel, volume){
+        if (this._firstVolumeEventPerChannel.hasOwnProperty(channel)){
+            this._firstVolumeEventPerChannel[channel].Event.set_Data2((255 * volume));
+        }
+    },
+    SetChannelProgram: function (channel, program){
+        if (this._firstProgramEventPerChannel.hasOwnProperty(channel)){
+            this._firstProgramEventPerChannel[channel].Event.set_Data1(program);
+        }
     }
 };
 AlphaSynth.MidiFileSequencerTempoChange = function (bpm, ticks, time){
@@ -3742,8 +3775,16 @@ AlphaSynth.Midi.Event.MidiEvent.prototype = {
     get_Data1: function (){
         return (this.Message & 65280) >> 8;
     },
+    set_Data1: function (value){
+        this.Message &= -65281;
+        this.Message |= value << 8;
+    },
     get_Data2: function (){
         return (this.Message & 16711680) >> 16;
+    },
+    set_Data2: function (value){
+        this.Message &= -16711681;
+        this.Message |= value << 16;
     }
 };
 AlphaSynth.Midi.Event.SystemCommonEvent = function (delta, status, data1, data2){
@@ -5342,12 +5383,12 @@ AlphaSynth.Synthesis.Voice.prototype = {
     StopImmediately: function (){
         this.VoiceParams.State = AlphaSynth.Synthesis.VoiceStateEnum.Stopped;
     },
-    Process: function (startIndex, endIndex){
+    Process: function (startIndex, endIndex, isMuted){
         //do not process if the voice is stopped
         if (this.VoiceParams.State == AlphaSynth.Synthesis.VoiceStateEnum.Stopped)
             return;
         //process using the patch's algorithm
-        this.Patch.Process(this.VoiceParams, startIndex, endIndex);
+        this.Patch.Process(this.VoiceParams, startIndex, endIndex, isMuted);
     },
     Configure: function (channel, note, velocity, patch, synthParams){
         this.VoiceParams.Reset();
@@ -5359,6 +5400,14 @@ AlphaSynth.Synthesis.Voice.prototype = {
     }
 };
 AlphaSynth.Synthesis.SynthHelper = function (){
+};
+AlphaSynth.Synthesis.SynthHelper.ClampB = function (value, min, max){
+    if (value <= min)
+        return min;
+    else if (value >= max)
+        return max;
+    else
+        return value;
 };
 AlphaSynth.Synthesis.SynthHelper.ClampD = function (value, min, max){
     if (value <= min)
@@ -5443,6 +5492,9 @@ AlphaSynth.Synthesis.Synthesizer = function (sampleRate, audioChannels, bufferSi
     this._layerList = null;
     this._midiEventQueue = null;
     this._midiEventCounts = null;
+    this._mutedChannels = null;
+    this._soloChannels = null;
+    this._isAnySolo = false;
     this.MidiEventProcessed = null;
     this.MicroBufferSize = 0;
     this.MicroBufferCount = 0;
@@ -5471,6 +5523,8 @@ AlphaSynth.Synthesis.Synthesizer = function (sampleRate, audioChannels, bufferSi
     this._midiEventQueue = new AlphaSynth.Ds.LinkedList();
     this._midiEventCounts = new Int32Array(this.MicroBufferCount);
     this._layerList = new Array(15);
+    this._mutedChannels = {};
+    this._soloChannels = {};
     this.ResetSynthControls();
 };
 AlphaSynth.Synthesis.Synthesizer.prototype = {
@@ -5511,6 +5565,7 @@ AlphaSynth.Synthesis.Synthesizer.prototype = {
         /*Break the process loop into sections representing the smallest timeframe before the midi controls need to be updated
         the bigger the timeframe the more efficent the process is, but playback quality will be reduced.*/
         var sampleIndex = 0;
+        var anySolo = this._isAnySolo;
         for (var x = 0; x < this.MicroBufferCount; x++){
             if (this._midiEventQueue.Length > 0){
                 for (var i = 0; i < this._midiEventCounts[x]; i++){
@@ -5522,7 +5577,10 @@ AlphaSynth.Synthesis.Synthesizer.prototype = {
             var node = this._voiceManager.ActiveVoices.First;
             //node used to traverse the active voices
             while (node != null){
-                node.Value.Process(sampleIndex, sampleIndex + this.MicroBufferSize * 2);
+                var channel = node.Value.VoiceParams.Channel;
+                // channel is muted if it is either explicitley muted, or another channel is set to solo but not this one. 
+                var isChannelMuted = this._mutedChannels.hasOwnProperty(channel) || (anySolo && !this._soloChannels.hasOwnProperty(channel));
+                node.Value.Process(sampleIndex, sampleIndex + this.MicroBufferSize * 2, isChannelMuted);
                 //if an active voice has stopped remove it from the list
                 if (node.Value.VoiceParams.State == AlphaSynth.Synthesis.VoiceStateEnum.Stopped){
                     var delnode = node;
@@ -5841,6 +5899,39 @@ AlphaSynth.Synthesis.Synthesizer.prototype = {
     DispatchEvent: function (i, synthEvent){
         this._midiEventQueue.AddFirst(synthEvent);
         this._midiEventCounts[i]++;
+    },
+    SetChannelMute: function (channel, mute){
+        if (mute){
+            this._mutedChannels[channel] = true;
+        }
+        else {
+            delete this._mutedChannels[channel];
+        }
+    },
+    ResetChannelStates: function (){
+        this._mutedChannels = {};
+        this._soloChannels = {};
+        this._isAnySolo = false;
+    },
+    SetChannelSolo: function (channel, solo){
+        if (solo){
+            this._soloChannels[channel] = true;
+        }
+        else {
+            delete this._soloChannels[channel];
+        }
+        this._isAnySolo = Object.keys(this._soloChannels).length > 0;
+    },
+    SetChannelVolume: function (channel, volume){
+        if (channel < 0 || channel >= this._synthChannels.length)
+            return;
+        this._synthChannels[channel].Volume.set_Coarse((255 * volume));
+        this._synthChannels[channel].UpdateCurrentVolumeFromVolume();
+    },
+    SetChannelProgram: function (channel, program){
+        if (channel < 0 || channel >= this._synthChannels.length)
+            return;
+        this._synthChannels[channel].Program = program;
     }
 };
 AlphaSynth.Util.PcmData = function (bits, pcmData, isDataInLittleEndianFormat){
