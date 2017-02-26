@@ -9,6 +9,7 @@
     <Import_RootNamespace>AlphaSynth</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)AlphaSynth.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Bank\AssetManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Bank\Components\Generators\WhiteNoiseGenerator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Bank\Components\Generators\TriangleGenerator.cs" />
@@ -35,12 +36,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)Bank\PatchAsset.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ds\LinkedList.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Ds\CircularSampleBuffer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)IAlphaSynth.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\ByteBuffer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)IO\IReadable.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)IO\IWriteable.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Main\IAlphaSynthSync.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Main\IAlphaSynthAsync.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Main\IAlphaSynth.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ISynthOutput.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)MidiFileSequencer.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Midi\Event\SystemExclusiveEvent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Midi\Event\SystemCommonEvent.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Midi\Event\RealTimeEvent.cs" />
@@ -52,10 +52,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Midi\MidiTrack.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Midi\MidiHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Midi\MidiFile.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Player\SynthPlayerState.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Player\SynthPlayer.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Player\ISynthOutput.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Sequencer\MidiFileSequencer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)PlayerState.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Sf2\Chunks\ZoneChunk.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Sf2\Chunks\SampleHeaderChunk.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Sf2\Chunks\PresetHeaderChunk.cs" />
@@ -77,6 +74,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Sf2\Generator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Sf2\Enum.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Synthesis\CCValue.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Synthesis\PlaybackRange.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Synthesis\SynthParameters.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Synthesis\VoiceParameters.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Synthesis\VoiceManager.cs" />
@@ -87,7 +85,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Util\Tables.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\SynthConstants.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\IOHelper.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Util\UrlLoader.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\WaveHelper.cs" />
   </ItemGroup>
 </Project>

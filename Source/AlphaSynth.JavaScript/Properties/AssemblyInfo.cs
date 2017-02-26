@@ -18,6 +18,7 @@
 
 using System;
 using System.Reflection;
+using AlphaSynth;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
@@ -62,11 +63,8 @@ using SharpKit.JavaScript;
 // Exclude Interfaces from exporting
 [assembly: JsType(Export = false, TargetType = typeof(IAlphaSynth))]
 [assembly: JsType(Export = false, TargetType = typeof(IFlashSynthOutput))]
-[assembly: JsType(Export = false, TargetType = typeof(IAlphaSynthAsync))]
-[assembly: JsType(Export = false, TargetType = typeof(IAlphaSynthSync))]
 [assembly: JsType(Export = false, TargetType = typeof(ISynthOutput))]
 [assembly: JsType(Export = false, TargetType = typeof(IReadable))]
-[assembly: JsType(Export = false, TargetType = typeof(IWriteable))]
 
 [assembly: JsType(JsMode.Prototype, TargetType = typeof(Math), Name = "Math", NativeArrayEnumerator = true, NativeEnumerator = false, Export = false)]
 

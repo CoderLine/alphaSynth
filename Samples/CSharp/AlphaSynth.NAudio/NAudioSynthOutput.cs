@@ -1,8 +1,5 @@
 ﻿using System;
 using AlphaSynth.Ds;
-using AlphaSynth.Platform;
-using AlphaSynth.Player;
-using AlphaSynth.Synthesis;
 using AlphaSynth.Util;
 using NAudio.Wave;
 
@@ -19,8 +16,6 @@ namespace AlphaSynth.NAudio
         private CircularSampleBuffer _circularBuffer;
 
         private bool _finished;
-        private double _currentTime;
-        private double _playbackSpeed;
 
         public int SampleRate
         {
@@ -34,15 +29,13 @@ namespace AlphaSynth.NAudio
 
         public void Open()
         {
-            _playbackSpeed = 1;
             _finished = false;
-            _currentTime = 0;
             _circularBuffer = new CircularSampleBuffer(BufferSize * BufferCount);
 
             _context = new DirectSoundOut(100);
             _context.Init(this);
 
-            OnReadyChanged(true);
+            Ready();
         }
 
         public void Close()
@@ -65,12 +58,6 @@ namespace AlphaSynth.NAudio
             _context.Pause();
         }
 
-        public void Seek(double position)
-        {
-            _currentTime = position;
-            _circularBuffer.Clear();
-        }
-
         public void SequencerFinished()
         {
             _finished = true;
@@ -79,6 +66,11 @@ namespace AlphaSynth.NAudio
         public void AddSamples(SampleArray f)
         {
             _circularBuffer.Write(f, 0, f.Length);
+        }
+
+        public void ResetSamples()
+        {
+            _circularBuffer.Clear();
         }
 
         private void RequestBuffers()
@@ -101,7 +93,7 @@ namespace AlphaSynth.NAudio
             {
                 if (_finished)
                 {
-                    if (Finished != null) Finished();
+                    Finished();
                 }
             }
             else
@@ -114,14 +106,8 @@ namespace AlphaSynth.NAudio
                     buffer[offset + i] = read[i];
                 }
 
-                var samples = count/2.0;
-                _currentTime += (samples / SampleRate) * 1000 * _playbackSpeed;
-
-            }
-
-            if (PositionChanged != null)
-            {
-                PositionChanged(_currentTime);
+                var samples = count/2;
+                SamplesPlayed(samples);
             }
 
             if (!_finished)
@@ -132,19 +118,9 @@ namespace AlphaSynth.NAudio
             return count;
         }
 
-        public void SetPlaybackSpeed(float playbackSpeed)
-        {
-            _playbackSpeed = playbackSpeed;
-        }
-
+        public event Action Ready;
+        public event Action<int> SamplesPlayed;
         public event Action SampleRequest;
         public event Action Finished;
-        public event Action<double> PositionChanged;
-        public event Action<bool> ReadyChanged;
-        protected virtual void OnReadyChanged(bool isReady)
-        {
-            Action<bool> handler = ReadyChanged;
-            if (handler != null) handler(isReady);
-        }
     }
 }

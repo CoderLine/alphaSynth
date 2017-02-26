@@ -16,11 +16,9 @@
  * License along with this library.
  */
 using System;
-using System.Runtime.CompilerServices;
 using AlphaSynth.Bank;
 using AlphaSynth.Bank.Patch;
 using AlphaSynth.Ds;
-using AlphaSynth.IO;
 using AlphaSynth.Midi;
 using AlphaSynth.Midi.Event;
 using AlphaSynth.Platform;
@@ -31,7 +29,7 @@ namespace AlphaSynth.Synthesis
     public class SynthEvent
     {
         public MidiEvent Event { get; set; }
-        public int Delta { get; set; }
+        public double Delta { get; set; }
 
         public SynthEvent(MidiEvent e)
         {
@@ -41,26 +39,28 @@ namespace AlphaSynth.Synthesis
 
     public class Synthesizer
     {
-        private VoiceManager _voiceManager;
-        private SynthParameters[] _synthChannels;
+        private readonly VoiceManager _voiceManager;
+        private readonly SynthParameters[] _synthChannels;
         private float _masterVolume;
-        private float _synthGain;
-        private FastList<Action<MidiEvent>> _midiMessageProcessed;
 
-        private Patch[] _layerList;
-
-        public LinkedList<SynthEvent> MidiEventQueue { get; private set; }
-
-        public int[] MidiEventCounts { get; private set; }
-
-        public SampleArray SampleBuffer { get; set; }
+        private readonly Patch[] _layerList;
+        private readonly LinkedList<SynthEvent> _midiEventQueue;
+        private readonly int[] _midiEventCounts;
 
         /// <summary>
-        /// The number of audio channels
+        /// The size of the individual sub buffers in samples
         /// </summary>
-        public int AudioChannels { get; private set; }
+        public int MicroBufferSize { get; private set; }
 
-        public bool LittleEndian { get; set; }
+        /// <summary>
+        /// The number of sub buffers
+        /// </summary>
+        public int MicroBufferCount { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the overall buffer of samples consisting of multiple microbuffers. 
+        /// </summary>
+        public SampleArray SampleBuffer { get; set; }
 
         /// <summary>
         /// The patch bank that holds all of the currently loaded instrument patches
@@ -71,7 +71,7 @@ namespace AlphaSynth.Synthesis
         /// The number of samples per second produced per channel
         /// </summary>
         public int SampleRate { get; private set; }
-
+        
         /// <summary>
         /// The master volume 
         /// </summary>
@@ -81,124 +81,35 @@ namespace AlphaSynth.Synthesis
             set { _masterVolume = SynthHelper.ClampF(value, 0, 10); }
         }
 
-        /// <summary>
-        /// The mix volume for each voice
-        /// </summary>
-        public float MixGain
-        {
-            get { return _synthGain; }
-            set { _synthGain = SynthHelper.ClampF(value, 0.5f, 1); }
-        }
-
-        /// <summary>
-        /// The size of the individual sub buffers in samples
-        /// </summary>
-        public int MicroBufferSize
-        {
-            get;
-            private set;
-        }
-
-        /// <summary>
-        /// The number of sub buffers
-        /// </summary>
-        public int MicroBufferCount
-        {
-            get;
-            private set;
-        }
-
-        /// <summary>
-        /// Controls the method used when stealing voices.
-        /// </summary>
-        public VoiceStealingMethod VoiceStealMethod
-        {
-            get { return _voiceManager.StealingMethod; }
-            set { _voiceManager.StealingMethod = value; }
-        }
-
-        /// <summary>
-        /// The number of voices in use.
-        /// </summary>
-        public int ActiveVoices
-        {
-            get { return _voiceManager.ActiveVoices.Length; }
-        }
-
-        /// <summary>
-        /// The number of voices that are not being used.
-        /// </summary>
-        public int FreeVoices
-        {
-            get { return _voiceManager.FreeVoices.Length; }
-        }
-
-        /// <summary>
-        /// The size of the entire buffer in bytes
-        /// </summary>
-        public int RawBufferSize
-        {//Assuming 16 bit data;
-            get { return SampleBuffer.Length * 2; }
-        }
-
-        /// <summary>
-        /// The size of the entire buffer in samples
-        /// </summary>
-        public int WorkingBufferSize
-        {
-            get { return SampleBuffer.Length; }
-        }
-
-        /// <summary>
-        /// The number of voices
-        /// </summary>
-        public int Polyphony
-        {
-            get { return _voiceManager.Polyphony; }
-        }
-
-
         public Synthesizer(int sampleRate, int audioChannels, int bufferSize, int bufferCount, int polyphony)
         {
             var MinSampleRate = 8000;
             var MaxSampleRate = 96000;
-
-            if (sampleRate < MinSampleRate || sampleRate > MaxSampleRate)
-                throw new Exception("Invalid paramater: (sampleRate) Valid ranges are " + MinSampleRate + " to " +
-                                    MaxSampleRate);
-            if (audioChannels < 1 || audioChannels > 2)
-                throw new Exception("Invalid paramater: (audioChannels) Valid ranges are " + 1 + " to " + 2);
-
-            _midiMessageProcessed = new FastList<Action<MidiEvent>>();
             //
             // Setup synth parameters
-            _synthGain = 0.35f;
             _masterVolume = 1;
 
-            SampleRate = sampleRate;
-            AudioChannels = audioChannels;
-            MicroBufferSize = SynthHelper.ClampI(bufferSize, (int)(SynthConstants.MinBufferSize * sampleRate),
-                (int)(SynthConstants.MaxBufferSize * sampleRate));
-            MicroBufferSize =
-                (int)
-                    (Math.Ceiling(MicroBufferSize / (double)SynthConstants.DefaultBlockSize) *
-                     SynthConstants.DefaultBlockSize); //ensure multiple of block size
+            SampleRate = SynthHelper.ClampI(sampleRate, MinSampleRate, MaxSampleRate);
+            MicroBufferSize = SynthHelper.ClampI(bufferSize, (int)(SynthConstants.MinBufferSize * sampleRate), (int)(SynthConstants.MaxBufferSize * sampleRate));
+            MicroBufferSize = (int)(Math.Ceiling(MicroBufferSize / (double)SynthConstants.DefaultBlockSize) * SynthConstants.DefaultBlockSize); //ensure multiple of block size
             MicroBufferCount = (Math.Max(1, bufferCount));
             SampleBuffer = new SampleArray((MicroBufferSize * MicroBufferCount * audioChannels));
-            LittleEndian = true;
 
-            //Setup Controllers
+            // Setup Controllers
             _synthChannels = new SynthParameters[SynthConstants.DefaultChannelCount];
             for (int x = 0; x < _synthChannels.Length; x++)
+            {
                 _synthChannels[x] = new SynthParameters(this);
-            //Create synth voices
+            }
+
+            // Create synth voices
             _voiceManager = new VoiceManager(SynthHelper.ClampI(polyphony, SynthConstants.MinPolyphony, SynthConstants.MaxPolyphony));
-            //Create midi containers
-            MidiEventQueue = new LinkedList<SynthEvent>();
-            MidiEventCounts = new int[MicroBufferCount];
+
+            // Create midi containers
+            _midiEventQueue = new LinkedList<SynthEvent>();
+            _midiEventCounts = new int[MicroBufferCount];
             _layerList = new Patch[15];
 
-            _midiMessageProcessed = new FastList<Action<MidiEvent>>();
             ResetSynthControls();
         }
 
@@ -220,9 +131,9 @@ namespace AlphaSynth.Synthesis
 
         public void ResetSynthControls()
         {
-            for (int x = 0; x < _synthChannels.Length; x++)
+            foreach (SynthParameters parameters in _synthChannels)
             {
-                _synthChannels[x].ResetControllers();
+                parameters.ResetControllers();
             }
             _synthChannels[MidiHelper.DrumChannel].BankSelect = PatchBank.DrumBank;
             ReleaseAllHoldPedals();
@@ -230,38 +141,9 @@ namespace AlphaSynth.Synthesis
 
         public void ResetPrograms()
         {
-            for (int x = 0; x < _synthChannels.Length; x++)
+            foreach (SynthParameters parameters in _synthChannels)
             {
-                _synthChannels[x].Program = 0;
-            }
-        }
-
-        public string GetProgramName(int channel)
-        {
-            var p = GetProgram(channel);
-            if (p == null) return "null";
-            return p.Name;
-        }
-
-        public Patch GetProgram(int channel)
-        {
-            if (SoundBank != null)
-            {
-                var sChannel = _synthChannels[channel];
-                var inst = SoundBank.GetPatchByNumber(sChannel.BankSelect, sChannel.Program);
-                if (inst != null)
-                    return inst;
-            }
-            return null;
-        }
-
-        public void SetAudioChannelCount(int channels)
-        {
-            channels = SynthHelper.ClampI(channels, 1, 2);
-            if (AudioChannels != channels)
-            {
-                AudioChannels = channels;
-                SampleBuffer = new SampleArray((MicroBufferSize * MicroBufferCount * AudioChannels));
+                parameters.Program = 0;
             }
         }
 
@@ -271,68 +153,46 @@ namespace AlphaSynth.Synthesis
             FillWorkingBuffer();
         }
 
-        public float GetChannelVolume(int channel)
-        {
-            return _synthChannels[channel].Volume.Combined / 16383f;
-        }
-
-        public float GetChannelExpression(int channel)
-        {
-            return _synthChannels[channel].Expression.Combined / 16383f;
-        }
-
-        public float GetChannelPan(int channel)
-        {
-            return (_synthChannels[channel].Pan.Combined - 8192.0f) / 8192f;
-        }
-
-        public float GetChannelPitchBend(int channel)
-        {
-            return (_synthChannels[channel].PitchBend.Combined - 8192.0f) / 8192f;
-        }
-
-        public bool GetChannelHoldPedalStatus(int channel)
-        {
-            return _synthChannels[channel].HoldPedal;
-        }
-
         private void FillWorkingBuffer()
         {
-            /*Break the process loop into sections representing the smallest timeframe before the midi controls need to be updated
-            the bigger the timeframe the more efficent the process is, but playback quality will be reduced.*/
-            var sampleIndex = 0;
-            for (int x = 0; x < MicroBufferCount; x++)
+            lock (this)
             {
-                if (MidiEventQueue.Length > 0)
+                /*Break the process loop into sections representing the smallest timeframe before the midi controls need to be updated
+                the bigger the timeframe the more efficent the process is, but playback quality will be reduced.*/
+                var sampleIndex = 0;
+                for (int x = 0; x < MicroBufferCount; x++)
                 {
-                    for (int i = 0; i < MidiEventCounts[x]; i++)
+                    if (_midiEventQueue.Length > 0)
                     {
-                        var m = MidiEventQueue.RemoveLast();
-                        ProcessMidiMessage(m.Event);
+                        for (int i = 0; i < _midiEventCounts[x]; i++)
+                        {
+                            var m = _midiEventQueue.RemoveLast();
+                            ProcessMidiMessage(m.Event);
+                        }
                     }
+                    //voice processing loop
+                    var node = _voiceManager.ActiveVoices.First; //node used to traverse the active voices
+                    while (node != null)
+                    {
+                        node.Value.Process(sampleIndex, sampleIndex + MicroBufferSize * SynthConstants.AudioChannels);
+                        //if an active voice has stopped remove it from the list
+                        if (node.Value.VoiceParams.State == VoiceStateEnum.Stopped)
+                        {
+                            var delnode = node; //node used to remove inactive voices
+                            node = node.Next;
+                            _voiceManager.RemoveVoiceFromRegistry(delnode.Value);
+                            _voiceManager.ActiveVoices.Remove(delnode);
+                            _voiceManager.FreeVoices.AddFirst(delnode.Value);
+                        }
+                        else
+                        {
+                            node = node.Next;
+                        }
+                    }
+                    sampleIndex += MicroBufferSize * SynthConstants.AudioChannels;
                 }
-                //voice processing loop
-                var node = _voiceManager.ActiveVoices.First; //node used to traverse the active voices
-                while (node != null)
-                {
-                    node.Value.Process(sampleIndex, sampleIndex + MicroBufferSize * AudioChannels);
-                    //if an active voice has stopped remove it from the list
-                    if (node.Value.VoiceParams.State == VoiceStateEnum.Stopped)
-                    {
-                        var delnode = node; //node used to remove inactive voices
-                        node = node.Next;
-                        _voiceManager.RemoveVoiceFromRegistry(delnode.Value);
-                        _voiceManager.ActiveVoices.Remove(delnode);
-                        _voiceManager.FreeVoices.AddFirst(delnode.Value);
-                    }
-                    else
-                    {
-                        node = node.Next;
-                    }
-                }
-                sampleIndex += MicroBufferSize * AudioChannels;
+                TypeUtils.ClearIntArray(_midiEventCounts);
             }
-            TypeUtils.ClearIntArray(MidiEventCounts);
         }
 
         #region Midi Handling
@@ -641,24 +501,16 @@ namespace AlphaSynth.Synthesis
                     _synthChannels[channel].UpdateCurrentPitch();                   
                     break;
             }
-            FireMidiMessageProcessed(e);
+            OnMidiEventProcessed(e);
         }
 
-         
-        public void AddMidiMessageProcessed(Action<MidiEvent> listener)
+        public event Action<MidiEvent> MidiEventProcessed;
+        private void OnMidiEventProcessed(MidiEvent e)
         {
-            _midiMessageProcessed.Add(listener);
-        }
-
-        private void FireMidiMessageProcessed(MidiEvent e)
-        {
-            for (int i = 0; i < _midiMessageProcessed.Count; i++)
+            var handler = MidiEventProcessed;
+            if (handler != null)
             {
-                var l = _midiMessageProcessed[i];
-                if (l != null)
-                {
-                    l(e);
-                }
+                handler(e);
             }
         }
 
@@ -692,5 +544,48 @@ namespace AlphaSynth.Synthesis
 
 
         #endregion
+
+        public void DispatchEvent(int i, SynthEvent synthEvent)
+        {
+            lock (this)
+            {
+                _midiEventQueue.AddFirst(synthEvent);
+                _midiEventCounts[i]++;
+            }
+        }
+
+        public void SetChannelMute(int channel, bool mute)
+        {
+            if (channel < 0 || channel >= _synthChannels.Length) return;
+            _synthChannels[channel].IsMuted = mute;
+        }
+
+        public void ResetChannelStates()
+        {
+            foreach (var synthChannel in _synthChannels)
+            {
+                synthChannel.IsSolo = false;
+                synthChannel.IsMuted = false;
+            }
+        }
+
+        public void SetChannelSolo(int channel, bool solo)
+        {
+            if (channel < 0 || channel >= _synthChannels.Length) return;
+            _synthChannels[channel].IsSolo = solo;
+        }
+
+        public void SetChannelVolume(int channel, double volume)
+        {
+            if (channel < 0 || channel >= _synthChannels.Length) return;
+            _synthChannels[channel].Volume.Coarse = (byte)(255 * volume);
+            _synthChannels[channel].UpdateCurrentVolumeFromVolume();
+        }
+
+        public void SetChannelProgram(int channel, byte program)
+        {
+            if (channel < 0 || channel >= _synthChannels.Length) return;
+            _synthChannels[channel].Program = (byte)program;
+        }
     }
 }

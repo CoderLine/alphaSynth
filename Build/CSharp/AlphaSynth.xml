@@ -4,163 +4,275 @@
         <name>AlphaSynth</name>
     </assembly>
     <members>
-        <member name="T:AlphaSynth.Main.IAlphaSynthSync">
+        <member name="P:AlphaSynth.AlphaSynth.IsReady">
+            <inheritdoc />
+        </member>
+        <member name="P:AlphaSynth.AlphaSynth.IsReadyForPlayback">
+            <inheritdoc />
+        </member>
+        <member name="P:AlphaSynth.AlphaSynth.State">
+            <inheritdoc />
+        </member>
+        <member name="P:AlphaSynth.AlphaSynth.LogLevel">
+            <inheritdoc />
+        </member>
+        <member name="P:AlphaSynth.AlphaSynth.MasterVolume">
+            <inheritdoc />
+        </member>
+        <member name="P:AlphaSynth.AlphaSynth.PlaybackSpeed">
+            <inheritdoc />
+        </member>
+        <member name="P:AlphaSynth.AlphaSynth.TickPosition">
+            <inheritdoc />
+        </member>
+        <member name="P:AlphaSynth.AlphaSynth.TimePosition">
+            <inheritdoc />
+        </member>
+        <member name="P:AlphaSynth.AlphaSynth.PlaybackRange">
+            <inheritdoc />
+        </member>
+        <member name="M:AlphaSynth.AlphaSynth.Play">
+            <inheritdoc />
+        </member>
+        <member name="M:AlphaSynth.AlphaSynth.Pause">
+            <inheritdoc />
+        </member>
+        <member name="M:AlphaSynth.AlphaSynth.PlayPause">
+            <inheritdoc />
+        </member>
+        <member name="M:AlphaSynth.AlphaSynth.Stop">
+            <inheritdoc />
+        </member>
+        <member name="M:AlphaSynth.AlphaSynth.LoadSoundFont(System.Byte[])">
+            <inheritdoc />
+        </member>
+        <member name="M:AlphaSynth.AlphaSynth.LoadMidi(System.Byte[])">
+            <inheritdoc />
+        </member>
+        <member name="M:AlphaSynth.AlphaSynth.SetChannelMute(System.Int32,System.Boolean)">
+            <inheritdoc />
+        </member>
+        <member name="M:AlphaSynth.AlphaSynth.ResetChannelStates">
+            <inheritdoc />
+        </member>
+        <member name="M:AlphaSynth.AlphaSynth.SetChannelSolo(System.Int32,System.Boolean)">
+            <inheritdoc />
+        </member>
+        <member name="M:AlphaSynth.AlphaSynth.SetChannelVolume(System.Int32,System.Double)">
+            <inheritdoc />
+        </member>
+        <member name="M:AlphaSynth.AlphaSynth.SetChannelProgram(System.Int32,System.Byte)">
+            <inheritdoc />
+        </member>
+        <member name="P:AlphaSynth.IAlphaSynth.IsReady">
             <summary>
-            Adds some getters to the IAlphaSynth interface. 
-            The return values are provided directly as return value
+            Gets or sets whether the synthesizer is ready for interaction. (output and worker are initialized)
             </summary>
         </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynthSync.IsReadyForPlay">
+        <member name="P:AlphaSynth.IAlphaSynth.IsReadyForPlayback">
             <summary>
-             Is ready for play
+            Gets or sets whether the synthesizer is ready for playback. (output, worker are initialized, soundfont and midi are loaded)
+            </summary>p
+        </member>
+        <member name="P:AlphaSynth.IAlphaSynth.State">
+            <summary>
+            Gets the current player state.
             </summary>
         </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynthSync.GetState">
+        <member name="P:AlphaSynth.IAlphaSynth.LogLevel">
             <summary>
-            Returns the current player state
-            </summary>
-            <returns>the current player state</returns>
-        </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynthSync.GetMasterVolume">
-            <summary>
-            Returns the current master volume
-            </summary>
-            <returns>the current master volume</returns>
-        </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynthSync.GetPlaybackSpeed">
-            <summary>
-            Returns the current playback speed. 
+            Gets or sets the loging level. 
             </summary>
         </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynthSync.IsSoundFontLoaded">
+        <member name="P:AlphaSynth.IAlphaSynth.MasterVolume">
             <summary>
-             Returns whether the soundfont was loaded and parsed
-            </summary>
-            <returns>true if the soundfont was loaded and parsed</returns>
-        </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynthSync.IsMidiLoaded">
-            <summary>
-             Returns whether the midi data was loaded and parsed
-            </summary>
-            <returns>true if the midi data was loaded and parsed</returns>
-        </member>
-        <member name="T:AlphaSynth.Main.IAlphaSynthAsync">
-            <summary>
-            Adds some getters to the IAlphaSynth interface. 
-            The return values are reported asynchronously via event.
+            Gets or sets the current master volume as percentage. (range: 0.0-3.0, default 1.0)
             </summary>
         </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynthAsync.IsReadyForPlay">
+        <member name="P:AlphaSynth.IAlphaSynth.PlaybackSpeed">
             <summary>
-             Is ready for play
+            Gets or sets the current playback speed as percentage. (range: 0.125-8.0, default: 1.0)
             </summary>
         </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynthAsync.GetState">
+        <member name="P:AlphaSynth.IAlphaSynth.TickPosition">
             <summary>
-             Returns the current player state
+            Gets or sets the position within the song in midi ticks.
             </summary>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:AlphaSynth.Main.IAlphaSynthAsync.IsSoundFontLoaded" -->
-        <member name="M:AlphaSynth.Main.IAlphaSynthAsync.IsMidiLoaded">
+        <member name="P:AlphaSynth.IAlphaSynth.TimePosition">
             <summary>
-             Returns whether the midi data was loaded and parsed
+            Gets or sets the position within the song in milliseconds.
             </summary>
         </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynthAsync.GetMasterVolume">
+        <member name="P:AlphaSynth.IAlphaSynth.PlaybackRange">
             <summary>
-            Returns the current master volume
+            Gets or sets the range of the song that should be played. Set this to null
+            to play the whole song. 
             </summary>
         </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynthAsync.GetPlaybackSpeed">
+        <member name="M:AlphaSynth.IAlphaSynth.Play">
             <summary>
-            Returns the current playback speed. 
-            </summary>
-        </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynthAsync.On(System.String,System.Action)">
-            <summary>
-             Adds a new event listener to events
-            </summary>
-        </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynth.Play">
-             <summary>
             Starts the playback if possible
-             </summary>    
+            </summary>  
         </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynth.Pause">
-             <summary>
+        <member name="M:AlphaSynth.IAlphaSynth.Pause">
+            <summary>
             Pauses the playback if was running
-             </summary>
+            </summary>
         </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynth.PlayPause">
+        <member name="M:AlphaSynth.IAlphaSynth.PlayPause">
             <summary>
             Starts the playback if possible, pauses the playback if was running
             </summary>
         </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynth.Stop">
+        <member name="M:AlphaSynth.IAlphaSynth.Stop">
             <summary>
             Stopps the playback
             </summary>
         </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynth.SetPositionTick(System.Int32)">
-            <summary>
-            Moves to the given tick position within the song
-            </summary>
-            <param name="tick">the midi tick position to jump at</param>
-        </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynth.SetPositionTime(System.Int32)">
-            <summary>
-            Moves to the given millisecond position within the song
-            </summary>
-            <param name="millis">the millisecond position to jump at</param>
-        </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynth.SetMasterVolume(System.Single)">
-            <summary>
-            Sets the master volume of the generated audio
-            </summary>
-            <param name="volume">the master volume from 0.0-3.0 (default 1.0)</param>
-        </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynth.SetPlaybackSpeed(System.Single)">
-            <summary>
-            Sets the current playback speed. 
-            </summary>
-            <param name="playbackSpeed">The playback speed where 1 is normal speed (100%) (0.125-8.0)</param>
-        </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynth.SetPlaybackRange(System.Int32,System.Int32)">
-            <summary>
-            Sets range that should be played. Call this method with -1,-1 to reset the playbackrange
-            </summary>
-            <param name="startTick">The start tick of the range to be played.</param>
-            <param name="endTick">The end tick of the range to be played</param>
-        </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynth.LoadSoundFontUrl(System.String)">
-            <summary>
-            Loads a soundfont from the given url
-            </summary>
-            <param name="url">the url to load the soundfont from</param>
-        </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynth.LoadSoundFontBytes(System.Byte[])">
+        <member name="M:AlphaSynth.IAlphaSynth.LoadSoundFont(System.Byte[])">
              <summary>
             Loads a soundfont from the given data
              </summary>
              <param name="data">a byte array to load the data from </param>
         </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynth.LoadMidiUrl(System.String)">
-            <summary>
-            Loads a midi from the given url
-            </summary>
-            <param name="url">the url to load the midi from</param>
-        </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynth.LoadMidiBytes(System.Byte[])">
+        <member name="M:AlphaSynth.IAlphaSynth.LoadMidi(System.Byte[])">
              <summary>
             Loads a midi from the given data
              </summary>
              <param name="data">a byte array to load the data from </param>
         </member>
-        <member name="M:AlphaSynth.Main.IAlphaSynth.SetLogLevel(AlphaSynth.Util.LogLevel)">
+        <member name="M:AlphaSynth.IAlphaSynth.SetChannelMute(System.Int32,System.Boolean)">
             <summary>
-            Sets the logging level which alphaTab should use.
+            Gets the mute state of a channel.
             </summary>
-            <param name="level">the logging level</param>
+            <param name="channel">The channel number</param>
+            <param name="mute">true if the channel should be muted, otherwise false.</param>
+        </member>
+        <member name="M:AlphaSynth.IAlphaSynth.ResetChannelStates">
+            <summary>
+            Resets the mute/solo state of all channels
+            </summary>
+        </member>
+        <member name="M:AlphaSynth.IAlphaSynth.SetChannelSolo(System.Int32,System.Boolean)">
+            <summary>
+            Gets the solo state of a channel.
+            </summary>
+            <param name="channel">The channel number</param>
+            <param name="solo">true if the channel should be played solo, otherwise false.</param>
+        </member>
+        <member name="M:AlphaSynth.IAlphaSynth.SetChannelVolume(System.Int32,System.Double)">
+            <summary>
+            Gets or sets the current and initial volume of the given channel.
+            </summary>
+            <param name="channel">The channel number.</param>
+            <param name="volume">The volume of of the channel (0.0-3.0)</param>
+        </member>
+        <member name="M:AlphaSynth.IAlphaSynth.SetChannelProgram(System.Int32,System.Byte)">
+            <summary>
+            Gets or sets the current and initial program of the given channel.
+            </summary>
+            <param name="channel">The channel number.</param>
+            <param name="program">The midi program.</param>
+        </member>
+        <member name="P:AlphaSynth.ISynthOutput.SampleRate">
+            <summary>
+            Gets the sample rate required by the output.
+            </summary>
+        </member>
+        <member name="M:AlphaSynth.ISynthOutput.Open">
+            <summary>
+            Called when the output should be opened.
+            </summary>
+        </member>
+        <member name="M:AlphaSynth.ISynthOutput.SequencerFinished">
+            <summary>
+            Called when the sequencer finished the playback. 
+            This tells the output not to request any samples anymore after the existing buffers are finished. 
+            </summary>
+        </member>
+        <member name="M:AlphaSynth.ISynthOutput.Play">
+            <summary>
+            Called when the output should start the playback. 
+            </summary>
+        </member>
+        <member name="M:AlphaSynth.ISynthOutput.Pause">
+            <summary>
+            Called when the output should stop the playback.
+            </summary>
+        </member>
+        <member name="M:AlphaSynth.ISynthOutput.AddSamples(AlphaSynth.Ds.SampleArray)">
+            <summary>
+            Called when samples have been synthesized and should be added to the playback buffer.
+            </summary>
+            <param name="samples"></param>
+        </member>
+        <member name="M:AlphaSynth.ISynthOutput.ResetSamples">
+            <summary>
+            Called when the samples in the output buffer should be reset. This is neeed for instance when seeking to another position. 
+            </summary>
+        </member>
+        <member name="E:AlphaSynth.ISynthOutput.Ready">
+            <summary>
+            Fired when the output has been successfully opened and is ready to play samples.
+            </summary>
+        </member>
+        <member name="E:AlphaSynth.ISynthOutput.SamplesPlayed">
+            <summary>
+            Fired when a certain number of samples have been played. 
+            </summary>
+        </member>
+        <member name="E:AlphaSynth.ISynthOutput.SampleRequest">
+            <summary>
+            Fired when the output needs more samples to be played. 
+            </summary>
+        </member>
+        <member name="E:AlphaSynth.ISynthOutput.Finished">
+            <summary>
+            Fired when the last samples after calling SequencerFinished have been played. 
+            </summary>
+        </member>
+        <member name="T:AlphaSynth.MidiFileSequencer">
+            <summary>
+            This sequencer dispatches midi events to the synthesizer based on the current
+            synthesize position. The sequencer does not consider the playback speed. 
+            </summary>
+        </member>
+        <member name="F:AlphaSynth.MidiFileSequencer._currentTime">
+            <remarks>
+            Note that this is not the actual playback position. It's the position where we are currently synthesizing at. 
+            Depending on the buffer size of the output, this position is after the actual playback. 
+            </remarks>
+        </member>
+        <member name="P:AlphaSynth.MidiFileSequencer.EndTick">
+            <summary>
+            Gets the duration of the song in ticks. 
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.MidiFileSequencer.EndTime">
+            <summary>
+            Gets the duration of the song in milliseconds. 
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.MidiFileSequencer.PlaybackSpeed">
+            <summary>
+            Gets or sets the playback speed. 
+            </summary>
+        </member>
+        <member name="T:AlphaSynth.Synthesis.PlaybackRange">
+            <summary>
+            Represents a range of the song that should be played.
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.PlaybackRange.StartTick">
+            <summary>
+            The position in midi ticks from where the song should start.
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.PlaybackRange.EndTick">
+            <summary>
+            The position in midi ticks to where the song should be played.
+            </summary>
         </member>
         <member name="T:AlphaSynth.Synthesis.SynthParameters">
             <summary>
@@ -247,9 +359,19 @@
             Resets all of the channel's controllers to initial first power on values. Not the same as CC-121.
             </summary>
         </member>
-        <member name="P:AlphaSynth.Synthesis.Synthesizer.AudioChannels">
+        <member name="P:AlphaSynth.Synthesis.Synthesizer.MicroBufferSize">
             <summary>
-            The number of audio channels
+            The size of the individual sub buffers in samples
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.Synthesizer.MicroBufferCount">
+            <summary>
+            The number of sub buffers
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.Synthesizer.SampleBuffer">
+            <summary>
+            Gets or sets the overall buffer of samples consisting of multiple microbuffers. 
             </summary>
         </member>
         <member name="P:AlphaSynth.Synthesis.Synthesizer.SoundBank">
@@ -265,51 +387,6 @@
         <member name="P:AlphaSynth.Synthesis.Synthesizer.MasterVolume">
             <summary>
             The master volume 
-            </summary>
-        </member>
-        <member name="P:AlphaSynth.Synthesis.Synthesizer.MixGain">
-            <summary>
-            The mix volume for each voice
-            </summary>
-        </member>
-        <member name="P:AlphaSynth.Synthesis.Synthesizer.MicroBufferSize">
-            <summary>
-            The size of the individual sub buffers in samples
-            </summary>
-        </member>
-        <member name="P:AlphaSynth.Synthesis.Synthesizer.MicroBufferCount">
-            <summary>
-            The number of sub buffers
-            </summary>
-        </member>
-        <member name="P:AlphaSynth.Synthesis.Synthesizer.VoiceStealMethod">
-            <summary>
-            Controls the method used when stealing voices.
-            </summary>
-        </member>
-        <member name="P:AlphaSynth.Synthesis.Synthesizer.ActiveVoices">
-            <summary>
-            The number of voices in use.
-            </summary>
-        </member>
-        <member name="P:AlphaSynth.Synthesis.Synthesizer.FreeVoices">
-            <summary>
-            The number of voices that are not being used.
-            </summary>
-        </member>
-        <member name="P:AlphaSynth.Synthesis.Synthesizer.RawBufferSize">
-            <summary>
-            The size of the entire buffer in bytes
-            </summary>
-        </member>
-        <member name="P:AlphaSynth.Synthesis.Synthesizer.WorkingBufferSize">
-            <summary>
-            The size of the entire buffer in samples
-            </summary>
-        </member>
-        <member name="P:AlphaSynth.Synthesis.Synthesizer.Polyphony">
-            <summary>
-            The number of voices
             </summary>
         </member>
     </members>

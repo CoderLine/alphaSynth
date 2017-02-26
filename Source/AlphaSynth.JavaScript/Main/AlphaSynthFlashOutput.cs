@@ -1,6 +1,5 @@
 ﻿using System;
 using AlphaSynth.Ds;
-using AlphaSynth.Player;
 using AlphaSynth.Util;
 using SharpKit.Html;
 using SharpKit.JavaScript;
@@ -14,9 +13,8 @@ namespace AlphaSynth.Main
         void AlphaSynthSequencerFinished();
         void AlphaSynthPlay();
         void AlphaSynthPause();
+        void AlphaSynthResetSamples();
         void AlphaSynthAddSamples(string base64Samples);
-        void AlphaSynthSeek(double position);
-        void AlphaSynthSetPlaybackSpeed(double playbackSpeed);
     }
 
     class AlphaSynthFlashOutput : HtmlContext, ISynthOutput
@@ -78,24 +76,6 @@ namespace AlphaSynth.Main
             );
         }
 
-        public void SetPlaybackSpeed(float playbackSpeed)
-        {
-            document.getElementById(_swfId).As<IFlashSynthOutput>().AlphaSynthSetPlaybackSpeed(playbackSpeed);
-        }
-
-
-        public void SequencerFinished()
-        {
-            document.getElementById(_swfId).As<IFlashSynthOutput>().AlphaSynthSequencerFinished();
-        }
-
-        public void AddSamples(SampleArray samples)
-        {
-            var uint8 = new Uint8Array(samples.Buffer);
-            var b64 = JsCode("window.btoa(String.fromCharCode.apply(null, uint8))").As<string>();
-            document.getElementById(_swfId).As<IFlashSynthOutput>().AlphaSynthAddSamples(b64);
-        }
-
         public void Play()
         {
             document.getElementById(_swfId).As<IFlashSynthOutput>().AlphaSynthPlay();
@@ -106,15 +86,40 @@ namespace AlphaSynth.Main
             document.getElementById(_swfId).As<IFlashSynthOutput>().AlphaSynthPause();
         }
 
-        public void Seek(double position)
+        public void SequencerFinished()
         {
-            document.getElementById(_swfId).As<IFlashSynthOutput>().AlphaSynthSeek(position);
+            document.getElementById(_swfId).As<IFlashSynthOutput>().AlphaSynthSequencerFinished();
+        }
+
+        public void AddSamples(SampleArray samples)
+        {
+            var uint8 = new Uint8Array(samples.Buffer);
+            JsFunction fromCharCode = JsCode("String.fromCharCode").As<JsFunction>();
+            var b64 = window.btoa(fromCharCode.call(null, uint8).As<string>());
+            document.getElementById(_swfId).As<IFlashSynthOutput>().AlphaSynthAddSamples(b64);
+        }
+
+
+        public void ResetSamples()
+        {
+            document.getElementById(_swfId).As<IFlashSynthOutput>().AlphaSynthResetSamples();
+        }
+
+
+
+        public event Action Ready;
+        public static void OnReady(string id)
+        {
+            if (Lookup.ContainsKey(id))
+            {
+                Lookup[id].Ready();
+            }
         }
 
         public event Action SampleRequest;
         public static void OnSampleRequest(string id)
         {
-            if (Lookup.ContainsKey(id) && Lookup[id].SampleRequest != null)
+            if (Lookup.ContainsKey(id))
             {
                 Lookup[id].SampleRequest();
             }
@@ -129,21 +134,12 @@ namespace AlphaSynth.Main
             }
         }
 
-        public event Action<double> PositionChanged;
-        public static void OnPositionChanged(string id, double position)
+        public event Action<int> SamplesPlayed;
+        public static void OnSamplesPlayed(string id, int samples)
         {
-            if (Lookup.ContainsKey(id) && Lookup[id].PositionChanged != null)
+            if (Lookup.ContainsKey(id))
             {
-                Lookup[id].PositionChanged(position);
-            }
-        }
-
-        public event Action<bool> ReadyChanged;
-        public static void OnReadyChanged(string id, bool isReady)
-        {
-            if (Lookup.ContainsKey(id) && Lookup[id].ReadyChanged != null)
-            {
-                Lookup[id].ReadyChanged(isReady);
+                Lookup[id].SamplesPlayed(samples);
             }
         }
     }

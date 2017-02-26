@@ -25,12 +25,32 @@ namespace AlphaSynth.Util
     public class Logger : HtmlContext
     {
         public static LogLevel LogLevel { get; set; }
-        public static Action<string> LogHandler { get; set; }
+        public static Action<LogLevel, string> LogHandler { get; set; }
 
         static Logger()
         {
             LogLevel = LogLevel.Info;
-            LogHandler = s => console.log(s);
+            LogHandler = (level, message) =>
+            {
+                switch (level)
+                {
+                    case LogLevel.None:
+                        console.log(message);
+                        break;
+                    case LogLevel.Debug:
+                        console.debug(message);
+                        break;
+                    case LogLevel.Info:
+                        console.info(message);
+                        break;
+                    case LogLevel.Warning:
+                        console.warn(message);
+                        break;
+                    case LogLevel.Error:
+                        console.error(message);
+                        break;
+                }
+            };
         }
 
         public static void Debug(string msg)
@@ -53,7 +73,7 @@ namespace AlphaSynth.Util
             Log(LogLevel.Error, msg);
         }
 
-        private static void Log(LogLevel logLevel, string msg)
+        internal static void Log(LogLevel logLevel, string msg)
         {
             if (logLevel < LogLevel) return;
 
@@ -61,7 +81,7 @@ namespace AlphaSynth.Util
 
             if (LogHandler != null)
             {
-                LogHandler(caller + "-" + msg);
+                LogHandler(logLevel, caller + "-" + msg);
             }
         }
 

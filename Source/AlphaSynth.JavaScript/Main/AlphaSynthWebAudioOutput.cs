@@ -25,8 +25,6 @@ namespace AlphaSynth.Main
         private CircularSampleBuffer _circularBuffer;
 
         private bool _finished;
-        private double _currentTime;
-        private double _playbackSpeed;
 
         public int SampleRate
         {
@@ -35,7 +33,6 @@ namespace AlphaSynth.Main
 
         public void Open()
         {
-            _playbackSpeed = 1;
             _finished = false;
 
             _circularBuffer = new CircularSampleBuffer(BufferSize * BufferCount);
@@ -62,8 +59,6 @@ namespace AlphaSynth.Main
                 HtmlContext.document.body.addEventListener("touchend", resume, false);
             }
 
-            _currentTime = 0;
-
             // create an empty buffer source (silence)
             _buffer = _context.createBuffer(2, BufferSize, _context.sampleRate);
 
@@ -71,7 +66,7 @@ namespace AlphaSynth.Main
             _audioNode = _context.createScriptProcessor(BufferSize, 0, 2);
             _audioNode.onaudioprocess = GenerateSound;
 
-            OnReadyChanged(true);
+            Ready();
         }
 
         public void Play()
@@ -96,24 +91,20 @@ namespace AlphaSynth.Main
             _audioNode.disconnect(0);
         }
 
-        public void Seek(double position)
-        {
-            _currentTime = position;
-            _circularBuffer.Clear();
-            if (PositionChanged != null)
-            {
-                PositionChanged(_currentTime);
-            }
-        }
-
         public void SequencerFinished()
         {
             _finished = true;
         }
 
+
         public void AddSamples(SampleArray f)
         {
             _circularBuffer.Write(f, 0, f.Length);
+        }
+
+        public void ResetSamples()
+        {
+            _circularBuffer.Clear();
         }
 
         private void RequestBuffers()
@@ -140,7 +131,7 @@ namespace AlphaSynth.Main
             {
                 if (_finished)
                 {
-                    if (Finished != null) Finished();
+                    Finished();
                 }
             }
             else
@@ -155,13 +146,10 @@ namespace AlphaSynth.Main
                     right[i] = buffer[s++];
                 }
 
-                _currentTime += (left.length / (double)SampleRate) * 1000 * _playbackSpeed;
+                SamplesPlayed(left.length);
             }
 
-            if (PositionChanged != null)
-            {
-                PositionChanged(_currentTime);
-            }
+
 
             if (!_finished)
             {
@@ -169,19 +157,10 @@ namespace AlphaSynth.Main
             }
         }
 
-        public void SetPlaybackSpeed(float playbackSpeed)
-        {
-            _playbackSpeed = playbackSpeed;
-        }
 
+        public event Action Ready;
+        public event Action<int> SamplesPlayed;
         public event Action SampleRequest;
         public event Action Finished;
-        public event Action<double> PositionChanged;
-        public event Action<bool> ReadyChanged;
-        protected virtual void OnReadyChanged(bool isReady)
-        {
-            Action<bool> handler = ReadyChanged;
-            if (handler != null) handler(isReady);
-        }
     }
 }

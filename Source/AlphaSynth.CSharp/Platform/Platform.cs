@@ -17,7 +17,6 @@
  */
 
 using System;
-using AlphaSynth.Player;
 
 namespace AlphaSynth.Platform
 {

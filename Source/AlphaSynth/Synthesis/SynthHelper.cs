@@ -22,6 +22,15 @@ namespace AlphaSynth.Synthesis
 {
     public class SynthHelper
     {
+        public static byte ClampB(byte value, byte min, byte max)
+        {
+            if (value <= min)
+                return min;
+            else if (value >= max)
+                return max;
+            else
+                return value;
+        }
         public static double ClampD(double value, double min, double max)
         {
             if (value <= min)

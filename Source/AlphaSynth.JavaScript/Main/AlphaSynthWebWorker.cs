@@ -1,7 +1,9 @@
 ﻿using System;
 using AlphaSynth.Player;
+using AlphaSynth.Synthesis;
 using AlphaSynth.Util;
 using SharpKit.Html;
+using SharpKit.Html.workers;
 using SharpKit.JavaScript;
 
 namespace AlphaSynth.Main
@@ -10,44 +12,86 @@ namespace AlphaSynth.Main
     /// This class implements a HTML5 WebWorker based version of alphaSynth
     /// which can be controlled via WebWorker messages.
     /// </summary>
-    class AlphaSynthWebWorker : IAlphaSynthSync
+    class AlphaSynthWebWorker
     {
-        private SynthPlayer _player;
-        private SharpKit.Html.workers.WorkerContext _main;
+        #region Commands
 
-        public AlphaSynthWebWorker(SharpKit.Html.workers.WorkerContext main)
+        public const string CmdPrefix = "alphaSynth.";
+
+        // Main -> Worker
+        public const string CmdInitialize = CmdPrefix + "initialize";
+
+        public const string CmdSetLogLevel = CmdPrefix + "setLogLevel";
+        public const string CmdSetMasterVolume = CmdPrefix + "setMasterVolume";
+        public const string CmdSetPlaybackSpeed = CmdPrefix + "setPlaybackSpeed";
+        public const string CmdSetTickPosition = CmdPrefix + "setTickPosition";
+        public const string CmdSetTimePosition = CmdPrefix + "setTimePosition";
+        public const string CmdSetPlaybackRange = CmdPrefix + "setPlaybackRange";
+
+        public const string CmdPlay = CmdPrefix + "play";
+        public const string CmdPause = CmdPrefix + "pause";
+        public const string CmdPlayPause = CmdPrefix + "playPause";
+        public const string CmdStop = CmdPrefix + "stop";
+        public const string CmdLoadSoundFontUrl = CmdPrefix + "loadSoundFontUrl";
+        public const string CmdLoadSoundFontBytes = CmdPrefix + "loadSoundFontBytes";
+        public const string CmdLoadMidiUrl = CmdPrefix + "loadMidiUrl";
+        public const string CmdLoadMidiBytes = CmdPrefix + "loadMidiBytes";
+        public const string CmdSetChannelMute = CmdPrefix + "setChannelMute";
+        public const string CmdSetChannelSolo = CmdPrefix + "setChannelSolo";
+        public const string CmdSetChannelVolume = CmdPrefix + "setChannelVolume";
+        public const string CmdSetChannelProgram = CmdPrefix + "setChannelProgram";
+        public const string CmdResetChannelStates = CmdPrefix + "resetChannelStates";
+
+        // Worker -> Main
+        public const string CmdReady = CmdPrefix + "ready";
+        public const string CmdReadyForPlayback = CmdPrefix + "readyForPlayback";
+        public const string CmdPositionChanged = CmdPrefix + "positionChanged";
+        public const string CmdPlayerStateChanged = CmdPrefix + "playerStateChanged";
+        public const string CmdFinished = CmdPrefix + "finished";
+        public const string CmdSoundFontLoad = CmdPrefix + "soundFontLoad";
+        public const string CmdSoundFontLoaded = CmdPrefix + "soundFontLoaded";
+        public const string CmdSoundFontLoadFailed = CmdPrefix + "soundFontLoadFailed";
+        public const string CmdMidiLoad = CmdPrefix + "midiLoad";
+        public const string CmdMidiLoaded = CmdPrefix + "midiLoaded";
+        public const string CmdMidiLoadFailed = CmdPrefix + "midiLoadFailed";
+        public const string CmdLog = CmdPrefix + "log";
+
+        #endregion
+
+        private readonly AlphaSynth _player;
+        private readonly DedicatedWorkerContext _main;
+
+        public AlphaSynthWebWorker(DedicatedWorkerContext main)
         {
             _main = main;
             _main.addEventListener("message", HandleMessage, false);
 
-            _player = new SynthPlayer();
-
+            _player = new AlphaSynth();
             _player.PositionChanged += OnPositionChanged;
             _player.PlayerStateChanged += OnPlayerStateChanged;
             _player.Finished += OnFinished;
-            _player.SoundFontLoad += OnSoundFontLoad;
             _player.SoundFontLoaded += OnSoundFontLoaded;
             _player.SoundFontLoadFailed += OnSoundFontLoadFailed;
-            _player.MidiLoad += OnMidiLoad;
+            _player.SoundFontLoadFailed += OnSoundFontLoadFailed;
             _player.MidiLoaded += OnMidiLoaded;
             _player.MidiLoadFailed += OnMidiLoadFailed;
-            _player.ReadyForPlay += OnReadyForPlay;
+            _player.ReadyForPlayback += OnReadyForPlayback;
 
-            OnReady();
+            _main.postMessage(new { cmd = CmdReady });
         }
 
         static AlphaSynthWebWorker()
         {
             if (!HtmlContext.self.document.As<bool>())
             {
-                var main = HtmlContext.self.As<SharpKit.Html.workers.WorkerContext>();
+                var main = HtmlContext.self.As<DedicatedWorkerContext>();
                 main.addEventListener("message", e =>
                 {
                     var data = e.As<MessageEvent>().data;
                     var cmd = data.Member("cmd").As<string>();
                     switch (cmd)
                     {
-                        case "alphaSynth.playerReady":
+                        case CmdInitialize:
                             WebWorkerOutput.PreferredSampleRate = data.Member("sampleRate").As<int>();
                             new AlphaSynthWebWorker(main);
                             break;
@@ -62,183 +106,127 @@ namespace AlphaSynth.Main
             var cmd = data.Member("cmd").As<string>();
             switch (cmd)
             {
-                case "alphaSynth.play":
-                    Play();
+                case CmdSetLogLevel:
+                    Logger.LogLevel = data.Member("value").As<LogLevel>();
                     break;
-                case "alphaSynth.pause":
-                    Pause();
-                    break;
-                case "alphaSynth.isReadyForPlay":
-                    PostMessage(new { cmd = "alphaSynth.isReadyForPlay", value = IsReadyForPlay() });
-                    break;
-                case "alphaSynth.getMasterVolume":
-                    PostMessage(new { cmd = "alphaSynth.getMasterVolume", value = _player.MasterVolume });
-                    break;
-                case "alphaSynth.setMasterVolume":
+                case CmdSetMasterVolume:
                     _player.MasterVolume = data.Member("value").As<float>();
                     break;
-                case "alphaSynth.getPlaybackSpeed":
-                    PostMessage(new { cmd = "alphaSynth.getPlaybackSpeed", value = _player.Sequencer.PlaybackSpeed });
+                case CmdSetPlaybackSpeed:
+                    _player.PlaybackSpeed = data.Member("value").As<double>();
                     break;
-                case "alphaSynth.setPlaybackSpeed":
-                    _player.PlaybackSpeed = data.Member("value").As<float>();
+                case CmdSetTickPosition:
+                    _player.TickPosition = data.Member("value").As<int>();
                     break;
-                case "alphaSynth.setPlaybackRange":
-                    SetPlaybackRange(data.Member("startTick").As<int>(), data.Member("endTick").As<int>());
+                case CmdSetTimePosition:
+                    _player.TimePosition = data.Member("value").As<double>();
                     break;
-                case "alphaSynth.playPause":
-                    PlayPause();
+                case CmdSetPlaybackRange:
+                    _player.PlaybackRange = data.Member("value").As<PlaybackRange>();
                     break;
-                case "alphaSynth.stop":
-                    Stop();
+                case CmdPlay:
+                    _player.Play();
                     break;
-                case "alphaSynth.setPositionTick":
-                    SetPositionTick(data.Member("tick").As<int>());
+                case CmdPause:
+                    _player.Pause();
                     break;
-                case "alphaSynth.setPositionTime":
-                    SetPositionTime(data.Member("time").As<int>());
+                case CmdStop:
+                    _player.Stop();
                     break;
-                case "alphaSynth.loadSoundFontUrl":
+                case CmdLoadSoundFontUrl:
                     LoadSoundFontUrl(data.Member("url").As<string>());
                     break;
-                case "alphaSynth.loadSoundFontBytes":
-                    LoadSoundFontBytes(data.Member("data").As<byte[]>());
+                case CmdLoadSoundFontBytes:
+                    _player.LoadSoundFont(data.Member("data").As<byte[]>());
                     break;
-                case "alphaSynth.loadMidiUrl":
+                case CmdLoadMidiUrl:
                     LoadMidiUrl(data.Member("url").As<string>());
                     break;
-                case "alphaSynth.loadMidiBytes":
-                    LoadMidiBytes(data.Member("data").As<byte[]>());
+                case CmdLoadMidiBytes:
+                    _player.LoadMidi(data.Member("data").As<byte[]>());
                     break;
-                case "alphaSynth.getState":
-                    PostMessage(new { cmd = "getState", value = GetState() });
+                case CmdSetChannelMute:
+                    _player.SetChannelMute(data.Member("channel").As<int>(), data.Member("mute").As<bool>());
                     break;
-                case "alphaSynth.isSoundFontLoaded":
-                    PostMessage(new { cmd = "isSoundFontLoaded", value = IsSoundFontLoaded() });
+                case CmdSetChannelSolo:
+                    _player.SetChannelSolo(data.Member("channel").As<int>(), data.Member("solo").As<bool>());
                     break;
-                case "alphaSynth.isMidiLoaded":
-                    PostMessage(new { cmd = "isMidiLoaded", value = IsMidiLoaded() });
+                case CmdSetChannelVolume:
+                    _player.SetChannelVolume(data.Member("channel").As<int>(), data.Member("volume").As<double>());
                     break;
-                case "alphaSynth.setLogLevel":
-                    SetLogLevel(data.Member("level").As<LogLevel>());
+                case CmdSetChannelProgram:
+                    _player.SetChannelProgram(data.Member("channel").As<int>(), data.Member("program").As<byte>());
+                    break;
+                case CmdResetChannelStates:
+                    _player.ResetChannelStates();
                     break;
             }
         }
 
-        [JsMethod(Export = false, InlineCodeExpression = "this._main.postMessage(o)")]
-        private void PostMessage(object o)
+        private void LoadMidiUrl(string url)
         {
+            Logger.Info("Start loading soundfont from url " + url);
 
+            var request = new XMLHttpRequest();
+            request.open("GET", url, true);
+            request.responseType = "arraybuffer";
+            request.onload = e =>
+            {
+                var buffer = new Uint8Array(request.response.As<ArrayBuffer>());
+                _player.LoadMidi(buffer.As<byte[]>());
+            };
+            request.onerror = e =>
+            {
+                Logger.Error("Loading failed: " + e.message);
+                OnMidiLoadFailed(this, EmptyEventArgs.Instance);
+            };
+            request.onprogress = e =>
+            {
+                Logger.Debug("Midi downloading: " + e.loaded + "/" + e.total + " bytes");
+                _main.postMessage(new
+                {
+                    cmd = CmdMidiLoad,
+                    loaded = e.loaded,
+                    total = e.total
+                });
+            };
+            request.send();
         }
 
-        public bool IsReadyForPlay()
+        private void LoadSoundFontUrl(string url)
         {
-            return _player.IsReady;
-        }
-
-        public void Play()
-        {
-            _player.Play();
-        }
-
-        public void Pause()
-        {
-            _player.Pause();
-        }
-
-        public void PlayPause()
-        {
-            _player.PlayPause();
-        }
-
-        public void Stop()
-        {
-            _player.Stop();
-        }
-
-        public void SetPositionTick(int tick)
-        {
-            _player.TickPosition = tick;
-        }
-
-        public void SetPositionTime(int millis)
-        {
-            _player.TimePosition = millis;
-        }
-
-        public void LoadSoundFontUrl(string url)
-        {
-            _player.LoadSoundFontUrl(url);
-        }
-
-        public void LoadSoundFontBytes(byte[] data)
-        {
-            _player.LoadSoundFontBytes(data);
-        }
-
-        public void LoadMidiUrl(string url)
-        {
-            _player.LoadMidiUrl(url);
-        }
-
-        public void LoadMidiBytes(byte[] data)
-        {
-            _player.LoadMidiBytes(data);
-        }
-
-        public SynthPlayerState GetState()
-        {
-            return _player.State;
-        }
-
-        public bool IsSoundFontLoaded()
-        {
-            return _player.IsSoundFontLoaded;
-        }
-
-        public bool IsMidiLoaded()
-        {
-            return _player.IsMidiLoaded;
-        }
-
-        public float GetMasterVolume()
-        {
-            return _player.MasterVolume;
-        }
-
-        public void SetMasterVolume(float volume)
-        {
-            _player.MasterVolume = volume;
-        }
-
-        public float GetPlaybackSpeed()
-        {
-            return _player.PlaybackSpeed;
-        }
-
-        public void SetPlaybackSpeed(float playbackSpeed)
-        {
-            _player.PlaybackSpeed = playbackSpeed;
-        }
-
-        public void SetPlaybackRange(int startTick, int endTick)
-        {
-            _player.SetPlaybackRange(startTick, endTick);
-        }
-
-        //
-        // Events
-
-        public void OnReady()
-        {
-            PostMessage(new { cmd = "alphaSynth.ready" });
+            Logger.Info("Start loading Soundfont from url " + url);
+            var request = new XMLHttpRequest();
+            request.open("GET", url, true);
+            request.responseType = "arraybuffer";
+            request.onload = e =>
+            {
+                var buffer = new Uint8Array(request.response.As<ArrayBuffer>());
+                _player.LoadSoundFont(buffer.As<byte[]>());
+            };
+            request.onerror = e =>
+            {
+                Logger.Error("Loading failed: " + e.message);
+                OnSoundFontLoadFailed(this, EventArgs.Empty);
+            };
+            request.onprogress = e =>
+            {
+                Logger.Debug("Soundfont downloading: " + e.loaded + "/" + e.total + " bytes");
+                _main.postMessage(new
+                {
+                    cmd = CmdSoundFontLoad,
+                    loaded = e.loaded,
+                    total = e.total
+                });
+            };
+            request.send();
         }
 
         public void OnPositionChanged(object sender, PositionChangedEventArgs e)
         {
-            PostMessage(new
+            _main.postMessage(new
             {
-                cmd = "alphaSynth.positionChanged",
+                cmd = CmdPositionChanged,
                 currentTime = e.CurrentTime,
                 endTime = e.EndTime,
                 currentTick = e.CurrentTick,
@@ -248,52 +236,42 @@ namespace AlphaSynth.Main
 
         public void OnPlayerStateChanged(object sender, PlayerStateChangedEventArgs e)
         {
-            PostMessage(new
+            _main.postMessage(new
             {
-                cmd = "alphaSynth.playerStateChanged",
+                cmd = CmdPlayerStateChanged,
                 state = e.State
             });
         }
 
         public void OnFinished(object sender, EventArgs e)
         {
-            PostMessage(new
+            _main.postMessage(new
             {
-                cmd = "alphaSynth.finished"
-            });
-        }
-
-        public void OnSoundFontLoad(object sender, ProgressEventArgs e)
-        {
-            PostMessage(new
-            {
-                cmd = "alphaSynth.soundFontLoad",
-                loaded = e.Loaded,
-                total = e.Total
+                cmd = CmdFinished
             });
         }
 
         public void OnSoundFontLoaded(object sender, EventArgs e)
         {
-            PostMessage(new
+            _main.postMessage(new
             {
-                cmd = "alphaSynth.soundFontLoaded"
+                cmd = CmdSoundFontLoaded
             });
         }
 
         public void OnSoundFontLoadFailed(object sender, EventArgs e)
         {
-            PostMessage(new
+            _main.postMessage(new
             {
-                cmd = "alphaSynth.soundFontLoadFailed"
+                cmd = CmdSoundFontLoadFailed
             });
         }
 
         public void OnMidiLoad(object sender, ProgressEventArgs e)
         {
-            PostMessage(new
+            _main.postMessage(new
             {
-                cmd = "alphaSynth.midiLoad",
+                cmd = CmdMidiLoad,
                 loaded = e.Loaded,
                 total = e.Total
             });
@@ -301,43 +279,36 @@ namespace AlphaSynth.Main
 
         public void OnMidiLoaded(object sender, EventArgs e)
         {
-            PostMessage(new
+            _main.postMessage(new
             {
-                cmd = "alphaSynth.midiFileLoaded"
+                cmd = CmdMidiLoaded
             });
         }
 
         public void OnMidiLoadFailed(object sender, EventArgs e)
         {
-            PostMessage(new
+            _main.postMessage(new
             {
-                cmd = "alphaSynth.midiFileLoadFailed"
+                cmd = CmdMidiLoaded
             });
         }
 
-        public void OnReadyForPlay(object sender, EventArgs e)
+        public void OnReadyForPlayback(object sender, EventArgs e)
         {
-            PostMessage(new
+            _main.postMessage(new
             {
-                cmd = "alphaSynth.readyForPlay",
-                value = IsReadyForPlay()
+                cmd = CmdReadyForPlayback
             });
         }
 
         public void SendLog(LogLevel level, string s)
         {
-            PostMessage(new
+            _main.postMessage(new
             {
-                cmd = "alphaSynth.log",
+                cmd = CmdLog,
                 level = level,
                 message = s
             });
-        }
-
-
-        public void SetLogLevel(LogLevel level)
-        {
-            Logger.LogLevel = level;
         }
     }
 }

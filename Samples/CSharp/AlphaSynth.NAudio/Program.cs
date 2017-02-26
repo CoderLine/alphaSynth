@@ -1,7 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Windows.Forms;
-using AlphaSynth.Player;
+using AlphaSynth.Synthesis;
+using Timer = System.Timers.Timer;
 
 namespace AlphaSynth.NAudio
 {
@@ -19,7 +20,6 @@ namespace AlphaSynth.NAudio
             //
             // Midi
             Console.WriteLine("Opening Midi");
-            string midiFile;
             var dlg = new OpenFileDialog { Filter = "Midi Files (*.mid)|*.mid;*.midi" };
             if (dlg.ShowDialog() != DialogResult.OK)
             {
@@ -60,13 +60,13 @@ namespace AlphaSynth.NAudio
             //
             // Creating Synth
             Platform.Platform.OutputFactory = () => new NAudioSynthOutput();
-            SynthPlayer player;
+            AlphaSynth player;
             try
             {
                 Console.WriteLine("Setup audio");
-                player = new SynthPlayer();
-                player.LoadMidiBytes(midiData);
-                player.LoadSoundFontBytes(sf2Data);
+                player = new AlphaSynth();
+                player.LoadMidi(midiData);
+                player.LoadSoundFont(sf2Data);
                 player.PositionChanged += (sender, args) =>
                 {
                     TimeSpan currentTime = TimeSpan.FromMilliseconds(args.CurrentTime);
@@ -75,11 +75,13 @@ namespace AlphaSynth.NAudio
                     Console.CursorTop--;
                     Console.Write("".PadLeft(Console.BufferWidth - 1, ' '));
                     Console.CursorLeft = 0;
-                    Console.WriteLine("{0:mm\\:ss\\:fff} ({1}) of {2:mm\\:ss\\:fff} ({3}) (Tempo {4})",
-                        currentTime, args.CurrentTick, endTime, args.EndTick,
-                        player.Sequencer.CurrentTempo);
+                    Console.WriteLine("{0:mm\\:ss\\:fff} ({1}) of {2:mm\\:ss\\:fff} ({3})",
+                        currentTime, args.CurrentTick, endTime, args.EndTick);
                 };
-                player.Finished += (sender, args) => ((NAudioSynthOutput) player.Output).Close();
+                player.Finished += (sender, args) =>
+                {
+                    ((NAudioSynthOutput) player.Output).Close();
+                };
             }
             catch (Exception e)
             {
@@ -93,7 +95,7 @@ namespace AlphaSynth.NAudio
             player.Play();
 
             Console.WriteLine("Press enter to exit");
-            while (player.State == SynthPlayerState.Playing)
+            while (player.State == PlayerState.Playing)
             {
                 try
                 {

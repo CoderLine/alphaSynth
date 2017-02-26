@@ -21,12 +21,6 @@ using AlphaSynth.Util;
 
 namespace AlphaSynth.Synthesis
 {
-    public enum VoiceStealingMethod
-    {
-        Oldest = 0,
-        Quietest = 1
-    }
-
     public class VoiceNode
     {
         public Voice Value { get; set; }
@@ -38,7 +32,6 @@ namespace AlphaSynth.Synthesis
         private Voice[] _voicePool;
         private LinkedList<VoiceNode> _vNodes;
 
-        public VoiceStealingMethod StealingMethod { get; set; }
         public int Polyphony { get; set; }
         public LinkedList<Voice> FreeVoices { get; set; }
         public LinkedList<Voice> ActiveVoices { get; set; }
@@ -46,7 +39,6 @@ namespace AlphaSynth.Synthesis
 
         public VoiceManager(int voiceCount)
         {
-            StealingMethod = VoiceStealingMethod.Quietest;
             Polyphony = voiceCount;
 
             _voicePool = new Voice[voiceCount];
@@ -77,15 +69,8 @@ namespace AlphaSynth.Synthesis
                 FreeVoices.RemoveFirst();
                 return voice;
             }
-            switch (StealingMethod)
-            {
-                case VoiceStealingMethod.Oldest:
-                    return StealOldest();
-                case VoiceStealingMethod.Quietest:
-                    return StealQuietestVoice();
-                default:
-                    return null;
-            }
+
+            return StealQuietestVoice();
         }
 
         public void AddToRegistry(Voice voice)
@@ -163,23 +148,6 @@ namespace AlphaSynth.Synthesis
                     current = current.Next;
                 }
             }
-        }
-
-        private Voice StealOldest()
-        {
-            var node = ActiveVoices.First;
-            //first look for a voice that is not playing
-            while (node != null && node.Value.VoiceParams.State == VoiceStateEnum.Playing)
-                node = node.Next;
-            //if no stopping voice is found use the oldest
-            if (node == null)
-                node = ActiveVoices.First;
-            //check and remove from registry
-            RemoveVoiceFromRegistry(node.Value);
-            ActiveVoices.Remove(node);
-            //stop voice if it is not already
-            node.Value.VoiceParams.State = VoiceStateEnum.Stopped;
-            return node.Value;
         }
 
         private Voice StealQuietestVoice()

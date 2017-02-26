@@ -19,19 +19,14 @@ using AlphaSynth.Platform;
 
 namespace AlphaSynth.IO
 {
-    public class ByteBuffer : IWriteable, IReadable
+    public class ByteBuffer : IReadable
     {
         private byte[] _buffer;
         private int _capacity;
-        private int _position;
 
         public int Length { get; private set; }
 
-        public int Position
-        {
-            get { return _position; }
-            set { _position = value; }
-        }
+        public int Position { get; set; }
 
         public virtual byte[] GetBuffer()
         {
@@ -121,49 +116,6 @@ namespace AlphaSynth.IO
             Position += n;
 
             return n;
-        }
-
-        public void WriteByte(byte value)
-        {
-            byte[] buffer = new byte[1];
-            buffer[0] = value;
-            Write(buffer, 0, 1);
-        }
-
-        public void Write(byte[] buffer, int offset, int count)
-        {
-            int i = Position + count;
-
-            if (i > Length)
-            {
-                if (i > _capacity)
-                {
-                    EnsureCapacity(i);
-                }
-                Length = i;
-            }
-            if ((count <= 8) && (buffer != _buffer))
-            {
-                int byteCount = count;
-                while (--byteCount >= 0)
-                    _buffer[Position + byteCount] = buffer[offset + byteCount];
-            }
-            else
-                Std.BlockCopy(buffer, offset, _buffer, Position, count);
-            Position = i;
-        }
-
-        private void EnsureCapacity(int value)
-        {
-            if (value > _capacity)
-            {
-                int newCapacity = value;
-                if (newCapacity < 256)
-                    newCapacity = 256;
-                if (newCapacity < _capacity * 2)
-                    newCapacity = _capacity * 2;
-                SetCapacity(newCapacity);
-            }
         }
 
         public virtual byte[] ToArray()

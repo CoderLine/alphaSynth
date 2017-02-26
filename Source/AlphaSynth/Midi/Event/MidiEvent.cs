@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-using System.Runtime.CompilerServices;
 
 namespace AlphaSynth.Midi.Event
 {
@@ -104,7 +103,7 @@ namespace AlphaSynth.Midi.Event
 
     public class MidiEvent
     {
-        protected readonly int Message;
+        protected int Message;
 
         public int DeltaTime { get; set; }
 
@@ -121,11 +120,21 @@ namespace AlphaSynth.Midi.Event
         public int Data1
         {
             get { return (Message & 0x000FF00) >> 8; }
+            set
+            {
+                Message &= ~0x000FF00;
+                Message |= value << 8;
+            }
         }
 
         public int Data2
         {
             get { return (Message & 0x0FF0000) >> 16; }
+            set
+            {
+                Message &= ~0x0FF0000;
+                Message |= value << 16;
+            }
         }
 
         public MidiEvent(int delta, int status, byte data1, byte data2)

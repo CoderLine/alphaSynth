@@ -102,9 +102,9 @@ namespace AlphaSynth.Bank.Patch
             var pitchWithBend = basePitchFrequency*SynthHelper.CentsToPitch(voiceparams.PitchOffset);
             var basePitch = pitchWithBend / voiceparams.SynthParams.Synth.SampleRate;
 
-            float baseVolume = voiceparams.SynthParams.Synth.MasterVolume * voiceparams.SynthParams.CurrentVolume * voiceparams.SynthParams.Synth.MixGain;
+            float baseVolume = voiceparams.SynthParams.Synth.MasterVolume * voiceparams.SynthParams.CurrentVolume * SynthConstants.DefaultMixGain;
             //--Main Loop
-            for (int x = startIndex; x < endIndex; x += SynthConstants.DefaultBlockSize * voiceparams.SynthParams.Synth.AudioChannels)
+            for (int x = startIndex; x < endIndex; x += SynthConstants.DefaultBlockSize * SynthConstants.AudioChannels)
             {
                 voiceparams.Envelopes[0].Increment(SynthConstants.DefaultBlockSize);
                 voiceparams.Envelopes[1].Increment(SynthConstants.DefaultBlockSize);
@@ -130,10 +130,8 @@ namespace AlphaSynth.Bank.Patch
                 float volume = (float)SynthHelper.DBtoLinear(voiceparams.VolOffset + voiceparams.Envelopes[1].Value + voiceparams.Lfos[0].Value * modLfoToVolume) * baseVolume;
 
                 //--Mix block based on number of channels
-                if (voiceparams.SynthParams.Synth.AudioChannels == 2)
-                    voiceparams.MixMonoToStereoInterp(x,
-                        volume * pan.Left * voiceparams.SynthParams.CurrentPan.Left,
-                        volume * pan.Right * voiceparams.SynthParams.CurrentPan.Right);
+                if (SynthConstants.AudioChannels == 2)
+                    voiceparams.MixMonoToStereoInterp(x, volume * pan.Left * voiceparams.SynthParams.CurrentPan.Left, volume * pan.Right * voiceparams.SynthParams.CurrentPan.Right);
                 else
                     voiceparams.MixMonoToMonoInterp(x, volume);
                 //--Check and end early if necessary

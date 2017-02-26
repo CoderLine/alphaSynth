@@ -51,7 +51,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Util\Logger.cs" />
     <Compile Include="Util\UnionData.cs" />
-    <Compile Include="Util\UrlLoader.cs" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="..\AlphaSynth\AlphaSynth.projitems" Label="Shared" Condition="Exists('..\AlphaSynth\AlphaSynth.projitems')" />

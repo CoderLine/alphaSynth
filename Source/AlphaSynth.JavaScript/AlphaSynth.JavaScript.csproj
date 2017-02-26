@@ -38,9 +38,7 @@
     <Compile Include="Main\AlphaSynthFlashOutput.cs" />
     <Compile Include="Main\AlphaSynthWebAudioOutput.cs" />
     <Compile Include="Main\AlphaSynthWebWorker.cs" />
-    <Compile Include="Main\AlphaSynthFlashPlayerApi.cs" />
     <Compile Include="Main\AlphaSynthWebWorkerApi.cs" />
-    <Compile Include="Main\AlphaSynthWebWorkerApiBase.cs" />
     <Compile Include="Platform\Platform.cs" />
     <Compile Include="Platform\Std.cs" />
     <Compile Include="Platform\TypeUtils.cs" />
@@ -49,7 +47,6 @@
     <Compile Include="Util\Extensions.cs" />
     <Compile Include="Util\Logger.cs" />
     <Compile Include="Util\UnionData.cs" />
-    <Compile Include="Util\UrlLoader.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="CopyAndMinify.bat" />

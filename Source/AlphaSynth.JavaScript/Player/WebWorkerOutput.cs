@@ -1,24 +1,35 @@
 ﻿using System;
 using AlphaSynth.Ds;
+using AlphaSynth.Main;
 using AlphaSynth.Util;
 using SharpKit.Html;
+using SharpKit.Html.workers;
 using SharpKit.JavaScript;
-using WorkerContext = SharpKit.Html.workers.WorkerContext;
 
 namespace AlphaSynth.Player
 {
     class WebWorkerOutput : ISynthOutput
     {
+        public const string CmdOutputPrefix = AlphaSynthWebWorker.CmdPrefix + "output.";
+
+        // Worker -> Output
+        public const string CmdOutputSequencerFinished = CmdOutputPrefix + "sequencerFinished";
+        public const string CmdOutputAddSamples = CmdOutputPrefix + "addSamples";
+        public const string CmdOutputPlay = CmdOutputPrefix + "play";
+        public const string CmdOutputPause = CmdOutputPrefix + "pause";
+        public const string CmdOutputResetSamples = CmdOutputPrefix + "resetSamples";
+
+        // Output -> Worker
+        public const string CmdOutputSampleRequest = CmdOutputPrefix + "sampleRequest";
+        public const string CmdOutputFinished = CmdOutputPrefix + "finished";
+        public const string CmdOutputSamplesPlayed = CmdOutputPrefix + "samplesPlayed";
+
+
         // this value is initialized by the alphaSynth WebWorker wrapper 
         // that also includes the alphaSynth library into the worker. 
         public static int PreferredSampleRate { get; set; }
 
-        private Action<int> _positionChangedListeners;
-        private Action _finishedListeners;
-        private Action _sampleRequestListeners;
-
-        private WorkerContext _workerSelf;
-        private int _sampleRate;
+        private DedicatedWorkerContext _worker;
 
         public int SampleRate
         {
@@ -28,10 +39,9 @@ namespace AlphaSynth.Player
         public void Open()
         {
             Logger.Debug("Initializing webworker worker");
-            _workerSelf = JsContext.JsCode("self").As<WorkerContext>();
-            _workerSelf.addEventListener("message", HandleMessage, false);
-
-            OnReadyChanged(true);
+            _worker = JsContext.JsCode("self").As<DedicatedWorkerContext>();
+            _worker.addEventListener("message", HandleMessage, false);
+            Ready();
         }
 
         private void HandleMessage(DOMEvent e)
@@ -40,79 +50,47 @@ namespace AlphaSynth.Player
             var cmd = data.Member("cmd").As<string>();
             switch (cmd)
             {
-                case "alphaSynth.playerSampleRequest":
-                    OnSampleRequest();
+                case CmdOutputSampleRequest:
+                    SampleRequest();
                     break;
-                case "alphaSynth.playerFinished":
-                    OnFinished();
+                case CmdOutputFinished:
+                    Finished();
                     break;
-                case "alphaSynth.playerPositionChanged":
-                    OnPositionChanged(data.Member("pos").As<double>());
+                case CmdOutputSamplesPlayed:
+                    SamplesPlayed(data.Member("samples").As<int>());
                     break;
             }
         }
 
-        [JsMethod(InlineCodeExpression = "this._workerSelf.postMessage(o)")]
-        private void PostMessage(object o)
-        {
-        }
 
-        public event Action<double> PositionChanged;
-        protected virtual void OnPositionChanged(double obj)
-        {
-            Action<double> handler = PositionChanged;
-            if (handler != null) handler(obj);
-        }
-
-        public event Action Finished;
-        protected virtual void OnFinished()
-        {
-            Action handler = Finished;
-            if (handler != null) handler();
-        }
-
+        public event Action Ready;
+        public event Action<int> SamplesPlayed;
         public event Action SampleRequest;
-        protected virtual void OnSampleRequest()
-        {
-            Action handler = SampleRequest;
-            if (handler != null) handler();
-        }
-
-        public event Action<bool> ReadyChanged;
-        protected virtual void OnReadyChanged(bool isReady)
-        {
-            Action<bool> handler = ReadyChanged;
-            if (handler != null) handler(isReady);
-        }
+        public event Action Finished;
 
         public void SequencerFinished()
         {
-            PostMessage(new { cmd = "alphaSynth.playerSequencerFinished" });
+            _worker.postMessage(new { cmd = CmdOutputSequencerFinished });
         }
 
         public void AddSamples(SampleArray samples)
         {
-            PostMessage(new { cmd = "alphaSynth.playerAddSamples", samples = samples });
+            _worker.postMessage(new { cmd = CmdOutputAddSamples, samples = samples });
         }
 
         public void Play()
         {
-            PostMessage(new { cmd = "alphaSynth.playerPlay" });
+            _worker.postMessage(new { cmd = CmdOutputPlay });
         }
 
         public void Pause()
         {
-            PostMessage(new { cmd = "alphaSynth.playerPause" });
+            _worker.postMessage(new { cmd = CmdOutputPause });
         }
 
-        public void Seek(double position)
+        public void ResetSamples()
         {
-            PostMessage(new { cmd = "alphaSynth.playerSeek", pos = position });
-        }
-
-        public void SetPlaybackSpeed(float playbackSpeed)
-        {
-            PostMessage(new { cmd = "alphaSynth.setPlaybackSpeed", value = playbackSpeed });
+            _worker.postMessage(new { cmd = CmdOutputResetSamples });
         }
     }
 }

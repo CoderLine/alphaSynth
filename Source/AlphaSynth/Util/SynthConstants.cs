@@ -45,5 +45,15 @@ namespace AlphaSynth.Util
         public const int DefaultChannelCount = 16;
         public const int DefaultKeyCount = 128;
 
+        public const float DefaultMixGain = 0.35f;
+
+        public const float MinVolume = 0;
+        public const float MaxVolume = 10;
+
+        public const byte MinProgram = 0;
+        public const byte MaxProgram = 127;
+
+        public const double MinPlaybackSpeed = 0.125;
+        public const double MaxPlaybackSpeed = 8;
     }
 }
