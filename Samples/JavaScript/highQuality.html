@@ -74,20 +74,20 @@
     <script>
     var as = null;
     try {
-        as = new AlphaSynth.Main.AlphaSynthApi();
+        as = AlphaSynth.Main.AlphaSynthApi.Create();
         // load data
         as.On('ready', function() {
             // load default data
-            as.LoadSoundFontUrl('../data/GeneralUser GS SoftSynth v1.44.sf2');
-            as.LoadMidiUrl('../data/Test2.mid');
+            as.LoadSoundFont('../data/GeneralUser GS SoftSynth v1.44.sf2');
+            as.LoadMidi('../data/Test2.mid');
         });
-        as.On('soundFontLoad', function(loaded, full) {
-            var percent = (((loaded/full)*100)|0);
+        as.On('soundFontLoad', function(data) {
+            var percent = (((data.loaded/data.total)*100)|0);
             document.querySelector('#sfLoad').innerText = percent + '%';
             document.querySelector('#sfLoad').style.width = percent + '%';
         });
-        as.On('midiLoad', function(loaded, full) {
-            var percent = (((loaded/full)*100)|0);
+        as.On('midiLoad', function(data) {
+            var percent = (((data.loaded/data.total)*100)|0);
             document.querySelector('#midiLoad').innerText = percent + '%';
             document.querySelector('#midiLoad').style.width = percent + '%';
         });
@@ -112,20 +112,17 @@
             as.SetMasterVolume(e);
         });
                 
-        as.On('readyForPlay', function(r) {
-            isReady = r;
+        as.On('readyForPlayback', function(r) {
             updateControls();            
         }); 
         as.On('playerStateChanged', function(s) {
-            state = s;
             updateControls();            
         }); 
-        as.On('positionChanged', function(currentTime, endTime) {
-            updatePosition(currentTime, endTime);            
+        as.On('positionChanged', function(data) {
+            updatePosition(data.currentTime, data.endTime);            
         }); 
         
         var isReady = false;
-        var state = 0;
         function updateControls() {
             var play = document.querySelector('#play');
             var pause = document.querySelector('#pause');
@@ -133,23 +130,16 @@
             
             play.setAttribute('disabled', 'disabled');
             pause.setAttribute('disabled', 'disabled');
-            stop.setAttribute('disabled', 'disabled');
+            stop.removeAttribute('disabled');
             slider.disable();
-            if(isReady) {
-                slider.enable();
-                switch(state) {
-                    case 0:
-                    play.removeAttribute('disabled');
-                    break;
-                    case 1:
-                    pause.removeAttribute('disabled');
-                    stop.removeAttribute('disabled');
-                    break;
-                    case 2:
-                    play.removeAttribute('disabled');
-                    stop.removeAttribute('disabled');
-                    break;
-                }
+            slider.enable();
+            switch(as.get_State()) {
+                case 0:
+                play.removeAttribute('disabled');
+                break;
+                case 1:
+                pause.removeAttribute('disabled');
+                break;
             }
         }
         updateControls();

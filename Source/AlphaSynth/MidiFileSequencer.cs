@@ -89,6 +89,7 @@ namespace AlphaSynth
         {
             _synthesizer = synthesizer;
             _firstProgramEventPerChannel = new FastDictionary<int, SynthEvent>();
+            _tempoChanges = new FastList<MidiFileSequencerTempoChange>();
             PlaybackSpeed = 1;
         }
 

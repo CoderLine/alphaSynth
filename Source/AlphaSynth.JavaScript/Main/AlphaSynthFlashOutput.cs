@@ -95,7 +95,7 @@ namespace AlphaSynth.Main
         {
             var uint8 = new Uint8Array(samples.Buffer);
             JsFunction fromCharCode = JsCode("String.fromCharCode").As<JsFunction>();
-            var b64 = window.btoa(fromCharCode.call(null, uint8).As<string>());
+            var b64 = window.btoa(fromCharCode.apply(null, uint8.As<object[]>()).As<string>());
             document.getElementById(_swfId).As<IFlashSynthOutput>().AlphaSynthAddSamples(b64);
         }
 

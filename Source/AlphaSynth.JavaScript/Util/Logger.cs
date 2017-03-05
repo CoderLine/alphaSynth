@@ -86,7 +86,7 @@ namespace AlphaSynth.Util
         }
 
 
-        [JsMethod(InlineCode = "arguments.callee.caller.caller.name")]
+        [JsMethod(InlineCode = "(arguments && arguments.callee && arguments.callee.caller && arguments.callee.caller.caller ? arguments.callee.caller.caller.name : '')")]
         private static string GetCaller()
         {
             return "";

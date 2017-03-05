@@ -253,8 +253,6 @@ namespace AlphaSynth.Main
                     }});
                 };
                 request.send();
-
-                _synth.postMessage(new { cmd = AlphaSynthWebWorker.CmdLoadMidiBytes, url = data });
             }
             else
             {

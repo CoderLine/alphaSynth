@@ -98,14 +98,14 @@ class FlashOutputDevice
     // API to JavaScript
     private function sampleRequest()
     {
-       // if we fall under the half of buffers
+        // if we fall under the half of buffers
         // we request one half
         var count = (BufferCount / 2) * BufferSize;
         if (_circularBuffer.count < count)
         {
             for (i in 0 ... Std.int(BufferCount/2))
             {
-                ExternalInterface.call("AlphaSynth.Main.AlphaSynthFlashOutput.OnSampleRequest", _id);
+               ExternalInterface.call("AlphaSynth.Main.AlphaSynthFlashOutput.OnSampleRequest", _id);
             }
         }
     }
@@ -122,7 +122,7 @@ class FlashOutputDevice
     
     private function samplesPlayed(samplesPlayed:Int)
     {
-        ExternalInterface.call("AlphaSynth.Main.AlphaSynthFlashOutput.OnSamplesPlayed", _id, samplesPlayed);
+       ExternalInterface.call("AlphaSynth.Main.AlphaSynthFlashOutput.OnSamplesPlayed", _id, samplesPlayed);
     }
     
     private function logDebug(msg:String)
