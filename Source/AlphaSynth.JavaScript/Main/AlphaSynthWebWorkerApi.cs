@@ -153,6 +153,9 @@ namespace AlphaSynth.Main
             _synth = new Worker(alphaSynthScriptFile);
             _synth.addEventListener("message", HandleWorkerMessage, false);
             _synth.postMessage(new { cmd = AlphaSynthWebWorker.CmdInitialize, sampleRate = _output.SampleRate });
+
+            MasterVolume = 1;
+            PlaybackSpeed = 1;
         }
 
         //

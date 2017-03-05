@@ -670,6 +670,8 @@ AlphaSynth.Main.AlphaSynthWebWorkerApi = function (player, alphaSynthScriptFile)
         cmd: "alphaSynth.initialize",
         sampleRate: this._output.get_SampleRate()
     });
+    this.set_MasterVolume(1);
+    this.set_PlaybackSpeed(1);
 };
 AlphaSynth.Main.AlphaSynthWebWorkerApi.prototype = {
     get_IsReady: function (){
@@ -1355,7 +1357,9 @@ AlphaSynth.AlphaSynth.prototype = {
     },
     set_PlaybackSpeed: function (value){
         value = AlphaSynth.Synthesis.SynthHelper.ClampD(value, 0.125, 8);
+        var oldSpeed = this._sequencer.PlaybackSpeed;
         this._sequencer.PlaybackSpeed = value;
+        this.UpdateTimePosition(this._timePosition * (oldSpeed / value));
     },
     get_TickPosition: function (){
         return this._tickPosition;

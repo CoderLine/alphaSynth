@@ -65,7 +65,9 @@ namespace AlphaSynth
             set
             {
                 value = SynthHelper.ClampD(value, SynthConstants.MinPlaybackSpeed, SynthConstants.MaxPlaybackSpeed);
+                var oldSpeed = _sequencer.PlaybackSpeed;
                 _sequencer.PlaybackSpeed = value;
+                UpdateTimePosition(_timePosition * (oldSpeed / value));
             }
         }
 
