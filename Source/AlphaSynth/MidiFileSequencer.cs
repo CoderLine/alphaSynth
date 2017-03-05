@@ -32,7 +32,6 @@ namespace AlphaSynth
         private readonly Synthesizer _synthesizer;
 
         private FastList<MidiFileSequencerTempoChange> _tempoChanges;
-        private FastDictionary<int, SynthEvent> _firstVolumeEventPerChannel;
         private FastDictionary<int, SynthEvent> _firstProgramEventPerChannel;
         private SynthEvent[] _synthData;
         private int _division;
@@ -89,7 +88,6 @@ namespace AlphaSynth
         public MidiFileSequencer(Synthesizer synthesizer)
         {
             _synthesizer = synthesizer;
-            _firstVolumeEventPerChannel = new FastDictionary<int, SynthEvent>();
             _firstProgramEventPerChannel = new FastDictionary<int, SynthEvent>();
             PlaybackSpeed = 1;
         }
@@ -184,20 +182,12 @@ namespace AlphaSynth
                     bpm = MidiHelper.MicroSecondsPerMinute / (double)meta.Value;
                     _tempoChanges.Add(new MidiFileSequencerTempoChange(bpm, absTick, (int)(absTime)));
                 }
-                else if (mEvent.Command == MidiEventTypeEnum.Controller && mEvent.Data1 == (int)ControllerTypeEnum.VolumeCoarse)
-                {
-                    var channel = mEvent.Channel;
-                    if (!_firstVolumeEventPerChannel.ContainsKey(channel))
-                    {
-                        _firstVolumeEventPerChannel[channel] = synthData;
-                    }
-                }
                 else if (mEvent.Command == MidiEventTypeEnum.ProgramChange)
                 {
                     var channel = mEvent.Channel;
-                    if (!_firstVolumeEventPerChannel.ContainsKey(channel))
+                    if (!_firstProgramEventPerChannel.ContainsKey(channel))
                     {
-                        _firstVolumeEventPerChannel[channel] = synthData;
+                        _firstProgramEventPerChannel[channel] = synthData;
                     }
                 }
             }
@@ -315,14 +305,6 @@ namespace AlphaSynth
                 _synthesizer.ResetPrograms();
                 _synthesizer.ResetSynthControls();
                 OnFinished();
-            }
-        }
-
-        public void SetChannelVolume(int channel, double volume)
-        {
-            if (_firstVolumeEventPerChannel.ContainsKey(channel))
-            {
-                _firstVolumeEventPerChannel[channel].Event.Data2 = (byte)(255 * volume);
             }
         }
 

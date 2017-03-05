@@ -600,17 +600,16 @@ namespace AlphaSynth.Synthesis
             _isAnySolo = _soloChannels.Count > 0;
         }
 
-        public void SetChannelVolume(int channel, double volume)
-        {
-            if (channel < 0 || channel >= _synthChannels.Length) return;
-            _synthChannels[channel].Volume.Coarse = (byte)(255 * volume);
-            _synthChannels[channel].UpdateCurrentVolumeFromVolume();
-        }
-
         public void SetChannelProgram(int channel, byte program)
         {
             if (channel < 0 || channel >= _synthChannels.Length) return;
             _synthChannels[channel].Program = (byte)program;
+        }
+
+        public void SetChannelVolume(int channel, double volume)
+        {
+            if (channel < 0 || channel >= _synthChannels.Length) return;
+            _synthChannels[channel].MixVolume = (float) volume;
         }
     }
 }

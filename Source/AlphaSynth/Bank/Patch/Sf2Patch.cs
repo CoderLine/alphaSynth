@@ -102,7 +102,7 @@ namespace AlphaSynth.Bank.Patch
             var pitchWithBend = basePitchFrequency*SynthHelper.CentsToPitch(voiceparams.PitchOffset);
             var basePitch = pitchWithBend / voiceparams.SynthParams.Synth.SampleRate;
 
-            float baseVolume = isMuted ? 0 : voiceparams.SynthParams.Synth.MasterVolume * voiceparams.SynthParams.CurrentVolume * SynthConstants.DefaultMixGain;
+            float baseVolume = isMuted ? 0 : voiceparams.SynthParams.Synth.MasterVolume * voiceparams.SynthParams.CurrentVolume * SynthConstants.DefaultMixGain * voiceparams.SynthParams.MixVolume;
 
             //--Main Loop
             for (int x = startIndex; x < endIndex; x += SynthConstants.DefaultBlockSize * SynthConstants.AudioChannels)

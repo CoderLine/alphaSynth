@@ -1492,7 +1492,6 @@ AlphaSynth.AlphaSynth.prototype = {
     },
     SetChannelVolume: function (channel, volume){
         volume = AlphaSynth.Synthesis.SynthHelper.ClampD(volume, 0, 10);
-        this._sequencer.SetChannelVolume(channel, volume);
         this._synthesizer.SetChannelVolume(channel, volume);
     },
     SetChannelProgram: function (channel, program){
@@ -2671,7 +2670,7 @@ AlphaSynth.Bank.Patch.Sf2Patch.prototype = {
         var basePitchFrequency = AlphaSynth.Synthesis.SynthHelper.CentsToPitch(voiceparams.SynthParams.CurrentPitch) * this.gen.Frequency;
         var pitchWithBend = basePitchFrequency * AlphaSynth.Synthesis.SynthHelper.CentsToPitch(voiceparams.PitchOffset);
         var basePitch = pitchWithBend / voiceparams.SynthParams.Synth.SampleRate;
-        var baseVolume = isMuted ? 0 : voiceparams.SynthParams.Synth.get_MasterVolume() * voiceparams.SynthParams.CurrentVolume * 0.35;
+        var baseVolume = isMuted ? 0 : voiceparams.SynthParams.Synth.get_MasterVolume() * voiceparams.SynthParams.CurrentVolume * 0.35 * voiceparams.SynthParams.MixVolume;
         //--Main Loop
         for (var x = startIndex; x < endIndex; x += 128){
             voiceparams.Envelopes[0].Increment(64);
@@ -3539,7 +3538,6 @@ AlphaSynth.IO.ByteBuffer.FromBuffer = function (data){
 AlphaSynth.MidiFileSequencer = function (synthesizer){
     this._synthesizer = null;
     this._tempoChanges = null;
-    this._firstVolumeEventPerChannel = null;
     this._firstProgramEventPerChannel = null;
     this._synthData = null;
     this._division = 0;
@@ -3553,7 +3551,6 @@ AlphaSynth.MidiFileSequencer = function (synthesizer){
     this.EndTick = 0;
     this.PlaybackSpeed = 0;
     this._synthesizer = synthesizer;
-    this._firstVolumeEventPerChannel = {};
     this._firstProgramEventPerChannel = {};
     this.PlaybackSpeed = 1;
 };
@@ -3636,16 +3633,10 @@ AlphaSynth.MidiFileSequencer.prototype = {
                 bpm = 60000000 / meta.Value;
                 this._tempoChanges.push(new AlphaSynth.MidiFileSequencerTempoChange(bpm, absTick, ((absTime)) | 0));
             }
-            else if (mEvent.get_Command() == AlphaSynth.Midi.Event.MidiEventTypeEnum.Controller && mEvent.get_Data1() == 7){
-                var channel = mEvent.get_Channel();
-                if (!this._firstVolumeEventPerChannel.hasOwnProperty(channel)){
-                    this._firstVolumeEventPerChannel[channel] = synthData;
-                }
-            }
             else if (mEvent.get_Command() == AlphaSynth.Midi.Event.MidiEventTypeEnum.ProgramChange){
                 var channel = mEvent.get_Channel();
-                if (!this._firstVolumeEventPerChannel.hasOwnProperty(channel)){
-                    this._firstVolumeEventPerChannel[channel] = synthData;
+                if (!this._firstProgramEventPerChannel.hasOwnProperty(channel)){
+                    this._firstProgramEventPerChannel[channel] = synthData;
                 }
             }
         }
@@ -3736,11 +3727,6 @@ AlphaSynth.MidiFileSequencer.prototype = {
             this._synthesizer.ResetPrograms();
             this._synthesizer.ResetSynthControls();
             this.OnFinished();
-        }
-    },
-    SetChannelVolume: function (channel, volume){
-        if (this._firstVolumeEventPerChannel.hasOwnProperty(channel)){
-            this._firstVolumeEventPerChannel[channel].Event.set_Data2((255 * volume));
         }
     },
     SetChannelProgram: function (channel, program){
@@ -5098,6 +5084,7 @@ AlphaSynth.Synthesis.SynthParameters = function (synth){
     this.CurrentPitch = 0;
     this.CurrentMod = 0;
     this.CurrentPan = null;
+    this.MixVolume = 0;
     this.Synth = synth;
     this.Pan = new AlphaSynth.Synthesis.CCValue(0);
     this.Volume = new AlphaSynth.Synthesis.CCValue(0);
@@ -5151,7 +5138,6 @@ AlphaSynth.Synthesis.SynthParameters.prototype = {
     UpdateCurrentVolumeFromVolume: function (){
         this.CurrentVolume = this.Volume.get_Combined() / 16383;
         this.CurrentVolume *= this.CurrentVolume;
-        this.CurrentVolume = 1;
     },
     UpdateCurrentVolumeFromExpression: function (){
         this.CurrentVolume = this.Expression.get_Combined() / 16383;
@@ -5922,16 +5908,15 @@ AlphaSynth.Synthesis.Synthesizer.prototype = {
         }
         this._isAnySolo = Object.keys(this._soloChannels).length > 0;
     },
-    SetChannelVolume: function (channel, volume){
-        if (channel < 0 || channel >= this._synthChannels.length)
-            return;
-        this._synthChannels[channel].Volume.set_Coarse((255 * volume));
-        this._synthChannels[channel].UpdateCurrentVolumeFromVolume();
-    },
     SetChannelProgram: function (channel, program){
         if (channel < 0 || channel >= this._synthChannels.length)
             return;
         this._synthChannels[channel].Program = program;
+    },
+    SetChannelVolume: function (channel, volume){
+        if (channel < 0 || channel >= this._synthChannels.length)
+            return;
+        this._synthChannels[channel].MixVolume = volume;
     }
 };
 AlphaSynth.Util.PcmData = function (bits, pcmData, isDataInLittleEndianFormat){

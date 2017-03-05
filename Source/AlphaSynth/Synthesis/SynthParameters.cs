@@ -96,6 +96,7 @@ namespace AlphaSynth.Synthesis
         public int CurrentPitch { get; set; }    //in cents
         public int CurrentMod { get; set; }      //in cents
         public PanComponent CurrentPan { get; set; }
+        public float MixVolume { get; set; }
 
         public SynthParameters(Synthesizer synth)
         {
@@ -108,6 +109,8 @@ namespace AlphaSynth.Synthesis
             PitchBend = new CCValue(0);
             MasterFineTune = new CCValue(0);
             Rpn = new CCValue(0);
+
+            MixVolume = 1;
 
             CurrentPan = new PanComponent();
 
@@ -159,7 +162,6 @@ namespace AlphaSynth.Synthesis
         {
             CurrentVolume = Volume.Combined / 16383f;
             CurrentVolume *= CurrentVolume;
-            CurrentVolume = 1;
         }
 
         public void UpdateCurrentVolumeFromExpression()

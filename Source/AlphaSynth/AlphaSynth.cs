@@ -288,7 +288,6 @@ namespace AlphaSynth
         public void SetChannelVolume(int channel, double volume)
         {
             volume = SynthHelper.ClampD(volume, SynthConstants.MinVolume, SynthConstants.MaxVolume);
-            _sequencer.SetChannelVolume(channel, volume);
             _synthesizer.SetChannelVolume(channel, volume);
         }
 

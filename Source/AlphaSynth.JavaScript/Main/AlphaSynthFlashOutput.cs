@@ -105,8 +105,6 @@ namespace AlphaSynth.Main
             document.getElementById(_swfId).As<IFlashSynthOutput>().AlphaSynthResetSamples();
         }
 
-
-
         public event Action Ready;
         public static void OnReady(string id)
         {
