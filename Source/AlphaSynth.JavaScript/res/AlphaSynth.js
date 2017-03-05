@@ -5093,6 +5093,7 @@ AlphaSynth.Synthesis.SynthParameters = function (synth){
     this.PitchBend = new AlphaSynth.Synthesis.CCValue(0);
     this.MasterFineTune = new AlphaSynth.Synthesis.CCValue(0);
     this.Rpn = new AlphaSynth.Synthesis.CCValue(0);
+    this.MixVolume = 1;
     this.CurrentPan = new AlphaSynth.Bank.Components.PanComponent();
     this.ResetControllers();
 };
