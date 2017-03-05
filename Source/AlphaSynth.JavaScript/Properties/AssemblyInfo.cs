@@ -64,7 +64,7 @@ using SharpKit.JavaScript;
 [assembly: JsType(Export = false, TargetType = typeof(IAlphaSynth))]
 [assembly: JsType(Export = false, TargetType = typeof(IFlashSynthOutput))]
 [assembly: JsType(Export = false, TargetType = typeof(ISynthOutput))]
-[assembly: JsType(Export = false, TargetType = typeof(IReadable))]
+[assembly: JsType(Export = false, TargetType = typeof(IReadable), AutomaticPropertiesAsFields = true)]
 
 [assembly: JsType(JsMode.Prototype, TargetType = typeof(Math), Name = "Math", NativeArrayEnumerator = true, NativeEnumerator = false, Export = false)]
 

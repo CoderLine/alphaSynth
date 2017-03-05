@@ -515,17 +515,14 @@ AlphaSynth.Main.AlphaSynthWebWorker.prototype = {
             case "alphaSynth.pause":
                 this._player.Pause();
                 break;
+            case "alphaSynth.playPause":
+                this._player.PlayPause();
+                break;
             case "alphaSynth.stop":
                 this._player.Stop();
                 break;
-            case "alphaSynth.loadSoundFontUrl":
-                this.LoadSoundFontUrl(data["url"]);
-                break;
             case "alphaSynth.loadSoundFontBytes":
                 this._player.LoadSoundFont(data["data"]);
-                break;
-            case "alphaSynth.loadMidiUrl":
-                this.LoadMidiUrl(data["url"]);
                 break;
             case "alphaSynth.loadMidiBytes":
                 this._player.LoadMidi(data["data"]);
@@ -546,52 +543,6 @@ AlphaSynth.Main.AlphaSynthWebWorker.prototype = {
                 this._player.ResetChannelStates();
                 break;
         }
-    },
-    LoadMidiUrl: function (url){
-        AlphaSynth.Util.Logger.Info("Start loading soundfont from url " + url);
-        var request = new XMLHttpRequest();
-        request.open("GET", url, true);
-        request.responseType = "arraybuffer";
-        request.onload = $CreateAnonymousDelegate(this, function (e){
-            var buffer = new Uint8Array(request.response);
-            this._player.LoadMidi(buffer);
-        });
-        request.onerror = $CreateAnonymousDelegate(this, function (e){
-            AlphaSynth.Util.Logger.Error("Loading failed: " + e.message);
-            this.OnMidiLoadFailed(this, AlphaSynth.EmptyEventArgs.Instance);
-        });
-        request.onprogress = $CreateAnonymousDelegate(this, function (e){
-            AlphaSynth.Util.Logger.Debug("Midi downloading: " + e.loaded + "/" + e.total + " bytes");
-            this._main.postMessage({
-                cmd: "alphaSynth.midiLoad",
-                loaded: e.loaded,
-                total: e.total
-            });
-        });
-        request.send();
-    },
-    LoadSoundFontUrl: function (url){
-        AlphaSynth.Util.Logger.Info("Start loading Soundfont from url " + url);
-        var request = new XMLHttpRequest();
-        request.open("GET", url, true);
-        request.responseType = "arraybuffer";
-        request.onload = $CreateAnonymousDelegate(this, function (e){
-            var buffer = new Uint8Array(request.response);
-            this._player.LoadSoundFont(buffer);
-        });
-        request.onerror = $CreateAnonymousDelegate(this, function (e){
-            AlphaSynth.Util.Logger.Error("Loading failed: " + e.message);
-            this.OnSoundFontLoadFailed(this, System.EventArgs.Empty);
-        });
-        request.onprogress = $CreateAnonymousDelegate(this, function (e){
-            AlphaSynth.Util.Logger.Debug("Soundfont downloading: " + e.loaded + "/" + e.total + " bytes");
-            this._main.postMessage({
-                cmd: "alphaSynth.soundFontLoad",
-                loaded: e.loaded,
-                total: e.total
-            });
-        });
-        request.send();
     },
     OnPositionChanged: function (sender, e){
         this._main.postMessage({
@@ -621,13 +572,6 @@ AlphaSynth.Main.AlphaSynthWebWorker.prototype = {
     OnSoundFontLoadFailed: function (sender, e){
         this._main.postMessage({
             cmd: "alphaSynth.soundFontLoadFailed"
-        });
-    },
-    OnMidiLoad: function (sender, e){
-        this._main.postMessage({
-            cmd: "alphaSynth.midiLoad",
-            loaded: e.Loaded,
-            total: e.Total
         });
     },
     OnMidiLoaded: function (sender, e){
@@ -666,9 +610,7 @@ $StaticConstructor(function (){
     AlphaSynth.Main.AlphaSynthWebWorker.CmdPause = "alphaSynth.pause";
     AlphaSynth.Main.AlphaSynthWebWorker.CmdPlayPause = "alphaSynth.playPause";
     AlphaSynth.Main.AlphaSynthWebWorker.CmdStop = "alphaSynth.stop";
-    AlphaSynth.Main.AlphaSynthWebWorker.CmdLoadSoundFontUrl = "alphaSynth.loadSoundFontUrl";
     AlphaSynth.Main.AlphaSynthWebWorker.CmdLoadSoundFontBytes = "alphaSynth.loadSoundFontBytes";
-    AlphaSynth.Main.AlphaSynthWebWorker.CmdLoadMidiUrl = "alphaSynth.loadMidiUrl";
     AlphaSynth.Main.AlphaSynthWebWorker.CmdLoadMidiBytes = "alphaSynth.loadMidiBytes";
     AlphaSynth.Main.AlphaSynthWebWorker.CmdSetChannelMute = "alphaSynth.setChannelMute";
     AlphaSynth.Main.AlphaSynthWebWorker.CmdSetChannelSolo = "alphaSynth.setChannelSolo";
@@ -680,10 +622,8 @@ $StaticConstructor(function (){
     AlphaSynth.Main.AlphaSynthWebWorker.CmdPositionChanged = "alphaSynth.positionChanged";
     AlphaSynth.Main.AlphaSynthWebWorker.CmdPlayerStateChanged = "alphaSynth.playerStateChanged";
     AlphaSynth.Main.AlphaSynthWebWorker.CmdFinished = "alphaSynth.finished";
-    AlphaSynth.Main.AlphaSynthWebWorker.CmdSoundFontLoad = "alphaSynth.soundFontLoad";
     AlphaSynth.Main.AlphaSynthWebWorker.CmdSoundFontLoaded = "alphaSynth.soundFontLoaded";
     AlphaSynth.Main.AlphaSynthWebWorker.CmdSoundFontLoadFailed = "alphaSynth.soundFontLoadFailed";
-    AlphaSynth.Main.AlphaSynthWebWorker.CmdMidiLoad = "alphaSynth.midiLoad";
     AlphaSynth.Main.AlphaSynthWebWorker.CmdMidiLoaded = "alphaSynth.midiLoaded";
     AlphaSynth.Main.AlphaSynthWebWorker.CmdMidiLoadFailed = "alphaSynth.midiLoadFailed";
     AlphaSynth.Main.AlphaSynthWebWorker.CmdLog = "alphaSynth.log";
@@ -839,10 +779,31 @@ AlphaSynth.Main.AlphaSynthWebWorkerApi.prototype = {
     },
     LoadSoundFont: function (data){
         if (typeof(data) == "string"){
-            this._synth.postMessage({
-                cmd: "alphaSynth.loadSoundFontUrl",
-                url: data
+            var url = data;
+            AlphaSynth.Util.Logger.Info("Start loading Soundfont from url " + url);
+            var request = new XMLHttpRequest();
+            request.open("GET", url, true);
+            request.responseType = "arraybuffer";
+            request.onload = $CreateAnonymousDelegate(this, function (e){
+                var buffer = new Uint8Array(request.response);
+                this._synth.postMessage({
+                    cmd: "alphaSynth.loadSoundFontBytes",
+                    data: buffer
+                });
             });
+            request.onerror = $CreateAnonymousDelegate(this, function (e){
+                AlphaSynth.Util.Logger.Error("Loading failed: " + e.message);
+                this.TriggerEvent("soundFontLoadFailed", null);
+            });
+            request.onprogress = $CreateAnonymousDelegate(this, function (e){
+                AlphaSynth.Util.Logger.Debug("Soundfont downloading: " + e.loaded + "/" + e.total + " bytes");
+                this.TriggerEvent("soundFontLoad", [{
+                    loaded: e.loaded,
+                    total: e.total
+                }
+                ]);
+            });
+            request.send();
         }
         else {
             this._synth.postMessage({
@@ -851,16 +812,35 @@ AlphaSynth.Main.AlphaSynthWebWorkerApi.prototype = {
             });
         }
     },
-    LoadMidiUrl: function (url){
-        this._synth.postMessage({
-            cmd: "alphaSynth.loadMidiUrl",
-            url: AlphaSynth.Main.AlphaSynthWebWorkerApi.QualifyUrl(url)
-        });
-    },
     LoadMidi: function (data){
         if (typeof(data) == "string"){
+            var url = data;
+            AlphaSynth.Util.Logger.Info("Start loading midi from url " + url);
+            var request = new XMLHttpRequest();
+            request.open("GET", url, true);
+            request.responseType = "arraybuffer";
+            request.onload = $CreateAnonymousDelegate(this, function (e){
+                var buffer = new Uint8Array(request.response);
+                this._synth.postMessage({
+                    cmd: "alphaSynth.loadMidiBytes",
+                    data: buffer
+                });
+            });
+            request.onerror = $CreateAnonymousDelegate(this, function (e){
+                AlphaSynth.Util.Logger.Error("Loading failed: " + e.message);
+                this.TriggerEvent("midiLoadFailed", null);
+            });
+            request.onprogress = $CreateAnonymousDelegate(this, function (e){
+                AlphaSynth.Util.Logger.Debug("Midi downloading: " + e.loaded + "/" + e.total + " bytes");
+                this.TriggerEvent("midiLoad", [{
+                    loaded: e.loaded,
+                    total: e.total
+                }
+                ]);
+            });
+            request.send();
             this._synth.postMessage({
-                cmd: "alphaSynth.loadMidiUrl",
+                cmd: "alphaSynth.loadMidiBytes",
                 url: data
             });
         }
@@ -930,17 +910,11 @@ AlphaSynth.Main.AlphaSynthWebWorkerApi.prototype = {
             case "alphaSynth.finished":
                 this.TriggerEvent("finished", null);
                 break;
-            case "alphaSynth.soundFontLoad":
-                this.TriggerEvent("soundFontLoad", [data]);
-                break;
             case "alphaSynth.soundFontLoaded":
                 this.TriggerEvent("soundFontLoaded", null);
                 break;
             case "alphaSynth.soundFontLoadFailed":
                 this.TriggerEvent("soundFontLoadFailed", null);
-                break;
-            case "alphaSynth.midiLoad":
-                this.TriggerEvent("midiLoad", [data]);
                 break;
             case "alphaSynth.midiLoaded":
                 this._isMidiLoaded = true;
@@ -966,6 +940,9 @@ AlphaSynth.Main.AlphaSynthWebWorkerApi.prototype = {
                 break;
             case "alphaSynth.output.pause":
                 this._output.Pause();
+                break;
+            case "alphaSynth.output.resetSamples":
+                this._output.ResetSamples();
                 break;
         }
     },
@@ -1433,7 +1410,7 @@ AlphaSynth.AlphaSynth.prototype = {
         }
     },
     Stop: function (){
-        if (this.get_State() == AlphaSynth.PlayerState.Paused || !this.get_IsReadyForPlayback())
+        if (!this.get_IsReadyForPlayback())
             return;
         AlphaSynth.Util.Logger.Debug("Stopping playback");
         this.Pause();
@@ -4112,9 +4089,9 @@ AlphaSynth.Midi.MidiFile.prototype = {
                 input.ReadByte();
             }
         }
-        var endPosition = AlphaSynth.Util.IOHelper.ReadInt32BE(input) + input.get_Position();
+        var endPosition = AlphaSynth.Util.IOHelper.ReadInt32BE(input) + input.Position;
         var prevStatus = 0;
-        while (input.get_Position() < endPosition){
+        while (input.Position < endPosition){
             var delta = AlphaSynth.Midi.MidiFile.ReadVariableLength(input);
             totalTime += delta;
             var status = input.ReadByte();
@@ -4162,7 +4139,7 @@ AlphaSynth.Midi.MidiFile.prototype = {
                 }
             }
         }
-        if (input.get_Position() != endPosition)
+        if (input.Position != endPosition)
             throw $CreateException(new System.Exception.ctor$$String("The track length was invalid for the current MTrk chunk."), new Error());
         if (Array.prototype.indexOf.call(channelList,9) != -1){
             if (Array.prototype.indexOf.call(drumList,0) == -1)
@@ -4566,13 +4543,13 @@ AlphaSynth.Sf2.SoundFontSampleData = function (input){
     var size = AlphaSynth.Util.IOHelper.ReadInt32LE(input);
     if (id.toLowerCase() != "list")
         throw $CreateException(new System.Exception.ctor$$String("Invalid soundfont. Could not find sdta LIST chunk."), new Error());
-    var readTo = input.get_Position() + size;
+    var readTo = input.Position + size;
     id = AlphaSynth.Util.IOHelper.Read8BitChars(input, 4);
     if (id.toLowerCase() != "sdta")
         throw $CreateException(new System.Exception.ctor$$String("Invalid soundfont. The LIST chunk is not of type sdta."), new Error());
     this.BitsPerSample = 0;
     var rawSampleData = null;
-    while (input.get_Position() < readTo){
+    while (input.Position < readTo){
         var subID = AlphaSynth.Util.IOHelper.Read8BitChars(input, 4);
         size = AlphaSynth.Util.IOHelper.ReadInt32LE(input);
         switch (subID.toLowerCase()){
@@ -4596,7 +4573,7 @@ AlphaSynth.Sf2.SoundFontSampleData = function (input){
             }
                 if (size % 2 == 1){
                 if (input.ReadByte() != 0){
-                    input.set_Position(input.get_Position() - 1);
+                    input.Position--;
                 }
             }
                 break;
@@ -4618,7 +4595,7 @@ AlphaSynth.Sf2.SoundFontPresets = function (input){
     var size = AlphaSynth.Util.IOHelper.ReadInt32LE(input);
     if (id.toLowerCase() != "list")
         throw $CreateException(new System.Exception.ctor$$String("Invalid soundfont. Could not find pdta LIST chunk."), new Error());
-    var readTo = input.get_Position() + size;
+    var readTo = input.Position + size;
     id = AlphaSynth.Util.IOHelper.Read8BitChars(input, 4);
     if (id.toLowerCase() != "pdta")
         throw $CreateException(new System.Exception.ctor$$String("Invalid soundfont. The LIST chunk is not of type pdta."), new Error());
@@ -4630,7 +4607,7 @@ AlphaSynth.Sf2.SoundFontPresets = function (input){
     var ibag = null;
     var phdr = null;
     var inst = null;
-    while (input.get_Position() < readTo){
+    while (input.Position < readTo){
         id = AlphaSynth.Util.IOHelper.Read8BitChars(input, 4);
         size = AlphaSynth.Util.IOHelper.ReadInt32LE(input);
         switch (id.toLowerCase()){
@@ -4697,11 +4674,11 @@ AlphaSynth.Sf2.SoundFontInfo = function (input){
     var size = AlphaSynth.Util.IOHelper.ReadInt32LE(input);
     if (id.toLowerCase() != "list")
         throw $CreateException(new System.Exception.ctor$$String("Invalid soundfont. Could not find INFO LIST chunk."), new Error());
-    var readTo = input.get_Position() + size;
+    var readTo = input.Position + size;
     id = AlphaSynth.Util.IOHelper.Read8BitChars(input, 4);
     if (id.toLowerCase() != "info")
         throw $CreateException(new System.Exception.ctor$$String("Invalid soundfont. The LIST chunk is not of type INFO."), new Error());
-    while (input.get_Position() < readTo){
+    while (input.Position < readTo){
         id = AlphaSynth.Util.IOHelper.Read8BitChars(input, 4);
         size = AlphaSynth.Util.IOHelper.ReadInt32LE(input);
         switch (id.toLowerCase()){

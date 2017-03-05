@@ -197,7 +197,7 @@ namespace AlphaSynth
         /// <inheritdoc />
         public void Stop()
         {
-            if (State == PlayerState.Paused || !IsReadyForPlayback) return;
+            if (!IsReadyForPlayback) return;
 
             Logger.Debug("Stopping playback");
             Pause();

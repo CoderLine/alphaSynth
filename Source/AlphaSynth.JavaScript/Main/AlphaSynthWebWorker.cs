@@ -32,9 +32,7 @@ namespace AlphaSynth.Main
         public const string CmdPause = CmdPrefix + "pause";
         public const string CmdPlayPause = CmdPrefix + "playPause";
         public const string CmdStop = CmdPrefix + "stop";
-        public const string CmdLoadSoundFontUrl = CmdPrefix + "loadSoundFontUrl";
         public const string CmdLoadSoundFontBytes = CmdPrefix + "loadSoundFontBytes";
-        public const string CmdLoadMidiUrl = CmdPrefix + "loadMidiUrl";
         public const string CmdLoadMidiBytes = CmdPrefix + "loadMidiBytes";
         public const string CmdSetChannelMute = CmdPrefix + "setChannelMute";
         public const string CmdSetChannelSolo = CmdPrefix + "setChannelSolo";
@@ -48,10 +46,8 @@ namespace AlphaSynth.Main
         public const string CmdPositionChanged = CmdPrefix + "positionChanged";
         public const string CmdPlayerStateChanged = CmdPrefix + "playerStateChanged";
         public const string CmdFinished = CmdPrefix + "finished";
-        public const string CmdSoundFontLoad = CmdPrefix + "soundFontLoad";
         public const string CmdSoundFontLoaded = CmdPrefix + "soundFontLoaded";
         public const string CmdSoundFontLoadFailed = CmdPrefix + "soundFontLoadFailed";
-        public const string CmdMidiLoad = CmdPrefix + "midiLoad";
         public const string CmdMidiLoaded = CmdPrefix + "midiLoaded";
         public const string CmdMidiLoadFailed = CmdPrefix + "midiLoadFailed";
         public const string CmdLog = CmdPrefix + "log";
@@ -130,17 +126,14 @@ namespace AlphaSynth.Main
                 case CmdPause:
                     _player.Pause();
                     break;
+                case CmdPlayPause:
+                    _player.PlayPause();
+                    break;
                 case CmdStop:
                     _player.Stop();
                     break;
-                case CmdLoadSoundFontUrl:
-                    LoadSoundFontUrl(data.Member("url").As<string>());
-                    break;
                 case CmdLoadSoundFontBytes:
                     _player.LoadSoundFont(data.Member("data").As<byte[]>());
-                    break;
-                case CmdLoadMidiUrl:
-                    LoadMidiUrl(data.Member("url").As<string>());
                     break;
                 case CmdLoadMidiBytes:
                     _player.LoadMidi(data.Member("data").As<byte[]>());
@@ -163,64 +156,6 @@ namespace AlphaSynth.Main
             }
         }
 
-        private void LoadMidiUrl(string url)
-        {
-            Logger.Info("Start loading soundfont from url " + url);
-
-            var request = new XMLHttpRequest();
-            request.open("GET", url, true);
-            request.responseType = "arraybuffer";
-            request.onload = e =>
-            {
-                var buffer = new Uint8Array(request.response.As<ArrayBuffer>());
-                _player.LoadMidi(buffer.As<byte[]>());
-            };
-            request.onerror = e =>
-            {
-                Logger.Error("Loading failed: " + e.message);
-                OnMidiLoadFailed(this, EmptyEventArgs.Instance);
-            };
-            request.onprogress = e =>
-            {
-                Logger.Debug("Midi downloading: " + e.loaded + "/" + e.total + " bytes");
-                _main.postMessage(new
-                {
-                    cmd = CmdMidiLoad,
-                    loaded = e.loaded,
-                    total = e.total
-                });
-            };
-            request.send();
-        }
-
-        private void LoadSoundFontUrl(string url)
-        {
-            Logger.Info("Start loading Soundfont from url " + url);
-            var request = new XMLHttpRequest();
-            request.open("GET", url, true);
-            request.responseType = "arraybuffer";
-            request.onload = e =>
-            {
-                var buffer = new Uint8Array(request.response.As<ArrayBuffer>());
-                _player.LoadSoundFont(buffer.As<byte[]>());
-            };
-            request.onerror = e =>
-            {
-                Logger.Error("Loading failed: " + e.message);
-                OnSoundFontLoadFailed(this, EventArgs.Empty);
-            };
-            request.onprogress = e =>
-            {
-                Logger.Debug("Soundfont downloading: " + e.loaded + "/" + e.total + " bytes");
-                _main.postMessage(new
-                {
-                    cmd = CmdSoundFontLoad,
-                    loaded = e.loaded,
-                    total = e.total
-                });
-            };
-            request.send();
-        }
 
         public void OnPositionChanged(object sender, PositionChangedEventArgs e)
         {
@@ -264,16 +199,6 @@ namespace AlphaSynth.Main
             _main.postMessage(new
             {
                 cmd = CmdSoundFontLoadFailed
-            });
-        }
-
-        public void OnMidiLoad(object sender, ProgressEventArgs e)
-        {
-            _main.postMessage(new
-            {
-                cmd = CmdMidiLoad,
-                loaded = e.Loaded,
-                total = e.Total
             });
         }
 

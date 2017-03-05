@@ -187,7 +187,31 @@ namespace AlphaSynth.Main
         {
             if (@typeof(data) == "string")
             {
-                _synth.postMessage(new {cmd = AlphaSynthWebWorker.CmdLoadSoundFontUrl, url = data});
+                var url = data.As<string>();
+                Logger.Info("Start loading Soundfont from url " + url);
+                var request = new XMLHttpRequest();
+                request.open("GET", url, true);
+                request.responseType = "arraybuffer";
+                request.onload = e =>
+                {
+                    var buffer = new Uint8Array(request.response.As<ArrayBuffer>());
+                    _synth.postMessage(new { cmd = AlphaSynthWebWorker.CmdLoadSoundFontBytes, data = buffer.As<byte[]>() });
+                };
+                request.onerror = e =>
+                {
+                    Logger.Error("Loading failed: " + e.message);
+                    TriggerEvent("soundFontLoadFailed");
+                };
+                request.onprogress = e =>
+                {
+                    Logger.Debug("Soundfont downloading: " + e.loaded + "/" + e.total + " bytes");
+                    TriggerEvent("soundFontLoad", new object[] {new
+                    {
+                        loaded = e.loaded,
+                        total = e.total
+                    }});
+                };
+                request.send();
             }
             else
             {
@@ -196,17 +220,38 @@ namespace AlphaSynth.Main
         }
 
         /// <inheritdoc />
-        public void LoadMidiUrl(string url)
-        {
-            _synth.postMessage(new { cmd = AlphaSynthWebWorker.CmdLoadMidiUrl, url = QualifyUrl(url) });
-        }
-
-        /// <inheritdoc />
         public void LoadMidi(byte[] data)
         {
             if (@typeof(data) == "string")
             {
-                _synth.postMessage(new { cmd = AlphaSynthWebWorker.CmdLoadMidiUrl, url = data });
+                var url = data.As<string>();
+                Logger.Info("Start loading midi from url " + url);
+
+                var request = new XMLHttpRequest();
+                request.open("GET", url, true);
+                request.responseType = "arraybuffer";
+                request.onload = e =>
+                {
+                    var buffer = new Uint8Array(request.response.As<ArrayBuffer>());
+                    _synth.postMessage(new { cmd = AlphaSynthWebWorker.CmdLoadMidiBytes, data = buffer });
+                };
+                request.onerror = e =>
+                {
+                    Logger.Error("Loading failed: " + e.message);
+                    TriggerEvent("midiLoadFailed");
+                };
+                request.onprogress = e =>
+                {
+                    Logger.Debug("Midi downloading: " + e.loaded + "/" + e.total + " bytes");
+                    TriggerEvent("midiLoad", new object[] { new
+                    {
+                        loaded = e.loaded,
+                        total = e.total
+                    }});
+                };
+                request.send();
+
+                _synth.postMessage(new { cmd = AlphaSynthWebWorker.CmdLoadMidiBytes, url = data });
             }
             else
             {
@@ -281,17 +326,11 @@ namespace AlphaSynth.Main
                 case AlphaSynthWebWorker.CmdFinished:
                     TriggerEvent("finished");
                     break;
-                case AlphaSynthWebWorker.CmdSoundFontLoad:
-                    TriggerEvent("soundFontLoad", new[] { data });
-                    break;
                 case AlphaSynthWebWorker.CmdSoundFontLoaded:
                     TriggerEvent("soundFontLoaded");
                     break;
                 case AlphaSynthWebWorker.CmdSoundFontLoadFailed:
                     TriggerEvent("soundFontLoadFailed");
-                    break;
-                case AlphaSynthWebWorker.CmdMidiLoad:
-                    TriggerEvent("midiLoad", new[] { data });
                     break;
                 case AlphaSynthWebWorker.CmdMidiLoaded:
                     _isMidiLoaded = true;
@@ -319,6 +358,9 @@ namespace AlphaSynth.Main
                     break;
                 case WebWorkerOutput.CmdOutputPause:
                     _output.Pause();
+                    break;
+                case WebWorkerOutput.CmdOutputResetSamples:
+                    _output.ResetSamples();
                     break;
             }
         }
