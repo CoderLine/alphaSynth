@@ -4,6 +4,7 @@ using AlphaSynth.Player;
 using AlphaSynth.Synthesis;
 using AlphaSynth.Util;
 using SharpKit.Html;
+using SharpKit.Html.fileapi;
 using SharpKit.Html.workers;
 using SharpKit.JavaScript;
 
@@ -150,7 +151,25 @@ namespace AlphaSynth.Main
 
             _output.Open();
 
-            _synth = new Worker(alphaSynthScriptFile);
+            try
+            {
+                _synth = new Worker(alphaSynthScriptFile);
+            }
+            catch
+            {
+                // fallback to blob worker 
+                try
+                {
+                    var script = "importScripts('" + alphaSynthScriptFile + "')";
+                    var blob = new Blob(new[] { script });
+                    _synth = new Worker(window.URL.createObjectURL(blob));
+                }
+                catch (Exception e)
+                {
+                    Logger.Error("Failed to create WebWorker: " + e);
+                    // TODO: fallback to synchronous mode
+                }
+            }
             _synth.addEventListener("message", HandleWorkerMessage, false);
             _synth.postMessage(new { cmd = AlphaSynthWebWorker.CmdInitialize, sampleRate = _output.SampleRate });
 
