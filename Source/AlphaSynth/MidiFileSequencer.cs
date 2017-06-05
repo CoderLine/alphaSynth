@@ -63,6 +63,8 @@ namespace AlphaSynth
             }
         }
 
+        public bool IsLooping { get; set; }
+
         /// <summary>
         /// Gets the duration of the song in ticks. 
         /// </summary>
@@ -83,7 +85,6 @@ namespace AlphaSynth
         {
             get; set;
         }
-
 
         public MidiFileSequencer(Synthesizer synthesizer)
         {
@@ -128,6 +129,7 @@ namespace AlphaSynth
                 _synthesizer.NoteOffAll(true);
                 _synthesizer.ResetPrograms();
                 _synthesizer.ResetSynthControls();
+
                 SilentProcess(timePosition);
             }
         }

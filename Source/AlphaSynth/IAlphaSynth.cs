@@ -80,6 +80,14 @@ namespace AlphaSynth
         }
 
         /// <summary>
+        /// Gets or sets whether the playback should automatically restart after it finished. 
+        /// </summary>
+        bool IsLooping
+        {
+            get; set;
+        }
+
+        /// <summary>
         /// Starts the playback if possible
         /// </summary>  
         void Play();

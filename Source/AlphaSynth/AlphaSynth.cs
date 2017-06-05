@@ -117,6 +117,19 @@ namespace AlphaSynth
             }
         }
 
+        /// <inheritdoc />
+        public bool IsLooping
+        {
+            get
+            {
+                return _sequencer.IsLooping;
+            }
+            set
+            {
+                _sequencer.IsLooping = value;
+            }
+        }
+
         public AlphaSynth()
         {
             Logger.Debug("Initializing player");
@@ -134,7 +147,11 @@ namespace AlphaSynth
                 // stop everything
                 Stop();
                 Logger.Debug("Finished playback");
-                OnFinished();
+                OnFinished(_sequencer.IsLooping);
+                if (_sequencer.IsLooping)
+                {
+                    Play();
+                }
             };
             Output.SampleRequest += () =>
             {
@@ -322,11 +339,11 @@ namespace AlphaSynth
 
         #region Events
 
-        public event EventHandler Finished;
-        protected virtual void OnFinished()
+        public event Action<bool> Finished;
+        protected virtual void OnFinished(bool isLooping)
         {
-            EventHandler handler = Finished;
-            if (handler != null) handler(this, EmptyEventArgs.Instance);
+            var handler = Finished;
+            if (handler != null) handler(isLooping);
         }
 
         public event EventHandler<PlayerStateChangedEventArgs> PlayerStateChanged;

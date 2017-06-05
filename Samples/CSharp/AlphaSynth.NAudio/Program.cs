@@ -78,7 +78,7 @@ namespace AlphaSynth.NAudio
                     Console.WriteLine("{0:mm\\:ss\\:fff} ({1}) of {2:mm\\:ss\\:fff} ({3})",
                         currentTime, args.CurrentTick, endTime, args.EndTick);
                 };
-                player.Finished += (sender, args) =>
+                player.Finished += isLooping =>
                 {
                     ((NAudioSynthOutput) player.Output).Close();
                 };

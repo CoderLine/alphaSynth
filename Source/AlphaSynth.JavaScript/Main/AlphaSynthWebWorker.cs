@@ -27,6 +27,7 @@ namespace AlphaSynth.Main
         public const string CmdSetTickPosition = CmdPrefix + "setTickPosition";
         public const string CmdSetTimePosition = CmdPrefix + "setTimePosition";
         public const string CmdSetPlaybackRange = CmdPrefix + "setPlaybackRange";
+        public const string CmdSetIsLooping = CmdPrefix + "setIsLooping";
 
         public const string CmdPlay = CmdPrefix + "play";
         public const string CmdPause = CmdPrefix + "pause";
@@ -120,6 +121,9 @@ namespace AlphaSynth.Main
                 case CmdSetPlaybackRange:
                     _player.PlaybackRange = data.Member("value").As<PlaybackRange>();
                     break;
+                case CmdSetIsLooping:
+                    _player.IsLooping = data.Member("value").As<bool>();
+                    break;
                 case CmdPlay:
                     _player.Play();
                     break;
@@ -178,11 +182,12 @@ namespace AlphaSynth.Main
             });
         }
 
-        public void OnFinished(object sender, EventArgs e)
+        public void OnFinished(bool isLooping)
         {
             _main.postMessage(new
             {
-                cmd = CmdFinished
+                cmd = CmdFinished,
+                isLooping = isLooping
             });
         }
 

@@ -32,6 +32,7 @@ namespace AlphaSynth.Main
         private bool _isMidiLoaded;
         private int _tickPosition;
         private double _timePosition;
+        private bool _isLooping;
         private PlaybackRange _playbackRange;
 
         /// <inheritdoc />
@@ -114,6 +115,17 @@ namespace AlphaSynth.Main
                 }
                 _timePosition = value;
                 _synth.postMessage(new { cmd = AlphaSynthWebWorker.CmdSetTimePosition, value = value });
+            }
+        }
+
+        /// <inheritdoc />
+        public bool IsLooping
+        {
+            get { return _isLooping; }
+            set
+            {
+                _isLooping = value;
+                _synth.postMessage(new { cmd = AlphaSynthWebWorker.CmdSetIsLooping, value = value });
             }
         }
 
@@ -309,15 +321,6 @@ namespace AlphaSynth.Main
         {
             program = SynthHelper.ClampB(program, SynthConstants.MinProgram, SynthConstants.MaxProgram);
             _synth.postMessage(new { cmd = AlphaSynthWebWorker.CmdSetChannelProgram, channel = channel, program = program });
-        }
-
-        private static string QualifyUrl(string url)
-        {
-            var img = (HtmlAnchorElement)document.createElement("a");
-            img.onerror = e => { };
-            img.href = url;
-            url = img.href;
-            return url;
         }
 
         public virtual void HandleWorkerMessage(DOMEvent e)

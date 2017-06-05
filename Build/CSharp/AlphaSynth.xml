@@ -31,6 +31,9 @@
         <member name="P:AlphaSynth.AlphaSynth.PlaybackRange">
             <inheritdoc />
         </member>
+        <member name="P:AlphaSynth.AlphaSynth.IsLooping">
+            <inheritdoc />
+        </member>
         <member name="M:AlphaSynth.AlphaSynth.Play">
             <inheritdoc />
         </member>
@@ -108,6 +111,11 @@
             <summary>
             Gets or sets the range of the song that should be played. Set this to null
             to play the whole song. 
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.IAlphaSynth.IsLooping">
+            <summary>
+            Gets or sets whether the playback should automatically restart after it finished. 
             </summary>
         </member>
         <member name="M:AlphaSynth.IAlphaSynth.Play">
