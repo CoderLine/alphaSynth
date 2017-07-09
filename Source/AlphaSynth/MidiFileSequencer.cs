@@ -102,7 +102,7 @@ namespace AlphaSynth
             }
 
             // map to speed=1
-            timePosition /= PlaybackSpeed;
+            timePosition *= PlaybackSpeed;
 
             // ensure playback range
             if (PlaybackRange != null)
@@ -247,7 +247,7 @@ namespace AlphaSynth
             tickPosition -= lastChange;
             timePosition += (tickPosition * (60000.0 / (bpm * _division)));
 
-            return timePosition * playbackSpeed;
+            return timePosition / playbackSpeed;
         }
 
         private int TimePositionToTickPositionWithSpeed(double timePosition, double playbackSpeed)

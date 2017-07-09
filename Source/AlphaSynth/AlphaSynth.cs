@@ -90,7 +90,7 @@ namespace AlphaSynth
                 Logger.Debug("Seeking to position " + value + "ms");
 
                 // tell the sequencer to jump to the given position
-                _sequencer.Seek(value * _sequencer.PlaybackSpeed);
+                _sequencer.Seek(value);
 
                 // update the internal position 
                 UpdateTimePosition(value);
