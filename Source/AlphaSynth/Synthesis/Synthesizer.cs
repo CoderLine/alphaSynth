@@ -30,11 +30,19 @@ namespace AlphaSynth.Synthesis
     public class SynthEvent
     {
         public MidiEvent Event { get; set; }
+        public bool IsMetronome { get; set; }
         public double Delta { get; set; }
 
         public SynthEvent(MidiEvent e)
         {
             Event = e;
+        }
+
+        public static SynthEvent NewMetronomeEvent(int metronomeLength)
+        {
+            var x = new SynthEvent(null);
+            x.IsMetronome = true;
+            return x;
         }
     }
 
@@ -42,15 +50,16 @@ namespace AlphaSynth.Synthesis
     {
         private readonly VoiceManager _voiceManager;
         private readonly SynthParameters[] _synthChannels;
-        private float _masterVolume;
 
         private readonly Patch[] _layerList;
         private readonly LinkedList<SynthEvent> _midiEventQueue;
         private readonly int[] _midiEventCounts;
 
+        private int _metronomeChannel;
         private FastDictionary<int, bool> _mutedChannels;
         private FastDictionary<int, bool> _soloChannels;
         private bool _isAnySolo;
+        private float _syn;
 
         /// <summary>
         /// The size of the individual sub buffers in samples
@@ -76,14 +85,20 @@ namespace AlphaSynth.Synthesis
         /// The number of samples per second produced per channel
         /// </summary>
         public int SampleRate { get; private set; }
-        
+
         /// <summary>
         /// The master volume 
         /// </summary>
-        public float MasterVolume
+        public float MasterVolume { get; set; }
+
+
+        /// <summary>
+        /// The metronome volume 
+        /// </summary>
+        public float MetronomeVolume
         {
-            get { return _masterVolume; }
-            set { _masterVolume = SynthHelper.ClampF(value, 0, 10); }
+            get { return _synthChannels[_metronomeChannel].MixVolume; }
+            set { _synthChannels[_metronomeChannel].MixVolume = value; }
         }
 
         public Synthesizer(int sampleRate, int audioChannels, int bufferSize, int bufferCount, int polyphony)
@@ -92,7 +107,7 @@ namespace AlphaSynth.Synthesis
             var MaxSampleRate = 96000;
             //
             // Setup synth parameters
-            _masterVolume = 1;
+            MasterVolume = 1;
 
             SampleRate = SynthHelper.ClampI(sampleRate, MinSampleRate, MaxSampleRate);
             MicroBufferSize = SynthHelper.ClampI(bufferSize, (int)(SynthConstants.MinBufferSize * sampleRate), (int)(SynthConstants.MaxBufferSize * sampleRate));
@@ -107,6 +122,9 @@ namespace AlphaSynth.Synthesis
                 _synthChannels[x] = new SynthParameters(this);
             }
 
+            // setup metronome channel
+            _metronomeChannel = _synthChannels.Length - 1;
+           
             // Create synth voices
             _voiceManager = new VoiceManager(SynthHelper.ClampI(polyphony, SynthConstants.MinPolyphony, SynthConstants.MaxPolyphony));
 
@@ -145,6 +163,10 @@ namespace AlphaSynth.Synthesis
             }
             _synthChannels[MidiHelper.DrumChannel].BankSelect = PatchBank.DrumBank;
             ReleaseAllHoldPedals();
+
+            _synthChannels[_metronomeChannel].UpdateCurrentVolumeFromVolume();
+            _synthChannels[_metronomeChannel].BankSelect = PatchBank.DrumBank;
+            //_synthChannels[_metronomeChannel].MixVolume = 0;
         }
 
         public void ResetPrograms()
@@ -176,7 +198,15 @@ namespace AlphaSynth.Synthesis
                         for (int i = 0; i < _midiEventCounts[x]; i++)
                         {
                             var m = _midiEventQueue.RemoveLast();
-                            ProcessMidiMessage(m.Event);
+                            if (m.IsMetronome)
+                            {
+                                NoteOff(_metronomeChannel, 37);
+                                NoteOn(_metronomeChannel, 37, 95);
+                            }
+                            else
+                            {
+                                ProcessMidiMessage(m.Event);
+                            }
                         }
                     }
                     //voice processing loop
@@ -401,7 +431,7 @@ namespace AlphaSynth.Synthesis
                             if (SoundBank.IsBankLoaded(data2))
                                 _synthChannels[channel].BankSelect = (byte)data2;
                             else
-                                _synthChannels[channel].BankSelect = (byte) ((channel == MidiHelper.DrumChannel) ? PatchBank.DrumBank : 0);
+                                _synthChannels[channel].BankSelect = (byte)((channel == MidiHelper.DrumChannel) ? PatchBank.DrumBank : 0);
                             break;
                         case ControllerTypeEnum.ModulationCoarse: //Modulation wheel coarse
                             _synthChannels[channel].ModRange.Coarse = (byte)data2;
@@ -511,7 +541,7 @@ namespace AlphaSynth.Synthesis
                 case MidiEventTypeEnum.PitchBend: //Pitch Bend
                     _synthChannels[channel].PitchBend.Coarse = (byte)data2;
                     _synthChannels[channel].PitchBend.Fine = (byte)data1;
-                    _synthChannels[channel].UpdateCurrentPitch();                   
+                    _synthChannels[channel].UpdateCurrentPitch();
                     break;
             }
             OnMidiEventProcessed(e);
@@ -609,7 +639,7 @@ namespace AlphaSynth.Synthesis
         public void SetChannelVolume(int channel, double volume)
         {
             if (channel < 0 || channel >= _synthChannels.Length) return;
-            _synthChannels[channel].MixVolume = (float) volume;
+            _synthChannels[channel].MixVolume = (float)volume;
         }
     }
 }

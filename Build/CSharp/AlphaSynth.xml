@@ -19,6 +19,9 @@
         <member name="P:AlphaSynth.AlphaSynth.MasterVolume">
             <inheritdoc />
         </member>
+        <member name="P:AlphaSynth.AlphaSynth.MetronomeVolume">
+            <inheritdoc />
+        </member>
         <member name="P:AlphaSynth.AlphaSynth.PlaybackSpeed">
             <inheritdoc />
         </member>
@@ -90,6 +93,11 @@
         <member name="P:AlphaSynth.IAlphaSynth.MasterVolume">
             <summary>
             Gets or sets the current master volume as percentage. (range: 0.0-3.0, default 1.0)
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.IAlphaSynth.MetronomeVolume">
+            <summary>
+            Gets or sets the metronome volume. (range: 0.0-3.0, default 0.0)
             </summary>
         </member>
         <member name="P:AlphaSynth.IAlphaSynth.PlaybackSpeed">
@@ -395,6 +403,11 @@
         <member name="P:AlphaSynth.Synthesis.Synthesizer.MasterVolume">
             <summary>
             The master volume 
+            </summary>
+        </member>
+        <member name="P:AlphaSynth.Synthesis.Synthesizer.MetronomeVolume">
+            <summary>
+            The metronome volume 
             </summary>
         </member>
     </members>

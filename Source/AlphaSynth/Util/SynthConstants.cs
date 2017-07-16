@@ -42,7 +42,7 @@ namespace AlphaSynth.Util
         public const int SincWidth = 16;
         public const int SincResolution = 64;
         public const int MaxVoiceComponents = 4;
-        public const int DefaultChannelCount = 16;
+        public const int DefaultChannelCount = 16 + 1 /*metronome*/;
         public const int DefaultKeyCount = 128;
 
         public const float DefaultMixGain = 0.35f;

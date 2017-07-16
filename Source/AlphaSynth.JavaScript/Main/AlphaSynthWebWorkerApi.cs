@@ -27,6 +27,7 @@ namespace AlphaSynth.Main
         private PlayerState _state;
         private LogLevel _logLevel;
         private float _masterVolume;
+        private float _metronomeVolume;
         private double _playbackSpeed;
         private bool _isSoundFontLoaded;
         private bool _isMidiLoaded;
@@ -73,6 +74,18 @@ namespace AlphaSynth.Main
                 value = SynthHelper.ClampF(value, SynthConstants.MinVolume, SynthConstants.MaxVolume);
                 _masterVolume = value;
                 _synth.postMessage(new { cmd = AlphaSynthWebWorker.CmdSetMasterVolume, value = value });
+            }
+        }
+
+        /// <inheritdoc />
+        public float MetronomeVolume
+        {
+            get { return _metronomeVolume; }
+            set
+            {
+                value = SynthHelper.ClampF(value, SynthConstants.MinVolume, SynthConstants.MaxVolume);
+                _metronomeVolume = value;
+                _synth.postMessage(new { cmd = AlphaSynthWebWorker.CmdSetMetronomeVolume, value = value });
             }
         }
 
@@ -187,6 +200,7 @@ namespace AlphaSynth.Main
 
             MasterVolume = 1;
             PlaybackSpeed = 1;
+            MetronomeVolume = 0;
         }
 
         //

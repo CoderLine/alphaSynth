@@ -33,7 +33,7 @@ namespace AlphaSynth
 
         private FastList<MidiFileSequencerTempoChange> _tempoChanges;
         private FastDictionary<int, SynthEvent> _firstProgramEventPerChannel;
-        private SynthEvent[] _synthData;
+        private FastList<SynthEvent> _synthData;
         private int _division;
         private int _eventIndex;
 
@@ -139,7 +139,7 @@ namespace AlphaSynth
             if (milliseconds <= 0) return;
 
             _currentTime += milliseconds;
-            while (_eventIndex < _synthData.Length && _synthData[_eventIndex].Delta < (_currentTime))
+            while (_eventIndex < _synthData.Count && _synthData[_eventIndex].Delta < (_currentTime))
             {
                 var m = _synthData[_eventIndex];
                 _synthesizer.ProcessMidiMessage(m.Event);
@@ -152,8 +152,6 @@ namespace AlphaSynth
         {
             _tempoChanges = new FastList<MidiFileSequencerTempoChange>();
 
-            // Converts midi to milliseconds for easy sequencing
-            double bpm = 120;
 
             // Combine all tracks into 1 track that is organized from lowest to highest absolute time
             if (midiFile.Tracks.Length > 1 || midiFile.Tracks[0].EndTime == 0)
@@ -165,25 +163,37 @@ namespace AlphaSynth
             _currentTime = 0;
 
             // build synth events. 
-            _synthData = new SynthEvent[midiFile.Tracks[0].MidiEvents.Length];
+            _synthData = new FastList<SynthEvent>();
 
+            // Converts midi to milliseconds for easy sequencing
+            double bpm = 120;
             var absTick = 0;
             var absTime = 0.0;
+
+            var metronomeLength = 0;
+            var metronomeTick = 0;
+            var metronomeTime = 0.0;
             for (int x = 0; x < midiFile.Tracks[0].MidiEvents.Length; x++)
             {
                 var mEvent = midiFile.Tracks[0].MidiEvents[x];
-                var synthData = _synthData[x] = new SynthEvent(mEvent);
+
+                var synthData = new SynthEvent(mEvent);
+                _synthData.Add(synthData);
                 absTick += mEvent.DeltaTime;
                 absTime += mEvent.DeltaTime * (60000.0 / (bpm * midiFile.Division));
-
                 synthData.Delta = absTime;
 
-                // Update tempo
                 if (mEvent.Command == MidiEventTypeEnum.Meta && mEvent.Data1 == (int)MetaEventTypeEnum.Tempo)
                 {
                     var meta = (MetaNumberEvent)mEvent;
                     bpm = MidiHelper.MicroSecondsPerMinute / (double)meta.Value;
                     _tempoChanges.Add(new MidiFileSequencerTempoChange(bpm, absTick, (int)(absTime)));
+                }
+                else if (mEvent.Command == MidiEventTypeEnum.Meta && mEvent.Data1 == (int)MetaEventTypeEnum.TimeSignature)
+                {
+                    var meta = (MetaDataEvent)mEvent;
+                    var timeSignatureDenominator = (int)Math.Pow(2, meta.Data[1]);
+                    metronomeLength = (int)(_division * (4.0 / timeSignatureDenominator));
                 }
                 else if (mEvent.Command == MidiEventTypeEnum.ProgramChange)
                 {
@@ -193,12 +203,26 @@ namespace AlphaSynth
                         _firstProgramEventPerChannel[channel] = synthData;
                     }
                 }
+
+                if (metronomeLength > 0)
+                {
+                    while (metronomeTick < absTick)
+                    {
+                        var metronome = SynthEvent.NewMetronomeEvent(metronomeLength);
+                        _synthData.Add(metronome);
+                        metronome.Delta = metronomeTime;
+
+                        metronomeTick += metronomeLength;
+                        metronomeTime += metronomeLength * (60000.0 / (bpm * midiFile.Division));
+                    }
+                }
             }
 
+            _synthData.Sort((a, b) => (int)(a.Delta - b.Delta));
             _endTime = absTime;
             EndTick = absTick;
         }
-        
+
 
         public void FillMidiEventQueue()
         {
@@ -206,7 +230,7 @@ namespace AlphaSynth
             for (int i = 0; i < _synthesizer.MicroBufferCount; i++)
             {
                 _currentTime += millisecondsPerBuffer;
-                while (_eventIndex < _synthData.Length && _synthData[_eventIndex].Delta < _currentTime)
+                while (_eventIndex < _synthData.Count && _synthData[_eventIndex].Delta < _currentTime)
                 {
                     _synthesizer.DispatchEvent(i, _synthData[_eventIndex]);
                     _eventIndex++;

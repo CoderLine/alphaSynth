@@ -326,7 +326,7 @@ namespace AlphaSynth.Midi
                 case MetaEventTypeEnum.TimeSignature:
                     if (input.ReadByte() != 4)
                         throw new Exception("Invalid time signature event. Expected size of 4.");
-                    return new MetaTextEvent(delta, status, (byte)metaStatus, input.ReadByte() + ":" + input.ReadByte() + ":" + input.ReadByte() + ":" + input.ReadByte());
+                    return new MetaDataEvent(delta, status, (byte)metaStatus, new byte[] { (byte) input.ReadByte(), (byte)input.ReadByte(), (byte)input.ReadByte(), (byte)input.ReadByte() });
                 case MetaEventTypeEnum.KeySignature:
                     if (input.ReadByte() != 2)
                         throw new Exception("Invalid key signature event. Expected size of 2.");

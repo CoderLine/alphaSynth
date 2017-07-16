@@ -59,6 +59,17 @@ namespace AlphaSynth
         }
 
         /// <inheritdoc />
+        public float MetronomeVolume
+        {
+            get { return _synthesizer.MetronomeVolume; }
+            set
+            {
+                value = SynthHelper.ClampF(value, SynthConstants.MinVolume, SynthConstants.MaxVolume);
+                _synthesizer.MetronomeVolume = value;
+            }
+        }
+
+        /// <inheritdoc />
         public double PlaybackSpeed
         {
             get { return _sequencer.PlaybackSpeed; }

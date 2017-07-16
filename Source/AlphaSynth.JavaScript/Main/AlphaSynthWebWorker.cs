@@ -23,6 +23,7 @@ namespace AlphaSynth.Main
 
         public const string CmdSetLogLevel = CmdPrefix + "setLogLevel";
         public const string CmdSetMasterVolume = CmdPrefix + "setMasterVolume";
+        public const string CmdSetMetronomeVolume = CmdPrefix + "setMetronomeVolume";
         public const string CmdSetPlaybackSpeed = CmdPrefix + "setPlaybackSpeed";
         public const string CmdSetTickPosition = CmdPrefix + "setTickPosition";
         public const string CmdSetTimePosition = CmdPrefix + "setTimePosition";
@@ -108,6 +109,9 @@ namespace AlphaSynth.Main
                     break;
                 case CmdSetMasterVolume:
                     _player.MasterVolume = data.Member("value").As<float>();
+                    break;
+                case CmdSetMetronomeVolume:
+                    _player.MetronomeVolume = data.Member("value").As<float>();
                     break;
                 case CmdSetPlaybackSpeed:
                     _player.PlaybackSpeed = data.Member("value").As<double>();
