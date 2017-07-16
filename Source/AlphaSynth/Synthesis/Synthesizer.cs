@@ -124,7 +124,7 @@ namespace AlphaSynth.Synthesis
 
             // setup metronome channel
             _metronomeChannel = _synthChannels.Length - 1;
-           
+
             // Create synth voices
             _voiceManager = new VoiceManager(SynthHelper.ClampI(polyphony, SynthConstants.MinPolyphony, SynthConstants.MaxPolyphony));
 
@@ -164,6 +164,7 @@ namespace AlphaSynth.Synthesis
             _synthChannels[MidiHelper.DrumChannel].BankSelect = PatchBank.DrumBank;
             ReleaseAllHoldPedals();
 
+            _synthChannels[_metronomeChannel].Volume.Coarse = 128;
             _synthChannels[_metronomeChannel].UpdateCurrentVolumeFromVolume();
             _synthChannels[_metronomeChannel].BankSelect = PatchBank.DrumBank;
             //_synthChannels[_metronomeChannel].MixVolume = 0;

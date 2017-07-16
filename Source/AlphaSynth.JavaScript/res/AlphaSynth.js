@@ -497,6 +497,9 @@ AlphaSynth.Main.AlphaSynthWebWorker.prototype = {
             case "alphaSynth.setMasterVolume":
                 this._player.set_MasterVolume(data["value"]);
                 break;
+            case "alphaSynth.setMetronomeVolume":
+                this._player.set_MetronomeVolume(data["value"]);
+                break;
             case "alphaSynth.setPlaybackSpeed":
                 this._player.set_PlaybackSpeed(data["value"]);
                 break;
@@ -5599,6 +5602,7 @@ AlphaSynth.Synthesis.Synthesizer.prototype = {
         }
         this._synthChannels[9].BankSelect = 128;
         this.ReleaseAllHoldPedals();
+        this._synthChannels[this._metronomeChannel].Volume.set_Coarse(128);
         this._synthChannels[this._metronomeChannel].UpdateCurrentVolumeFromVolume();
         this._synthChannels[this._metronomeChannel].BankSelect = 128;
         //_synthChannels[_metronomeChannel].MixVolume = 0;
