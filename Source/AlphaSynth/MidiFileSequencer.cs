@@ -142,7 +142,10 @@ namespace AlphaSynth
             while (_eventIndex < _synthData.Count && _synthData[_eventIndex].Delta < (_currentTime))
             {
                 var m = _synthData[_eventIndex];
-                _synthesizer.ProcessMidiMessage(m.Event);
+                if (!m.IsMetronome)
+                {
+                    _synthesizer.ProcessMidiMessage(m.Event);   
+                }
                 _eventIndex++;
             }
         }

@@ -86,6 +86,7 @@ namespace AlphaSynth.Main
             if (_source != null)
             {
                 _source.stop(0);
+                _source.disconnect(0);
             }
             _source = null;
             _audioNode.disconnect(0);
