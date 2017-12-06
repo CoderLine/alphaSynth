@@ -322,6 +322,13 @@ namespace AlphaSynth
         }
 
         /// <inheritdoc />
+        public void SetChannelPan(int channel, double pan)
+        {
+            pan = SynthHelper.ClampD(pan, SynthConstants.MinPan, SynthConstants.MaxPan);
+            _synthesizer.SetChannelPan(channel, pan);
+        }
+
+        /// <inheritdoc />
         public void SetChannelProgram(int channel, byte program)
         {
             program = SynthHelper.ClampB(program, SynthConstants.MinProgram, SynthConstants.MaxProgram);

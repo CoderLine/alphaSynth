@@ -152,8 +152,15 @@ namespace AlphaSynth
         /// Gets or sets the current and initial volume of the given channel.
         /// </summary>
         /// <param name="channel">The channel number.</param>
-        /// <param name="volume">The volume of of the channel (0.0-3.0)</param>
+        /// <param name="volume">The volume of the channel (0.0-3.0)</param>
         void SetChannelVolume(int channel, double volume);
+
+        /// <summary>
+        /// Gets or sets the current and initial pan of the given channel.
+        /// </summary>
+        /// <param name="channel">The channel number.</param>
+        /// <param name="pan">The pan of the channel (from -1.0 to 1.0)</param>
+        void SetChannelPan(int channel, double pan);
 
         /// <summary>
         /// Gets or sets the current and initial program of the given channel.

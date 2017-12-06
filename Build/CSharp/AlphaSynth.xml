@@ -67,6 +67,9 @@
         <member name="M:AlphaSynth.AlphaSynth.SetChannelVolume(System.Int32,System.Double)">
             <inheritdoc />
         </member>
+        <member name="M:AlphaSynth.AlphaSynth.SetChannelPan(System.Int32,System.Double)">
+            <inheritdoc />
+        </member>
         <member name="M:AlphaSynth.AlphaSynth.SetChannelProgram(System.Int32,System.Byte)">
             <inheritdoc />
         </member>
@@ -182,7 +185,14 @@
             Gets or sets the current and initial volume of the given channel.
             </summary>
             <param name="channel">The channel number.</param>
-            <param name="volume">The volume of of the channel (0.0-3.0)</param>
+            <param name="volume">The volume of the channel (0.0-3.0)</param>
+        </member>
+        <member name="M:AlphaSynth.IAlphaSynth.SetChannelPan(System.Int32,System.Double)">
+            <summary>
+            Gets or sets the current and initial pan of the given channel.
+            </summary>
+            <param name="channel">The channel number.</param>
+            <param name="pan">The pan of the channel (from -1.0 to 1.0)</param>
         </member>
         <member name="M:AlphaSynth.IAlphaSynth.SetChannelProgram(System.Int32,System.Byte)">
             <summary>

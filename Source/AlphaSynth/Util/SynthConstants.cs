@@ -50,6 +50,9 @@ namespace AlphaSynth.Util
         public const float MinVolume = 0;
         public const float MaxVolume = 10;
 
+        public const float MinPan = -1;
+        public const float MaxPan = 1;
+
         public const byte MinProgram = 0;
         public const byte MaxProgram = 127;
 

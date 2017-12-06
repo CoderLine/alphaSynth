@@ -642,5 +642,11 @@ namespace AlphaSynth.Synthesis
             if (channel < 0 || channel >= _synthChannels.Length) return;
             _synthChannels[channel].MixVolume = (float)volume;
         }
+
+        public void SetChannelPan(int channel, double pan)
+        {
+            if (channel < 0 || channel >= _synthChannels.Length) return;
+            _synthChannels[channel].CurrentPan.SetValue((float)pan, Bank.Components.PanFormulaEnum.Neg6dBCenter);
+        }
     }
 }

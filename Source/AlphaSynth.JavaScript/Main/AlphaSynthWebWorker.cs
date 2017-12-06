@@ -39,6 +39,7 @@ namespace AlphaSynth.Main
         public const string CmdSetChannelMute = CmdPrefix + "setChannelMute";
         public const string CmdSetChannelSolo = CmdPrefix + "setChannelSolo";
         public const string CmdSetChannelVolume = CmdPrefix + "setChannelVolume";
+        public const string CmdSetChannelPan = CmdPrefix + "setChannelPan";
         public const string CmdSetChannelProgram = CmdPrefix + "setChannelProgram";
         public const string CmdResetChannelStates = CmdPrefix + "resetChannelStates";
 
@@ -154,6 +155,9 @@ namespace AlphaSynth.Main
                     break;
                 case CmdSetChannelVolume:
                     _player.SetChannelVolume(data.Member("channel").As<int>(), data.Member("volume").As<double>());
+                    break;
+                case CmdSetChannelPan:
+                    _player.SetChannelPan(data.Member("channel").As<int>(), data.Member("pan").As<double>());
                     break;
                 case CmdSetChannelProgram:
                     _player.SetChannelProgram(data.Member("channel").As<int>(), data.Member("program").As<byte>());

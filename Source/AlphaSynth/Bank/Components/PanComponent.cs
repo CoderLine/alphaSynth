@@ -36,7 +36,7 @@ namespace AlphaSynth.Bank.Components
 
         public void SetValue(float value, PanFormulaEnum formula)
         {
-            value = SynthHelper.ClampF(value, -1, 1);
+            value = SynthHelper.ClampF(value, SynthConstants.MinPan, SynthConstants.MaxPan);
             double dvalue;
             switch (formula)
             {
@@ -46,11 +46,11 @@ namespace AlphaSynth.Bank.Components
                     Right = (float)Math.Sin(dvalue);
                     break;
                 case PanFormulaEnum.Neg6dBCenter:
-                    Left = (float)(.5 + value * -.5);
-                    Right = (float)(.5 + value * .5);
+                    Left = (float)(0.5 - value * 0.5);
+                    Right = (float)(0.5 + value * 0.5);
                     break;
                 case PanFormulaEnum.ZeroCenter:
-                    dvalue = SynthConstants.HalfPi * (value + 1.0) / 2.0;
+                    dvalue = SynthConstants.HalfPi * (value + 1) / 2.0;
                     Left = (float)(Math.Cos(dvalue) / SynthConstants.InverseSqrtOfTwo);
                     Right = (float)(Math.Sin(dvalue) / SynthConstants.InverseSqrtOfTwo);
                     break;

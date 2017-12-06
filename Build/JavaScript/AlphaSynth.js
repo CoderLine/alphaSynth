@@ -543,6 +543,9 @@ AlphaSynth.Main.AlphaSynthWebWorker.prototype = {
             case "alphaSynth.setChannelVolume":
                 this._player.SetChannelVolume(data["channel"], data["volume"]);
                 break;
+            case "alphaSynth.setChannelPan":
+                this._player.SetChannelPan(data["channel"], data["pan"]);
+                break;
             case "alphaSynth.setChannelProgram":
                 this._player.SetChannelProgram(data["channel"], data["program"]);
                 break;
@@ -625,6 +628,7 @@ $StaticConstructor(function (){
     AlphaSynth.Main.AlphaSynthWebWorker.CmdSetChannelMute = "alphaSynth.setChannelMute";
     AlphaSynth.Main.AlphaSynthWebWorker.CmdSetChannelSolo = "alphaSynth.setChannelSolo";
     AlphaSynth.Main.AlphaSynthWebWorker.CmdSetChannelVolume = "alphaSynth.setChannelVolume";
+    AlphaSynth.Main.AlphaSynthWebWorker.CmdSetChannelPan = "alphaSynth.setChannelPan";
     AlphaSynth.Main.AlphaSynthWebWorker.CmdSetChannelProgram = "alphaSynth.setChannelProgram";
     AlphaSynth.Main.AlphaSynthWebWorker.CmdResetChannelStates = "alphaSynth.resetChannelStates";
     AlphaSynth.Main.AlphaSynthWebWorker.CmdReady = "alphaSynth.ready";
@@ -922,6 +926,14 @@ AlphaSynth.Main.AlphaSynthWebWorkerApi.prototype = {
             cmd: "alphaSynth.setChannelVolume",
             channel: channel,
             volume: volume
+        });
+    },
+    SetChannelPan: function (channel, pan){
+        pan = AlphaSynth.Synthesis.SynthHelper.ClampD(pan, -1, 1);
+        this._synth.postMessage({
+            cmd: "alphaSynth.setChannelPan",
+            channel: channel,
+            pan: pan
         });
     },
     SetChannelProgram: function (channel, program){
@@ -1526,6 +1538,10 @@ AlphaSynth.AlphaSynth.prototype = {
     SetChannelVolume: function (channel, volume){
         volume = AlphaSynth.Synthesis.SynthHelper.ClampD(volume, 0, 10);
         this._synthesizer.SetChannelVolume(channel, volume);
+    },
+    SetChannelPan: function (channel, pan){
+        pan = AlphaSynth.Synthesis.SynthHelper.ClampD(pan, -1, 1);
+        this._synthesizer.SetChannelPan(channel, pan);
     },
     SetChannelProgram: function (channel, program){
         program = AlphaSynth.Synthesis.SynthHelper.ClampB(program, 0, 127);
@@ -2513,7 +2529,7 @@ AlphaSynth.Bank.Components.PanComponent.prototype = {
                 this.Right = Math.sin(dvalue);
                 break;
             case AlphaSynth.Bank.Components.PanFormulaEnum.Neg6dBCenter:
-                this.Left = (0.5 + value * -0.5);
+                this.Left = (0.5 - value * 0.5);
                 this.Right = (0.5 + value * 0.5);
                 break;
             case AlphaSynth.Bank.Components.PanFormulaEnum.ZeroCenter:
@@ -5995,6 +6011,11 @@ AlphaSynth.Synthesis.Synthesizer.prototype = {
         if (channel < 0 || channel >= this._synthChannels.length)
             return;
         this._synthChannels[channel].MixVolume = volume;
+    },
+    SetChannelPan: function (channel, pan){
+        if (channel < 0 || channel >= this._synthChannels.length)
+            return;
+        this._synthChannels[channel].CurrentPan.SetValue(pan, AlphaSynth.Bank.Components.PanFormulaEnum.Neg6dBCenter);
     }
 };
 AlphaSynth.Util.PcmData = function (bits, pcmData, isDataInLittleEndianFormat){
@@ -6240,6 +6261,8 @@ $StaticConstructor(function (){
     AlphaSynth.Util.SynthConstants.DefaultMixGain = 0.35;
     AlphaSynth.Util.SynthConstants.MinVolume = 0;
     AlphaSynth.Util.SynthConstants.MaxVolume = 10;
+    AlphaSynth.Util.SynthConstants.MinPan = -1;
+    AlphaSynth.Util.SynthConstants.MaxPan = 1;
     AlphaSynth.Util.SynthConstants.MinProgram = 0;
     AlphaSynth.Util.SynthConstants.MaxProgram = 127;
     AlphaSynth.Util.SynthConstants.MinPlaybackSpeed = 0.125;
