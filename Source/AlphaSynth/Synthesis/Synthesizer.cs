@@ -29,18 +29,20 @@ namespace AlphaSynth.Synthesis
 {
     public class SynthEvent
     {
+        public int EventIndex { get; set; }
         public MidiEvent Event { get; set; }
         public bool IsMetronome { get; set; }
         public double Delta { get; set; }
 
-        public SynthEvent(MidiEvent e)
+        public SynthEvent(int eventIndex, MidiEvent e)
         {
+            EventIndex = eventIndex;
             Event = e;
         }
 
-        public static SynthEvent NewMetronomeEvent(int metronomeLength)
+        public static SynthEvent NewMetronomeEvent(int eventIndex, int metronomeLength)
         {
-            var x = new SynthEvent(null);
+            var x = new SynthEvent(eventIndex, null);
             x.IsMetronome = true;
             return x;
         }

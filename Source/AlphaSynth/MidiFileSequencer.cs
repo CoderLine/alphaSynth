@@ -180,7 +180,7 @@ namespace AlphaSynth
             {
                 var mEvent = midiFile.Tracks[0].MidiEvents[x];
 
-                var synthData = new SynthEvent(mEvent);
+                var synthData = new SynthEvent(_synthData.Count, mEvent);
                 _synthData.Add(synthData);
                 absTick += mEvent.DeltaTime;
                 absTime += mEvent.DeltaTime * (60000.0 / (bpm * midiFile.Division));
@@ -211,7 +211,7 @@ namespace AlphaSynth
                 {
                     while (metronomeTick < absTick)
                     {
-                        var metronome = SynthEvent.NewMetronomeEvent(metronomeLength);
+                        var metronome = SynthEvent.NewMetronomeEvent(_synthData.Count, metronomeLength);
                         _synthData.Add(metronome);
                         metronome.Delta = metronomeTime;
 
@@ -221,7 +221,18 @@ namespace AlphaSynth
                 }
             }
 
-            _synthData.Sort((a, b) => (int)(a.Delta - b.Delta));
+            _synthData.Sort((a, b) =>
+            {
+                if (a.Delta > b.Delta)
+                {
+                    return 1;
+                }
+                else if (a.Delta < b.Delta)
+                {
+                    return -1;
+                }
+                return a.EventIndex - b.EventIndex;
+            });
             _endTime = absTime;
             EndTick = absTick;
         }
