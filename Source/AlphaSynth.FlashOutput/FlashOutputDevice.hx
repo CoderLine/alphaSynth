@@ -167,7 +167,7 @@ class FlashOutputDevice
                     e.data.writeFloat(raw.readFloat());
                 }
                 
-                samplesPlayed(samplesRead);
+                samplesPlayed(Std.int(samplesRead / 2));
             }
                         
             if (!_finished)
