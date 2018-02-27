@@ -15,9 +15,9 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library.
  */
-using System.Runtime.CompilerServices;
-using AlphaSynth.IO;
+using System.Linq;
 using AlphaSynth.Midi.Event;
+using System.Collections.Generic;
 
 namespace AlphaSynth.Midi
 {
@@ -27,19 +27,34 @@ namespace AlphaSynth.Midi
         public byte[] DrumInstruments { get; private set; }
         public byte[] ActiveChannels { get; private set; }
         public MidiEvent[] MidiEvents { get; private set; }
+        public string Name { get; private set; }
+        public string InstrumentName { get; private set; }
 
         public int NoteOnCount { get; set; }
         public int EndTime { get; set; }
 
         public MidiTrack(byte[] instPrograms, byte[] drumPrograms, byte[] activeChannels, MidiEvent[] midiEvents)
         {
-            Instruments = instPrograms;
-            DrumInstruments = drumPrograms;
-            ActiveChannels = activeChannels;
-            MidiEvents = midiEvents;
+            Instruments = instPrograms ?? Enumerable.Empty<byte>().ToArray();
+            DrumInstruments = drumPrograms ?? Enumerable.Empty<byte>().ToArray();
+            ActiveChannels = activeChannels ?? Enumerable.Empty<byte>().ToArray();
+            MidiEvents = midiEvents ?? Enumerable.Empty<MidiEvent>().ToArray();
+
+            var textEvents = MidiEvents.Where(e => e is MetaTextEvent).Select(e => e as MetaTextEvent).ToArray();
+            Name = ExtractText(textEvents, (int)MetaEventTypeEnum.SequenceOrTrackName);
+            InstrumentName = ExtractText(textEvents, (int)MetaEventTypeEnum.InstrumentName);
 
             NoteOnCount = 0;
             EndTime = 0;
+        }
+
+        private static string ExtractText(IEnumerable<MetaTextEvent> textEvents, int eventType, string defValue = "undefined")
+        {
+            if (!textEvents.Any())
+                return defValue;
+
+            var result = string.Join(" ", textEvents.Where(e => e.MetaStatus == eventType).Select(e => e.Text)).Trim();
+            return (string.IsNullOrWhiteSpace(result)) ? defValue : result;
         }
     }
 }
